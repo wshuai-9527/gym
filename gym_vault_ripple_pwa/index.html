@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="theme-color" content="#f5fbff" />
+<link rel="manifest" href="manifest.webmanifest" />
+<title>今日训练 · Liquid Ripple</title>
+<style>
+:root{
+  --w:430px;
+  --nav:78px;
+  --ink:#132033;
+  --ink2:#314258;
+  --muted:#718096;
+  --line:rgba(38,73,103,.13);
+  --glass:rgba(255,255,255,.58);
+  --glass2:rgba(255,255,255,.38);
+  --deepGlass:rgba(255,255,255,.78);
+  --a:#4fbdf7;
+  --b:#87f3d5;
+  --c:#b19cff;
+  --warn:#ffb84d;
+  --bad:#ff6f87;
+  --good:#2fc58a;
+  --shadow:0 24px 70px rgba(38,77,126,.18), inset 0 1px 0 rgba(255,255,255,.7);
+  --r:28px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC","Microsoft YaHei",Arial,sans-serif;color:var(--ink);background:#ecf7ff;overflow-x:hidden}
+body{display:flex;justify-content:center}
+button,input,textarea{font:inherit;color:inherit}button{border:0;cursor:pointer}input,textarea{outline:none}
+.app{width:100%;max-width:var(--w);min-height:100vh;position:relative;overflow:hidden;background:linear-gradient(180deg,#f5fbff 0%,#eff8ff 44%,#f8fcff 100%);box-shadow:0 0 0 1px rgba(54,92,137,.08)}
+.app::before,.app::after{content:"";position:fixed;left:50%;transform:translateX(-50%);width:min(100%,var(--w));height:100vh;pointer-events:none;z-index:0;background:
+ radial-gradient(160px 160px at 18% 9%,rgba(105,202,255,.34),transparent 62%),
+ radial-gradient(190px 190px at 92% 18%,rgba(128,250,211,.32),transparent 64%),
+ radial-gradient(250px 250px at 33% 70%,rgba(181,156,255,.24),transparent 67%);
+ filter:saturate(1.12);}
+.liquid{position:fixed;inset:0;left:50%;width:min(100%,var(--w));transform:translateX(-50%);pointer-events:none;z-index:0;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(26px);opacity:.46;mix-blend-mode:multiply;animation:float 13s ease-in-out infinite alternate}.b1{width:230px;height:230px;background:#7bddff;left:-70px;top:-42px}.b2{width:240px;height:240px;background:#9ff7d9;right:-92px;top:155px;animation-duration:15s}.b3{width:280px;height:280px;background:#d9c9ff;left:72px;bottom:18px;animation-duration:18s}
+@keyframes float{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(24px,28px,0) scale(1.07)}100%{transform:translate3d(-18px,54px,0) scale(.96)}}
+.screen{position:relative;z-index:1;display:none;padding:calc(14px + env(safe-area-inset-top)) 14px calc(var(--nav) + 28px + env(safe-area-inset-bottom))}.screen.active{display:block}.screen-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 2px 14px}.title h1{margin:0;font-size:30px;line-height:1.04;letter-spacing:-.06em;font-weight:950}.title p{margin:7px 0 0;color:var(--muted);font-size:13px;font-weight:650}.chip{border-radius:999px;padding:9px 12px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.68);box-shadow:var(--shadow);font-size:12px;font-weight:900;color:#2f526f;white-space:nowrap}
+.glass{position:relative;border-radius:var(--r);background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.36));border:1px solid rgba(255,255,255,.72);box-shadow:var(--shadow);backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6);overflow:hidden}.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.82),rgba(255,255,255,0) 42%,rgba(80,190,247,.10) 100%);pointer-events:none}.hero{padding:20px;margin-bottom:14px}.hero-inner{position:relative;z-index:1}.kicker{letter-spacing:.22em;color:#3b96c7;font-size:11px;font-weight:1000;margin-bottom:10px}.hero h2{font-size:42px;line-height:.98;letter-spacing:-.08em;margin:0 0 12px;font-weight:1000}.hero p{margin:0;color:var(--ink2);font-size:15px;line-height:1.55;font-weight:700}.hero-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}.progress-ring{width:84px;height:84px;border-radius:50%;background:conic-gradient(var(--a) calc(var(--p,0)*1%),rgba(48,86,123,.10) 0);display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.7)}.progress-ring span{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.86);font-size:18px;font-weight:1000;color:#16344a}.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}.quick div{padding:10px;border-radius:18px;background:rgba(255,255,255,.48);border:1px solid rgba(255,255,255,.56)}.quick b{display:block;font-size:17px}.quick span{font-size:11px;color:var(--muted);font-weight:800}.section-title{display:flex;align-items:flex-end;justify-content:space-between;margin:18px 4px 10px}.section-title h2{font-size:19px;margin:0;letter-spacing:-.035em}.section-title span{font-size:12px;color:var(--muted);font-weight:750}
+.card{padding:14px;margin-bottom:12px}.exercise{position:relative;z-index:1}.ex-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:11px}.ex-name{font-size:19px;font-weight:1000;letter-spacing:-.045em}.ex-kind{padding:6px 9px;border-radius:999px;background:linear-gradient(135deg,rgba(79,189,247,.24),rgba(135,243,213,.28));font-size:11px;color:#276079;font-weight:1000;white-space:nowrap}.target{font-size:13px;color:var(--ink2);line-height:1.45;font-weight:700;margin-bottom:12px}.mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.mini{border-radius:18px;padding:10px;background:rgba(255,255,255,.46);border:1px solid rgba(255,255,255,.52)}.mini span{display:block;font-size:11px;color:var(--muted);font-weight:800;margin-bottom:4px}.mini b{font-size:14px;line-height:1.25}.input-row{display:grid;grid-template-columns:1fr 92px;gap:8px;align-items:end;margin:10px 0}.field label{display:block;font-size:11px;color:var(--muted);font-weight:850;margin:0 0 5px 2px}.field input{width:100%;height:43px;border-radius:16px;border:1px solid rgba(47,89,128,.12);background:rgba(255,255,255,.62);padding:0 12px;font-weight:950;color:#18324a;box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}.sets{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px}.set-label{font-size:15px;font-weight:1000;min-width:52px}.set-buttons{display:flex;gap:8px}.round{width:43px;height:43px;border-radius:16px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.66);box-shadow:0 10px 26px rgba(42,87,130,.12);font-size:22px;font-weight:1000;color:#357394}.round.plus{background:linear-gradient(135deg,#5be4ff,#8af4cf);color:#092230}.tip{margin-top:10px;border-radius:18px;padding:10px 11px;background:rgba(255,255,255,.42);border:1px solid rgba(255,255,255,.48);font-size:13px;line-height:1.52;color:#3a4b5e;font-weight:650}.bar{height:8px;background:rgba(45,80,116,.10);border-radius:999px;overflow:hidden;margin-top:11px}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#52c5ff,#63eec3);border-radius:999px;transition:.25s}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:16px 0 4px}.btn{height:51px;border-radius:19px;font-weight:1000;letter-spacing:-.01em;box-shadow:0 14px 30px rgba(50,100,145,.16)}.primary{background:linear-gradient(135deg,#58cfff,#77f0c8);color:#082031}.ghost{background:rgba(255,255,255,.48);border:1px solid rgba(255,255,255,.62);color:#27445c}.danger{background:rgba(255,111,135,.12);border:1px solid rgba(255,111,135,.25);color:#af3f55}
+.timer-card{padding:18px;margin-bottom:14px}.time-big{position:relative;z-index:1;font-variant-numeric:tabular-nums;text-align:center;font-size:56px;line-height:1;font-weight:1000;letter-spacing:-.06em;color:#12263b;margin:8px 0}.time-sub{text-align:center;color:var(--muted);font-weight:800;font-size:12px}.button-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}.button-row.two{grid-template-columns:1fr 1fr}.small{height:45px;border-radius:17px;background:rgba(255,255,255,.54);border:1px solid rgba(255,255,255,.62);font-weight:1000;color:#27445c}.small.hot{background:linear-gradient(135deg,#6bd8ff,#b7a8ff);color:#102238}.small.green{background:linear-gradient(135deg,#75f0c8,#5ecfff);color:#102238}.preset{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.preset button{height:43px;border-radius:16px;background:rgba(255,255,255,.50);border:1px solid rgba(255,255,255,.58);font-weight:1000;color:#2c4d66}.custom{display:grid;grid-template-columns:1fr 108px;gap:8px;margin-top:10px}.custom input{height:43px;border-radius:16px;background:rgba(255,255,255,.58);border:1px solid rgba(255,255,255,.62);padding:0 12px;font-weight:850}.meter{height:9px;border-radius:999px;background:rgba(45,80,116,.10);overflow:hidden;margin-top:14px}.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#b7a8ff,#5fcfff,#75f0c8);border-radius:999px;transition:.25s}.wake{position:relative;z-index:1;margin-top:13px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-radius:20px;background:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.55);padding:12px}.wake b{display:block;font-size:14px}.wake span{font-size:12px;color:var(--muted);font-weight:750}.switch{width:56px;height:32px;border-radius:999px;background:rgba(37,70,100,.14);position:relative;flex:0 0 auto}.switch i{position:absolute;width:26px;height:26px;border-radius:50%;left:3px;top:3px;background:#fff;box-shadow:0 4px 12px rgba(30,64,95,.2);transition:.2s}.switch.on{background:linear-gradient(135deg,#78efc8,#5dcfff)}.switch.on i{left:27px}.laps{margin-top:10px}.lap{display:flex;justify-content:space-between;align-items:center;padding:10px 2px;border-bottom:1px solid rgba(42,75,109,.11);font-size:13px;font-weight:850}.lap span{color:#34485e}.lap b{font-variant-numeric:tabular-nums}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{position:relative;z-index:1;padding:14px;border-radius:22px;background:rgba(255,255,255,.46);border:1px solid rgba(255,255,255,.55)}.stat b{display:block;font-size:28px;letter-spacing:-.04em}.stat span{font-size:12px;color:var(--muted);font-weight:850}.rows{display:grid;gap:8px}.row{position:relative;z-index:1;display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid rgba(42,75,109,.11);font-size:13px;font-weight:850}.row span:last-child{text-align:right;color:#51677d}.bars{display:grid;gap:10px}.hbar{position:relative;z-index:1}.hbar div{display:flex;justify-content:space-between;font-size:12px;font-weight:900;margin-bottom:6px}.hbar i{display:block;height:10px;border-radius:999px;background:linear-gradient(90deg,#5fcfff,#75f0c8);width:var(--v)}.rules{display:grid;gap:8px}.rule{position:relative;z-index:1;padding:10px 12px;border-radius:17px;background:rgba(255,255,255,.43);border:1px solid rgba(255,255,255,.52);font-size:12px;font-weight:800;color:#42566b}.archive-day{position:relative;z-index:1;margin-bottom:12px}.archive-day h3{margin:0 2px 8px;font-size:14px;color:#337aa4}.archive-item{border-radius:20px;background:rgba(255,255,255,.46);border:1px solid rgba(255,255,255,.55);padding:11px;margin-bottom:8px}.archive-item b{font-size:14px}.archive-item p{margin:5px 0 0;color:var(--muted);font-size:12px;font-weight:750;line-height:1.45}.textarea{width:100%;min-height:124px;border-radius:22px;background:rgba(255,255,255,.58);border:1px solid rgba(255,255,255,.68);padding:12px;resize:vertical;font-weight:750;line-height:1.55}
+.nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:var(--w);height:calc(var(--nav) + env(safe-area-inset-bottom));padding:8px 10px calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr);gap:7px;z-index:20;background:rgba(255,255,255,.64);border-top:1px solid rgba(255,255,255,.7);box-shadow:0 -18px 60px rgba(54,94,136,.16);backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6)}.nav button{border-radius:20px;background:transparent;color:#7890a6;font-size:11px;font-weight:1000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px}.nav button b{font-size:20px;line-height:1}.nav button.active{background:rgba(255,255,255,.62);color:#16445e;border:1px solid rgba(255,255,255,.75);box-shadow:0 12px 26px rgba(50,96,141,.13)}.toast{position:fixed;z-index:99;left:50%;bottom:calc(var(--nav) + 18px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);width:min(402px,calc(100% - 28px));border-radius:20px;background:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.76);box-shadow:var(--shadow);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);padding:13px 14px;color:#1d344a;font-size:14px;font-weight:850;opacity:0;pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Water ripple premium layer */
+.wave-canvas{position:fixed;left:50%;top:0;transform:translateX(-50%);width:min(100%,var(--w));height:100vh;z-index:0;pointer-events:none;opacity:.72;mix-blend-mode:screen;filter:saturate(1.2)}
+.liquid::after{content:"";position:absolute;inset:-10%;background:
+  repeating-radial-gradient(ellipse at 28% 18%,rgba(255,255,255,.28) 0 1px,transparent 1px 22px),
+  repeating-radial-gradient(ellipse at 76% 82%,rgba(77,183,237,.13) 0 1px,transparent 1px 28px);
+  opacity:.32;filter:blur(.3px);animation:waterDrift 18s ease-in-out infinite alternate;}
+@keyframes waterDrift{0%{transform:translate3d(-12px,-8px,0) scale(1.02) rotate(0deg)}50%{transform:translate3d(10px,12px,0) scale(1.05) rotate(.8deg)}100%{transform:translate3d(-4px,22px,0) scale(1.03) rotate(-.6deg)}}
+.glass::after{content:"";position:absolute;inset:-42%;border-radius:inherit;background:
+  radial-gradient(closest-side at 32% 38%,rgba(255,255,255,.38),transparent 62%),
+  conic-gradient(from 120deg,transparent,rgba(94,199,255,.08),transparent,rgba(113,239,203,.10),transparent);
+  opacity:.62;mix-blend-mode:screen;pointer-events:none;animation:liquidSheen 12s ease-in-out infinite alternate;}
+@keyframes liquidSheen{0%{transform:translate3d(-8%, -4%,0) rotate(0deg) scale(1)}100%{transform:translate3d(8%, 5%,0) rotate(8deg) scale(1.04)}}
+.touch-ripple{position:absolute;width:18px;height:18px;border-radius:50%;pointer-events:none;z-index:8;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(255,255,255,.62) 0,rgba(124,215,255,.36) 38%,rgba(124,215,255,0) 72%);border:1px solid rgba(255,255,255,.7);animation:rippleBurst 850ms cubic-bezier(.17,.67,.21,.99) forwards;}
+@keyframes rippleBurst{0%{opacity:.88;width:18px;height:18px;filter:blur(0)}100%{opacity:0;width:160px;height:160px;filter:blur(2px)}}
+.nav button,.btn,.small,.preset button,.round,.glass{position:relative;overflow:hidden}
+.nav button::after,.btn::after,.small::after,.preset button::after,.round::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--rx,50%) var(--ry,50%),rgba(255,255,255,.48),transparent 34%);opacity:0;transition:opacity .28s;pointer-events:none}.nav button:active::after,.btn:active::after,.small:active::after,.preset button:active::after,.round:active::after{opacity:1}
+
+@media(max-width:370px){.screen{padding-left:10px;padding-right:10px}.hero h2{font-size:36px}.time-big{font-size:48px}.mini-grid,.input-row{grid-template-columns:1fr}.quick{grid-template-columns:1fr 1fr}.nav{gap:4px;padding-left:6px;padding-right:6px}.nav button{font-size:10px}.preset{grid-template-columns:repeat(2,1fr)}}
+@media(prefers-reduced-motion:reduce){.blob{animation:none}.bar i,.meter i,.switch i,.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="liquid"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+  <canvas class="wave-canvas" id="waveCanvas" aria-hidden="true"></canvas>
+
+  <section class="screen active" id="tab-check">
+    <div class="screen-head">
+      <div class="title"><h1>今日训练</h1><p id="todayLine">臀腿 · 当前重点</p></div>
+      <div class="chip" id="datePill">今天</div>
+    </div>
+    <div class="glass hero">
+      <div class="hero-inner hero-row">
+        <div>
+          <div class="kicker">FOCUS</div>
+          <h2>臀腿日</h2>
+          <p>按计划完成动作组数即可。实际重量可直接改，完成一组点一次。</p>
+        </div>
+        <div class="progress-ring" id="progressRing"><span id="progressText">0%</span></div>
+      </div>
+      <div class="quick">
+        <div><b id="doneSets">0/15</b><span>完成组数</span></div>
+        <div><b>5 项</b><span>今日动作</span></div>
+        <div><b>保守递进</b><span>末组试重</span></div>
+      </div>
+    </div>
+    <div class="section-title"><h2>打卡清单</h2><span>不含计时器</span></div>
+    <div id="planList"></div>
+    <div class="actions"><button class="btn primary" onclick="saveToday()">保存今日</button><button class="btn ghost" onclick="resetToday()">清空</button></div>
+  </section>
+
+  <section class="screen" id="tab-time">
+    <div class="screen-head">
+      <div class="title"><h1>训练计时</h1><p>总训练时间和组间休息都在这里</p></div>
+      <div class="chip" id="timerState">未开始</div>
+    </div>
+    <div class="glass timer-card">
+      <div class="kicker">SESSION</div>
+      <div class="time-big" id="workTime">00:00:00</div>
+      <div class="time-sub">训练总计时</div>
+      <div class="button-row"><button class="small hot" id="workStart" onclick="toggleWorkout()">开始</button><button class="small" onclick="lapWorkout()">记节点</button><button class="small" onclick="resetWorkout()">重置</button></div>
+      <div class="laps" id="laps"></div>
+    </div>
+    <div class="glass timer-card">
+      <div class="kicker">REST</div>
+      <div class="time-big" id="restTime">01:30</div>
+      <div class="time-sub" id="restState">已设定 90 秒</div>
+      <div class="meter"><i id="restMeter"></i></div>
+      <div class="preset"><button onclick="setRest(60)">60s</button><button onclick="setRest(90)">90s</button><button onclick="setRest(120)">120s</button><button onclick="setRest(180)">180s</button></div>
+      <div class="custom"><input id="customSec" inputmode="numeric" placeholder="自定义秒数" /><button class="small" onclick="setCustomRest()">设定</button></div>
+      <div class="button-row"><button class="small green" id="restStart" onclick="toggleRest()">开始</button><button class="small" onclick="addRest(15)">+15s</button><button class="small" onclick="resetRest()">重置</button></div>
+      <div class="button-row two"><button class="small" onclick="markSetAndRest()">完成一组并休息</button><button class="small" onclick="addRest(-15)">-15s</button></div>
+      <div class="wake"><div><b>防息屏尝试</b><span>Safari/系统可能限制，训练时可点开</span></div><button class="switch" id="wakeSwitch" onclick="toggleWake()"><i></i></button></div>
+    </div>
+  </section>
+
+  <section class="screen" id="tab-analysis">
+    <div class="screen-head"><div class="title"><h1>训练分析</h1><p>历史数据在后台归一化后统计</p></div><div class="chip">ANALYSIS</div></div>
+    <div class="section-title"><h2>阶段概览</h2><span>5.16–6.3</span></div>
+    <div class="stat-grid" id="stats"></div>
+    <div class="section-title"><h2>模块分布</h2><span>力量 + 篮球</span></div>
+    <div class="glass card"><div class="bars" id="moduleBars"></div></div>
+    <div class="section-title"><h2>主项 PR</h2><span>统一动作名后统计</span></div>
+    <div class="glass card"><div class="rows" id="prs"></div></div>
+    <div class="section-title"><h2>动作归一化规则</h2><span>避免重复动作</span></div>
+    <div class="glass card"><div class="rules" id="rules"></div></div>
+  </section>
+
+  <section class="screen" id="tab-archive">
+    <div class="screen-head"><div class="title"><h1>训练档案</h1><p>所有记录都用统一动作名显示</p></div><div class="chip">ARCHIVE</div></div>
+    <div class="glass card">
+      <textarea class="textarea" id="newLog" placeholder="新增记录示例：\n6.4\n平板卧推\n15kg*12*3\n二头弯举\n12.5kg*12*3"></textarea>
+      <div class="actions"><button class="btn primary" onclick="addLog()">添加记录</button><button class="btn ghost" onclick="exportData()">导出</button></div>
+      <button class="btn danger" style="width:100%" onclick="restoreData()">恢复默认档案</button>
+    </div>
+    <div class="section-title"><h2>历史记录</h2><span>已清洗动作名</span></div>
+    <div id="archiveList"></div>
+  </section>
+
+  <nav class="nav">
+    <button class="active" onclick="showTab('check',this)"><b>✓</b>打卡</button>
+    <button onclick="showTab('time',this)"><b>◷</b>计时</button>
+    <button onclick="showTab('analysis',this)"><b>◇</b>分析</button>
+    <button onclick="showTab('archive',this)"><b>▤</b>档案</button>
+  </nav>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+const STORE='gym-vault-liquid-ripple-v1';
+const todayKey=()=>new Date().toISOString().slice(0,10);
+let data={checkins:{},records:[],laps:[]};
+const plan=[
+ {name:'壶铃摆动',type:'启动',target:'10kg · 15次 × 4组',rec:'10kg × 15 × 4',defaultWeight:'10kg',tips:'髋关节铰链发力，背保持中立；不是蹲起，不要用手臂硬抬。',sets:4},
+ {name:'保加利亚分腿蹲',type:'主项',target:'10kg · 12次 × 3组',rec:'10kg × 12 × 3；状态好末组试 12.5kg',defaultWeight:'10kg',tips:'前脚踩稳，身体微前倾，膝盖跟脚尖同向；底部别弹。',sets:3},
+ {name:'哑铃箭步蹲',type:'主项',target:'12.5kg · 12次 × 3组',rec:'12.5kg × 12 × 3',defaultWeight:'12.5kg',tips:'步幅略大，下落垂直；前腿主导站起，别靠后脚蹬地偷力。',sets:3},
+ {name:'哑铃罗马尼亚硬拉',type:'后链',target:'15kg × 2组 + 17.5kg × 1组',rec:'15kg × 12 × 2；17.5kg × 10–12 × 1',defaultWeight:'15kg / 17.5kg',tips:'髋向后推，小腿接近垂直；感受腘绳肌被拉长，腰不要塌。',sets:3},
+ {name:'平板支撑',type:'核心',target:'75秒 × 3组',rec:'75s × 3',defaultWeight:'75s',tips:'肋骨下压，臀部微收；别塌腰，宁可缩短时间也要保持质量。',sets:3}
+];
+const rawRecords=`5.16|平板卧推,10kg*12*2,12.5kg*12*2;俯卧撑,15*3;坐姿推肩,10kg*8*2,8kg*10*2;侧平举,3kg*15*3;过顶臂屈伸,6kg*10*3;窄距俯卧撑,8*2
+5.17|高位下拉,11kg*12,18kg*12*2;单臂哑铃划船,10kg*12,7.5kg*12*2;上斜划船,7.5kg*12*3;俯身反向飞鸟,3kg*15*3;靠腿二头弯举,10kg*12,12.5kg*12*2
+5.18|壶铃摆动,10kg*20*4;保加利亚分腿蹲,8kg*12*2,10kg*12;哑铃箭步蹲,8kg*12,10kg*12*2;哑铃罗马尼亚硬拉,10kg*12,12.5kg*12*2;平板支撑,70s*3
+5.19|篮球
+5.20|平板卧推,12.5kg*12*3;坐姿推肩,10kg*12*3;侧平举,4kg*15*3;过顶臂屈伸,6kg*12,8kg*12*3;俯卧撑,15*3;上斜卧推,12.5kg*12*3
+5.21|哑铃仰卧上拉,10kg*12*3;上斜划船,8kg*12*3;单臂哑铃划船,10kg*12*3;俯身反向飞鸟,3kg*15*3;靠腿二头弯举,12.5kg*12*3
+5.22|篮球
+5.23|壶铃摆动,10kg*15*4;保加利亚分腿蹲,10kg*12*3;哑铃箭步蹲,10kg*12*3;哑铃罗马尼亚硬拉,10kg*12,12.5kg*12*2;平板支撑,120s,75s
+5.24|平板卧推,12.5kg*12*4;坐姿推肩,10kg*12*4;上斜卧推,12.5kg*12,10kg*12*3;侧平举,3kg*15*4;过顶臂屈伸,7.5kg*12,8kg*12*3
+5.25|哑铃仰卧上拉,8kg*12*4;上斜划船,8kg*12*4;单臂哑铃划船,8kg*12*4;俯身反向飞鸟,2kg*15*2,3kg*12*2
+5.26|壶铃摆动,10kg*12*4;保加利亚分腿蹲,10kg*12*3;哑铃箭步蹲,10kg*12*3;哑铃罗马尼亚硬拉,12.5kg*12*3;平板支撑,75s*3
+5.27|篮球
+5.28|平板卧推,12.5kg*12*3,15kg*12;坐姿推肩,12.5kg*12*3;上斜卧推,12.5kg*12*3;侧平举,4kg*15*4;过顶臂屈伸,10kg*12*3
+5.29|休整
+5.30|高位下拉,15kg*12,20kg*12*3;上斜划船,10kg*12*3;单臂哑铃划船,10kg*12*3;上斜宽肘划船,4kg*15,5kg*15*2;靠腿二头弯举,12.5kg*12*2,15kg*12
+5.31|壶铃摆动,10kg*12*3;保加利亚分腿蹲,10kg*12*3;哑铃箭步蹲,12.5kg*12*3;哑铃罗马尼亚硬拉,15kg*12*2,17.5kg*12;平板支撑,70s*2
+6.1|平板卧推,15kg*12*3;坐姿推肩,12.5kg*12*3;上斜卧推,12.5kg*12*3;侧平举,4kg*15*3;过顶臂屈伸,10kg*12*2,12.5kg*12
+6.2|高位下拉,20kg*12,25kg*12,30kg*12;上斜划船,10kg*12*3;单臂哑铃划船,10kg*12*3;上斜宽肘划船,5kg*12,6kg*12*2;靠腿二头弯举,12.5kg*15*3
+6.3|篮球`;
+const rules=[['双哑铃上斜划船 / 上斜划船','上斜划船'],['单臂划船 / 单臂哑铃划船','单臂哑铃划船'],['二头弯举 / 靠腿弯举 / 坐姿靠腿二头弯举','靠腿二头弯举'],['坐姿臂屈伸 / 哑铃过顶臂屈伸','过顶臂屈伸'],['保加利亚蹲 / 保加利亚分腿蹲','保加利亚分腿蹲'],['罗马尼亚硬拉 / 哑铃罗马尼亚硬拉','哑铃罗马尼亚硬拉'],['摆','休整']];
+function canon(n){n=(n||'').trim(); if(/篮球|🏀/.test(n))return '篮球'; if(/^摆$|休整|摆烂/.test(n))return '休整'; if(/上斜宽肘划船/.test(n))return '上斜宽肘划船'; if(/双哑铃上斜划船|上斜.*划船/.test(n))return '上斜划船'; if(/单臂.*划船/.test(n))return '单臂哑铃划船'; if(/二头|靠腿.*弯举|坐姿靠腿/.test(n))return '靠腿二头弯举'; if(/臂屈伸/.test(n))return '过顶臂屈伸'; if(/保加利亚/.test(n))return '保加利亚分腿蹲'; if(/箭步/.test(n))return '哑铃箭步蹲'; if(/罗马尼亚/.test(n))return '哑铃罗马尼亚硬拉'; if(/推肩/.test(n))return '坐姿推肩'; if(/侧平举/.test(n))return '侧平举'; if(/平板卧推/.test(n))return '平板卧推'; if(/上斜卧推/.test(n))return '上斜卧推'; return n}
+function parseRaw(txt){return txt.trim().split('\n').map(line=>{let [date,body]=line.split('|'); return {date,items:body.split(';').map(x=>{let parts=x.split(','); return {name:canon(parts[0]),sets:parts.slice(1)}})}})}
+function load(){try{data={...data,...JSON.parse(localStorage.getItem(STORE)||'{}')}}catch(e){} if(!data.records||!data.records.length)data.records=parseRaw(rawRecords); if(!data.checkins)data.checkins={}; if(!data.laps)data.laps=[]}
+function persist(){localStorage.setItem(STORE,JSON.stringify(data))}
+function showTab(id,btn){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}
+function ensureCheck(){let k=todayKey();data.checkins[k]=data.checkins[k]||{};return data.checkins[k]}
+function renderPlan(){document.getElementById('datePill').textContent=new Date().toLocaleDateString('zh-CN',{month:'numeric',day:'numeric',weekday:'short'});let ch=data.checkins[todayKey()]||{};document.getElementById('planList').innerHTML=plan.map((ex,i)=>{let st=ch[i]||{done:0,actual:ex.defaultWeight,note:''};let sets=ex.sets||3;let pct=Math.min(100,(st.done||0)/sets*100);return `<div class="glass card"><div class="exercise"><div class="ex-top"><div><div class="ex-name">${ex.name}</div><div class="target">${ex.target}</div></div><div class="ex-kind">${ex.type}</div></div><div class="mini-grid"><div class="mini"><span>推荐安排</span><b>${ex.rec}</b></div><div class="mini"><span>实际记录</span><b>可改重量 / 时间</b></div></div><div class="input-row"><div class="field"><label>实际重量 / 时间</label><input class="actualInput" data-i="${i}" value="${st.actual||ex.defaultWeight}" /></div><div class="field"><label>完成</label><input readonly value="${st.done||0}/${sets}" /></div></div><div class="sets"><div class="set-label" id="cnt-${i}">${st.done||0}/${sets}</div><div class="set-buttons"><button class="round" onclick="decSet(${i})">−</button><button class="round plus" onclick="incSet(${i})">＋</button></div></div><div class="tip">${ex.tips}</div><div class="bar"><i style="width:${pct}%"></i></div></div></div>`}).join('');document.querySelectorAll('.actualInput').forEach(inp=>inp.addEventListener('input',e=>{let i=e.target.dataset.i;let ch=ensureCheck();ch[i]={...(ch[i]||{}),actual:e.target.value,done:ch[i]?.done||0};persist();}));updateProgress()}
+function incSet(i){let ch=ensureCheck();let max=plan[i].sets||3;let st=ch[i]||{done:0,actual:plan[i].defaultWeight};st.done=Math.min(max,(st.done||0)+1);ch[i]=st;persist();renderPlan();toast('已记录一组')}
+function decSet(i){let ch=ensureCheck();let st=ch[i]||{done:0,actual:plan[i].defaultWeight};st.done=Math.max(0,(st.done||0)-1);ch[i]=st;persist();renderPlan()}
+function updateProgress(){let ch=data.checkins[todayKey()]||{};let done=plan.reduce((a,ex,i)=>a+(ch[i]?.done||0),0);let total=plan.reduce((a,ex)=>a+(ex.sets||3),0);let pct=Math.round(done/total*100);document.getElementById('progressText').textContent=pct+'%';document.getElementById('progressRing').style.setProperty('--p',pct);document.getElementById('doneSets').textContent=done+'/'+total}
+function saveToday(){persist();toast('今日打卡已保存')}
+function resetToday(){if(confirm('清空今天的打卡？')){delete data.checkins[todayKey()];persist();renderPlan()}}
+let workTimer=null,workStartAt=0,workElapsed=0,workRunning=false;
+function fmt(sec){sec=Math.max(0,Math.floor(sec));let h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;return h>0?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}
+function fmtHMS(sec){sec=Math.max(0,Math.floor(sec));let h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}
+function currentWorkSec(){return workElapsed+(workRunning?(Date.now()-workStartAt)/1000:0)}
+function updateWork(){document.getElementById('workTime').textContent=fmtHMS(currentWorkSec())}
+function toggleWorkout(){if(workRunning){workElapsed+=(Date.now()-workStartAt)/1000;clearInterval(workTimer);workRunning=false;document.getElementById('workStart').textContent='继续';document.getElementById('timerState').textContent='暂停'}else{workStartAt=Date.now();workTimer=setInterval(updateWork,500);workRunning=true;document.getElementById('workStart').textContent='暂停';document.getElementById('timerState').textContent='训练中'}updateWork()}
+function resetWorkout(){clearInterval(workTimer);workRunning=false;workElapsed=0;data.laps=[];persist();document.getElementById('workStart').textContent='开始';document.getElementById('timerState').textContent='未开始';renderLaps();updateWork()}
+function lapWorkout(){let name=prompt('节点名称','完成一项训练');if(!name)return;data.laps.unshift({name,time:fmtHMS(currentWorkSec())});persist();renderLaps();toast('已记录节点')}
+function renderLaps(){document.getElementById('laps').innerHTML=(data.laps||[]).map(x=>`<div class="lap"><span>${x.name}</span><b>${x.time}</b></div>`).join('')}
+let restTotal=90,restLeft=90,restTimer=null,restRunning=false;
+function setRest(s){restTotal=Math.max(15,s);restLeft=restTotal;restRunning=false;clearInterval(restTimer);document.getElementById('restStart').textContent='开始';renderRest()}
+function setCustomRest(){let v=parseInt(document.getElementById('customSec').value,10);if(v>0)setRest(v)}
+function renderRest(){document.getElementById('restTime').textContent=fmt(restLeft);document.getElementById('restState').textContent=restRunning?'休息中':'已设定 '+restTotal+' 秒';let pct=restTotal?Math.max(0,Math.min(100,(restTotal-restLeft)/restTotal*100)):0;document.getElementById('restMeter').style.width=pct+'%'}
+function toggleRest(){if(restRunning){restRunning=false;clearInterval(restTimer);document.getElementById('restStart').textContent='继续';renderRest();return}restRunning=true;document.getElementById('restStart').textContent='暂停';restTimer=setInterval(()=>{restLeft--;renderRest();if(restLeft<=0){clearInterval(restTimer);restRunning=false;document.getElementById('restStart').textContent='开始';beep();if(navigator.vibrate)navigator.vibrate([160,80,160]);toast('休息结束，准备下一组')}} ,1000);renderRest()}
+function resetRest(){setRest(restTotal)}
+function addRest(s){restLeft=Math.max(0,restLeft+s);restTotal=Math.max(restLeft,restTotal+s);renderRest()}
+function markSetAndRest(){setRest(restTotal);toggleRest();toast('已开始组间休息')}
+function beep(){try{let ctx=new (window.AudioContext||window.webkitAudioContext)();let o=ctx.createOscillator();let g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=880;g.gain.value=.08;o.start();setTimeout(()=>{o.stop();ctx.close()},260)}catch(e){}}
+let wakeLock=null;async function toggleWake(){let sw=document.getElementById('wakeSwitch');if(wakeLock){try{await wakeLock.release()}catch(e){}wakeLock=null;sw.classList.remove('on');toast('已关闭防息屏');return}try{wakeLock=await navigator.wakeLock.request('screen');sw.classList.add('on');toast('已尝试开启防息屏')}catch(e){toast('当前浏览器不支持或被系统限制')}}
+function category(r){let names=r.items.map(i=>i.name).join('|');if(/篮球/.test(names))return '篮球';if(/休整/.test(names))return '休整';if(/分腿蹲|箭步|罗马尼亚|壶铃|平板支撑/.test(names))return '臀腿';if(/下拉|划船|飞鸟|弯举|上拉/.test(names))return '背二头';return '胸肩三头'}
+function renderAnalysis(){let rec=data.records||[];let counts={胸肩三头:0,背二头:0,臀腿:0,篮球:0,休整:0};rec.forEach(r=>counts[category(r)]++);let strength=rec.filter(r=>!['篮球','休整'].includes(category(r))).length;document.getElementById('stats').innerHTML=`<div class="stat glass"><b>${strength}</b><span>力量训练日</span></div><div class="stat glass"><b>${counts['篮球']}</b><span>篮球有氧日</span></div><div class="stat glass"><b>${counts['臀腿']}</b><span>臀腿训练日</span></div><div class="stat glass"><b>${rec.length}</b><span>总记录天数</span></div>`;let maxCount=Math.max(...Object.values(counts));document.getElementById('moduleBars').innerHTML=Object.entries(counts).map(([k,v])=>`<div class="hbar"><div><span>${k}</span><b>${v}</b></div><i style="--v:${maxCount?v/maxCount*100:0}%"></i></div>`).join('');let targets=['平板卧推','高位下拉','坐姿推肩','上斜划船','哑铃罗马尼亚硬拉','哑铃箭步蹲','靠腿二头弯举'];document.getElementById('prs').innerHTML=targets.map(t=>{let max=0,last='—';rec.forEach(r=>r.items.filter(i=>i.name===t).forEach(i=>i.sets.forEach(s=>{let m=s.match(/(\d+(?:\.\d+)?)kg/);if(m&&+m[1]>=max){max=+m[1];last=r.date+' · '+s}})));return `<div class="row"><span>${t}</span><span>${max?max+'kg · '+last:'—'}</span></div>`}).join('');document.getElementById('rules').innerHTML=rules.map(r=>`<div class="rule">${r[0]} → <b>${r[1]}</b></div>`).join('')}
+function renderArchive(){document.getElementById('archiveList').innerHTML=(data.records||[]).slice().reverse().map(r=>`<div class="archive-day"><h3>${r.date}</h3>${r.items.map(i=>`<div class="archive-item"><b>${i.name}</b><p>${i.sets.length?i.sets.join(' / '):''}</p></div>`).join('')}</div>`).join('')}
+function addLog(){let txt=document.getElementById('newLog').value.trim();if(!txt)return;let lines=txt.split('\n').map(x=>x.trim()).filter(Boolean);let date=lines.shift();let items=[];for(let i=0;i<lines.length;i++){if(!/[\d]+(kg|s)|\*/.test(lines[i])){let name=canon(lines[i]);let sets=[];while(lines[i+1]&&(/[\d]+(kg|s)|\*/.test(lines[i+1]))){sets.push(lines[++i])}items.push({name,sets})}}data.records.push({date,items});persist();document.getElementById('newLog').value='';renderArchive();renderAnalysis();toast('已添加，并自动统一动作名')}
+function exportData(){let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='gym-vault-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function restoreData(){if(confirm('恢复默认训练档案？今日打卡会保留。')){data.records=parseRaw(rawRecords);persist();renderArchive();renderAnalysis()}}
+function toast(msg){let el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2100)}
+
+// Premium water ripple: animated background waves + touch ripple feedback
+const waveCanvas=document.getElementById('waveCanvas');
+const waveCtx=waveCanvas.getContext('2d');
+let ripples=[];let waveT=0;
+function resizeWave(){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  const rect=document.querySelector('.app').getBoundingClientRect();
+  waveCanvas.width=Math.floor(rect.width*dpr);waveCanvas.height=Math.floor(window.innerHeight*dpr);
+  waveCanvas.style.width=rect.width+'px';waveCanvas.style.height=window.innerHeight+'px';
+  waveCtx.setTransform(dpr,0,0,dpr,0,0);
+}
+function drawWave(){
+  const w=waveCanvas.clientWidth,h=waveCanvas.clientHeight; if(!w||!h){requestAnimationFrame(drawWave);return}
+  waveCtx.clearRect(0,0,w,h); waveT+=0.009;
+  const layers=[
+    {y:h*.18,a:10,len:116,s:.85,c:'rgba(104,199,255,.16)'},
+    {y:h*.43,a:15,len:148,s:1.18,c:'rgba(103,232,201,.13)'},
+    {y:h*.76,a:18,len:186,s:.72,c:'rgba(174,154,255,.12)'}
+  ];
+  layers.forEach((L,idx)=>{
+    waveCtx.beginPath();
+    for(let x=0;x<=w;x+=3){
+      const y=L.y + Math.sin(x/L.len + waveT*L.s*5 + idx)*L.a + Math.sin(x/(L.len*.52) - waveT*3)*L.a*.34;
+      x===0?waveCtx.moveTo(x,y):waveCtx.lineTo(x,y);
+    }
+    waveCtx.lineTo(w,h);waveCtx.lineTo(0,h);waveCtx.closePath();
+    const g=waveCtx.createLinearGradient(0,L.y,0,h);g.addColorStop(0,L.c);g.addColorStop(1,'rgba(255,255,255,0)');
+    waveCtx.fillStyle=g;waveCtx.fill();
+  });
+  ripples=ripples.filter(r=>Date.now()-r.t<1300);
+  ripples.forEach(r=>{
+    const p=(Date.now()-r.t)/1300; const radius=18+p*150; const alpha=(1-p)*.34;
+    waveCtx.beginPath();waveCtx.arc(r.x,r.y,radius,0,Math.PI*2);
+    waveCtx.strokeStyle=`rgba(68,166,230,${alpha})`;waveCtx.lineWidth=2;waveCtx.stroke();
+    waveCtx.beginPath();waveCtx.arc(r.x,r.y,radius*.56,0,Math.PI*2);
+    waveCtx.strokeStyle=`rgba(255,255,255,${alpha*.9})`;waveCtx.lineWidth=1;waveCtx.stroke();
+  });
+  requestAnimationFrame(drawWave);
+}
+function addTouchRipple(e){
+  const app=document.querySelector('.app'); const rect=app.getBoundingClientRect();
+  const p=e.touches?e.touches[0]:e; const x=p.clientX-rect.left, y=p.clientY;
+  ripples.push({x,y,t:Date.now()});
+  const dot=document.createElement('span');dot.className='touch-ripple';dot.style.left=x+'px';dot.style.top=(p.clientY-rect.top)+'px';
+  app.appendChild(dot);setTimeout(()=>dot.remove(),900);
+  const target=e.target.closest('button,.btn,.small,.round,.preset button');
+  if(target){const rr=target.getBoundingClientRect();target.style.setProperty('--rx',((p.clientX-rr.left)/rr.width*100)+'%');target.style.setProperty('--ry',((p.clientY-rr.top)/rr.height*100)+'%')}
+}
+window.addEventListener('resize',resizeWave);window.addEventListener('orientationchange',()=>setTimeout(resizeWave,250));
+document.querySelector('.app').addEventListener('pointerdown',addTouchRipple,{passive:true});
+if(!matchMedia('(prefers-reduced-motion: reduce)').matches){resizeWave();drawWave();}
+
+load();renderPlan();renderLaps();renderRest();renderAnalysis();renderArchive();updateWork();
+</script>
+</body>
+</html>
