@@ -1,7 +1,7 @@
 {
-  "name": "今日训练 · Liquid Ripple",
+  "name": "今日训练 · Liquid Ripple v3",
   "short_name": "今日训练",
-  "start_url": "./index.html",
+  "start_url": "./index.html?v=3",
   "display": "standalone",
   "background_color": "#f4fbff",
   "theme_color": "#f4fbff",
