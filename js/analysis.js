@@ -1,4 +1,4 @@
-import{category,cmpMD}from'./training.js?v=14';
+import{category,cmpMD}from'./training.js?v=15';
 export function setParts(s){s=String(s).replaceAll('×','*').replace(/[–—]/g,'-');const kg=(s.match(/([\d.]+)\s*kg/i)||[])[1];const nums=[...s.matchAll(/([\d.]+)(?:-([\d.]+))?/g)].map(m=>m[2]?(+m[1]+ +m[2])/2:+m[1]);let reps=kg?nums[1]:nums[0],count=kg?(nums[2]||1):(nums[1]||1);if(/s/.test(s)&&!kg)reps=0;return{kg:kg?+kg:0,reps:reps||0,count:count||1}}
 export function factor(name){return['平板卧推','上斜卧推','坐姿推肩','侧平举','上斜划船','双臂哑铃俯身划船','单臂哑铃划船','罗马尼亚硬拉','原地箭步蹲','保加利亚分腿蹲','靠腿二头弯举'].includes(name)?2:1}
 export function volumeItem(item){return(item.sets||[]).reduce((a,s)=>{const p=setParts(s);return a+p.kg*p.reps*p.count*factor(item.name)},0)}

@@ -1,4 +1,4 @@
-import{NORMALIZE_RULES,TYPE_META}from'./data.js?v=14';
+import{NORMALIZE_RULES,TYPE_META}from'./data.js?v=15';
 export const mdToDate=(md)=>{const[y,m,d]=md.includes('-')?md.split('-').map(Number):[new Date().getFullYear(),...md.split('.').map(Number)];return new Date(y,m-1,d)};
 export const dateToMD=(d)=>`${d.getMonth()+1}.${d.getDate()}`;
 export const cmpMD=(a,b)=>mdToDate(a)-mdToDate(b);

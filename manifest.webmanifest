@@ -1,7 +1,7 @@
 {
-  "name": "Gym Vault V14 · 今日训练",
-  "short_name": "今日训练 V14",
-  "start_url": "./index.html?v=14",
+  "name": "Gym Vault V15 · 今日训练",
+  "short_name": "今日训练 V15",
+  "start_url": "./index.html?v=15",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f5fbff",
