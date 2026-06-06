@@ -1,13 +1,12 @@
 {
-  "name": "Gym Vault V16 · 今日训练",
-  "short_name": "今日训练 V16",
-  "start_url": "./index.html?v=16",
+  "name": "Gym Vault V17 Stable",
+  "short_name": "Gym V17",
+  "start_url": "./index.html?v=17",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f5fbff",
   "theme_color": "#f5fbff",
   "orientation": "portrait",
-  "description": "完整历史动态分析、最新三分化模板、智能递进计划、计时与档案 PWA。",
   "icons": [
     {
       "src": "icon.svg",
