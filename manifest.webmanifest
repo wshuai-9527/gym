@@ -1,18 +1,1 @@
-{
-  "name": "Gym Vault V17 Stable",
-  "short_name": "Gym V17",
-  "start_url": "./index.html?v=17",
-  "scope": "./",
-  "display": "standalone",
-  "background_color": "#f5fbff",
-  "theme_color": "#f5fbff",
-  "orientation": "portrait",
-  "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
-}
+{"name":"Gym Vault V19 Visual Coach","short_name":"Gym V19","start_url":"./index.html?v=19","scope":"./","display":"standalone","background_color":"#f5fbff","theme_color":"#f5fbff","orientation":"portrait","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
