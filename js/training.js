@@ -1,4 +1,4 @@
-import{NORMALIZE_RULES,TYPE_META}from'./data.js';
+import{NORMALIZE_RULES,TYPE_META}from'./data.js?v=14';
 export const mdToDate=(md)=>{const[y,m,d]=md.includes('-')?md.split('-').map(Number):[new Date().getFullYear(),...md.split('.').map(Number)];return new Date(y,m-1,d)};
 export const dateToMD=(d)=>`${d.getMonth()+1}.${d.getDate()}`;
 export const cmpMD=(a,b)=>mdToDate(a)-mdToDate(b);
@@ -15,7 +15,16 @@ export function latestStrength(records){return normalizeRecords(records).filter(
 function parseSet(s){s=String(s).replace(/[–—]/g,'-');const kg=(s.match(/([\d.]+)\s*kg/i)||[])[1];const nums=[...s.matchAll(/([\d.]+)(?:-([\d.]+))?/g)].map(m=>m[2]?(+m[1]+ +m[2])/2:+m[1]);return{kg:kg?+kg:0,reps:kg?(nums[1]||0):(nums[0]||0),count:kg?(nums[2]||1):(nums[1]||1)}}
 function fmtKg(x){return x?`${Number(x.toFixed(1)).toString().replace('.0','')}kg`:''}
 function bestFor(records,name){let best=null,last=null;normalizeRecords(records).forEach(r=>(r.items||[]).filter(i=>i.name===name).forEach(i=>{last={date:r.date,item:i};(i.sets||[]).forEach(s=>{const p=parseSet(s);if(p.kg&&(!best||p.kg>best.kg||(p.kg===best.kg&&p.reps>best.reps)))best={...p,date:r.date}})}));return{best,last}}
-function adaptiveSets(ex,records){const {best,last}=bestFor(records,ex.name);if(!best)return ex.sets;const isMain=/主项|厚度|背阔|后链|单侧腿|上胸|肩部/.test(ex.type);const jump=best.kg>=20?5:best.kg>=10?2.5:1;const stable=best.reps>=12;let base=best.kg,trial=stable?best.kg+jump:best.kg;let reps=stable?'10–12':'12';let sets=ex.sets.map((_,i)=>[fmtKg(base),reps]);if(isMain&&sets.length>=3){sets=sets.map((s,i)=>i===sets.length-1?[fmtKg(trial),stable?'8–10':'10–12']:[fmtKg(base),reps])}if(ex.name==='平板支撑')sets=ex.sets;return sets}
+function adaptiveSets(ex,records){const {best}=bestFor(records,ex.name);if(!best)return ex.sets;
+ const fixed=['壶铃摆动','平板支撑','侧平举','上斜胸托反向飞鸟']; if(fixed.includes(ex.name))return ex.sets;
+ const isMain=/主项|厚度|背阔|后链|单侧腿|上胸|肩部/.test(ex.type);
+ const jump=best.kg>=25?5:best.kg>=7.5?2.5:1;
+ const stable=best.reps>=12;
+ const base=best.kg,trial=stable?best.kg+jump:best.kg;
+ const targetReps=(ex.target.match(/(\d+[–-]\d+)/)||[])[1]||'8–12';
+ let sets=ex.sets.map((s)=>[fmtKg(base),s[1]||targetReps]);
+ if(isMain&&sets.length>=3&&stable){sets=sets.map((s,i)=>i===sets.length-1?[fmtKg(trial),targetReps]:[fmtKg(base),targetReps])}
+ return sets}
 export function buildPlanContext(records,planLibrary){const last=latestStrength(records);const lastType=last?typeFromCat(category(last)):null;const type=last?nextTypeAfter(lastType):'Push';let date=todayMD();if(last&&cmpMD(last.date,date)>=0){const d=mdToDate(last.date);d.setDate(d.getDate()+1);date=dateToMD(d)}const raw=planLibrary[type];const exercises=raw.map(ex=>{const sets=adaptiveSets(ex,records);const rec=sets.map(s=>s[0]?`${s[0]}×${s[1]}`:`${s[1]}`).join(' / ');return{...ex,sets,rec,target:rec}});return{type,date,label:TYPE_META[type].label,line:TYPE_META[type].line,last,exercises,strategy:'动态标准进步型'}}
 export function createCheckin(ctx){return{key:`${ctx.date}-${ctx.type}`,date:ctx.date,type:ctx.type,sets:ctx.exercises.map(ex=>({name:ex.name,sets:ex.sets.map(([weight,reps],i)=>({id:`${ex.name}-${i}`,weight,reps,done:false}))}))}}
 export function recordFromCheckin(checkin){return{date:checkin.date,items:checkin.sets.map(ex=>({name:ex.name,sets:ex.sets.filter(s=>s.done).map(s=>`${s.weight?`${s.weight}*`:''}${s.reps}`)})).filter(i=>i.sets.length)}}
