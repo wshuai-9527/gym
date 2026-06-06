@@ -1,4 +1,4 @@
-const CACHE_NAME='gym-vault-v12-cache';
+const CACHE_NAME='gym-vault-v13-cache';
 const APP_SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg','./css/app.css','./js/app.js','./js/state.js','./js/ui.js','./js/storage.js','./js/data.js','./js/training.js','./js/analysis.js','./js/timer.js'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(APP_SHELL)))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});

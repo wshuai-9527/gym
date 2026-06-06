@@ -6,23 +6,24 @@
 <meta name="theme-color" content="#f5fbff">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="stylesheet" href="./css/app.css">
-<title>Gym Vault V12</title>
+<title>Gym Vault V13</title>
 </head>
 <body>
 <div class="app" id="app">
   <canvas class="wave-canvas" id="waveCanvas" aria-hidden="true"></canvas>
-  <div class="liquid" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
+  <div class="liquid" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i><i class="orb o1"></i><i class="orb o2"></i></div>
 
   <section class="screen active" data-screen="check">
     <header class="screen-head">
-      <div class="title"><h1>今日训练</h1><p id="todayLine">读取训练档案 · 自动生成下一练</p></div>
+      <div class="title"><h1>今日训练</h1><p id="todayLine">读取完整档案 · 动态生成下一练</p></div>
       <div class="chip" id="datePill">今天</div>
     </header>
     <article class="glass hero">
       <div class="hero-copy">
         <div class="kicker">FOCUS</div>
         <h2 id="planTitle">Loading</h2>
-        <p id="planDesc">正在生成今日计划。</p>
+        <p id="planDesc">正在根据历史记录生成今日计划。</p>
+        <div class="hero-tags" id="heroTags"></div>
       </div>
       <div class="progress-ring" id="progressRing"><span id="progressText">0%</span></div>
     </article>
@@ -72,7 +73,7 @@
   </section>
 
   <section class="screen" data-screen="analysis">
-    <header class="screen-head"><div class="title"><h1>训练分析</h1><p>单只哑铃记录 · 分析自动校正</p></div><div class="chip">V12</div></header>
+    <header class="screen-head"><div class="title"><h1>训练分析</h1><p>从第一天到最新一天动态更新</p></div><div class="chip">V13</div></header>
     <article class="glass analysis-hero">
       <div class="kicker">INTELLIGENCE</div>
       <h2 id="analysisScore">分析中</h2>
@@ -84,8 +85,8 @@
     <div class="section-title"><h2>可视化看板</h2><span>图表 + 解读</span></div>
     <div class="chart-grid">
       <article class="glass card chart-card"><div class="chart-head"><h3>训练量趋势</h3><span>kg·次</span></div><div id="volumeChart"></div><p id="volumeNote" class="chart-note"></p></article>
-      <article class="glass card chart-card"><div class="chart-head"><h3>模块频率</h3><span>次数</span></div><div id="freqChart"></div><p id="freqNote" class="chart-note"></p></article>
-      <article class="glass card chart-card"><div class="chart-head"><h3>模块负荷</h3><span>校正后</span></div><div id="loadChart"></div><p id="loadNote" class="chart-note"></p></article>
+      <article class="glass card chart-card"><div class="chart-head"><h3>推 / 拉 / 腿频率</h3><span>次数</span></div><div id="freqChart"></div><p id="freqNote" class="chart-note"></p></article>
+      <article class="glass card chart-card"><div class="chart-head"><h3>推 / 拉 / 腿负荷</h3><span>校正后</span></div><div id="loadChart"></div><p id="loadNote" class="chart-note"></p></article>
       <article class="glass card chart-card"><div class="chart-head"><h3>主项 PR</h3><span>e1RM</span></div><div id="prChart"></div><p id="prNote" class="chart-note"></p></article>
     </div>
     <div class="section-title"><h2>科学判断</h2><span>基于当前数据</span></div>
@@ -93,7 +94,7 @@
   </section>
 
   <section class="screen" data-screen="archive">
-    <header class="screen-head"><div class="title"><h1>训练档案</h1><p>统一动作名 · 自动清洗</p></div><div class="chip">ARCHIVE</div></header>
+    <header class="screen-head"><div class="title"><h1>训练档案</h1><p>完整历史 · 自动合并 · 不覆盖新增</p></div><div class="chip">ARCHIVE</div></header>
     <article class="glass card">
       <textarea class="textarea" id="newLog" placeholder="新增记录示例：
 6.7
@@ -103,6 +104,7 @@
 10kg*12*3"></textarea>
       <div class="actions"><button class="btn primary" data-action="add-log">添加记录</button><button class="btn ghost" data-action="export-data">导出 JSON</button></div>
       <button class="btn danger full" data-action="restore-data">恢复默认档案</button>
+      <button class="btn ghost full" data-action="merge-default">合并完整历史档案</button>
       <button class="btn ghost full" data-action="clear-cache">刷新网页缓存</button>
     </article>
     <div class="section-title"><h2>历史记录</h2><span>已清洗动作名</span></div>
