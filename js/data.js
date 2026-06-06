@@ -1,4 +1,4 @@
-export const APP_VERSION='V15';
+export const APP_VERSION='V16';
 export const NORMALIZE_RULES=[
 ['哑铃平板卧推','平板卧推'],['平板卧推','平板卧推'],
 ['哑铃推肩','坐姿推肩'],['哑铃坐姿推肩','坐姿推肩'],['坐姿推肩','坐姿推肩'],

@@ -1,6 +1,6 @@
-const CACHE_NAME='gym-vault-v15-cache';
+const CACHE_NAME='gym-vault-v16-cache';
 const CACHE_VERSION='15';
-const APP_SHELL=['./','./index.html','./index.html?v=15','./manifest.webmanifest','./manifest.webmanifest?v=15','./icon.svg','./css/app.css','./css/app.css?v=15','./js/app.js?v=15','./js/state.js?v=15','./js/ui.js?v=15','./js/storage.js?v=15','./js/data.js?v=15','./js/training.js?v=15','./js/analysis.js?v=15','./js/timer.js?v=15'];
+const APP_SHELL=['./','./index.html','./index.html?v=16','./manifest.webmanifest','./manifest.webmanifest?v=16','./icon.svg','./css/app.css','./css/app.css?v=16','./js/app.js?v=16','./js/state.js?v=16','./js/ui.js?v=16','./js/storage.js?v=16','./js/data.js?v=16','./js/training.js?v=16','./js/analysis.js?v=16','./js/timer.js?v=16'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(APP_SHELL)))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const url=new URL(e.request.url);if(url.origin!==location.origin)return;e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE_NAME).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request).then(c=>c||(e.request.mode==='navigate'?caches.match('./index.html'):undefined))))});

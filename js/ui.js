@@ -1,6 +1,6 @@
-import{buildPlanContext,createCheckin,recordFromCheckin,saveRecord,basketballRecord,parseRawRecords,normalizeRecords,nextUnchecked,mergeRecords}from'./training.js?v=15';
-import{buildAnalysis,fmtPct}from'./analysis.js?v=15';
-import{PLAN_LIBRARY,RAW_RECORDS,APP_VERSION}from'./data.js?v=15';
+import{buildPlanContext,createCheckin,recordFromCheckin,saveRecord,basketballRecord,parseRawRecords,normalizeRecords,nextUnchecked,mergeRecords}from'./training.js?v=16';
+import{buildAnalysis,fmtPct}from'./analysis.js?v=16';
+import{PLAN_LIBRARY,RAW_RECORDS,APP_VERSION}from'./data.js?v=16';
 const $=(s,r=document)=>r.querySelector(s),el=(t,c)=>{const n=document.createElement(t);if(c)n.className=c;return n};
 function fmtTime(s){s=Math.max(0,Math.floor(s));const h=String(Math.floor(s/3600)).padStart(2,'0'),m=String(Math.floor(s%3600/60)).padStart(2,'0'),x=String(s%60).padStart(2,'0');return`${h}:${m}:${x}`}
 function fmtRest(s){s=Math.max(0,Math.ceil(s));return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}

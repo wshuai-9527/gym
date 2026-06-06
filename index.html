@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#f5fbff">
-<link rel="manifest" href="./manifest.webmanifest?v=15">
-<link rel="stylesheet" href="./css/app.css?v=15">
-<title>Gym Vault V15</title>
+<link rel="manifest" href="./manifest.webmanifest?v=16">
+<link rel="stylesheet" href="./css/app.css?v=16">
+<title>Gym Vault V16</title>
 </head>
 <body>
 <div class="app" id="app">
@@ -73,7 +73,7 @@
   </section>
 
   <section class="screen" data-screen="analysis">
-    <header class="screen-head"><div class="title"><h1>训练分析</h1><p>从 5.16 到最新一天动态更新</p></div><div class="chip">V15</div></header>
+    <header class="screen-head"><div class="title"><h1>训练分析</h1><p>从 5.16 到最新一天动态更新</p></div><div class="chip">V16</div></header>
     <article class="glass analysis-hero">
       <div class="kicker">INTELLIGENCE</div>
       <h2 id="analysisScore">分析中</h2>
@@ -129,8 +129,8 @@
   <div class="toast" id="toast"></div>
 </div>
 <script>
-(()=>{const k='gym-vault-v15-cleaned';if(!sessionStorage.getItem(k)&&'serviceWorker'in navigator&&'caches'in window){sessionStorage.setItem(k,'1');Promise.all([navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))),caches.keys().then(ks=>Promise.all(ks.map(x=>caches.delete(x))))]).then(()=>{if(!location.search.includes('v=15'))location.replace(location.pathname+'?v=15')}).catch(()=>{})}})();
+(()=>{const k='gym-vault-v16-cleaned';if(!sessionStorage.getItem(k)&&'serviceWorker'in navigator&&'caches'in window){sessionStorage.setItem(k,'1');Promise.all([navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))),caches.keys().then(ks=>Promise.all(ks.map(x=>caches.delete(x))))]).then(()=>{if(!location.search.includes('v=16'))location.replace(location.pathname+'?v=16')}).catch(()=>{})}})();
 </script>
-<script type="module" src="./js/app.js?v=15"></script>
+<script type="module" src="./js/app.js?v=16"></script>
 </body>
 </html>
