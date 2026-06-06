@@ -1,0 +1,13 @@
+import{APP_VERSION,RAW_RECORDS}from'./data.js';
+import{StorageManager}from'./storage.js';
+import{AppState}from'./state.js';
+import{parseRawRecords,normalizeRecords}from'./training.js';
+import{TimerManager}from'./timer.js';
+import{UIManager}from'./ui.js';
+const defaultState={version:APP_VERSION,records:normalizeRecords(parseRawRecords(RAW_RECORDS)),checkins:{},timers:{work:{running:false,startAt:0,elapsed:0,laps:[]},rest:{duration:90,running:false,endAt:0}},activePlanKey:''};
+const storage=new StorageManager('gym-vault-v12',defaultState);
+const appState=new AppState(storage.load());
+const timer=new TimerManager(appState);
+const ui=new UIManager({state:appState,storage,timer});
+ui.mount();
+if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').then(r=>r.update()).catch(()=>{});

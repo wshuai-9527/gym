@@ -1,16 +1,19 @@
 {
-  "name": "今日训练 · Liquid Ripple v3",
-  "short_name": "今日训练",
-  "start_url": "./index.html?v=3",
+  "name": "Gym Vault V12 · 今日训练",
+  "short_name": "今日训练 V12",
+  "start_url": "./index.html?v=12",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#f4fbff",
-  "theme_color": "#f4fbff",
+  "background_color": "#f5fbff",
+  "theme_color": "#f5fbff",
   "orientation": "portrait",
+  "description": "原生 ES Modules 手机健身打卡、计时、分析与档案 PWA。",
   "icons": [
     {
       "src": "icon.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }
