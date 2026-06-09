@@ -1,5 +1,6 @@
 const CACHE='gym-vault-action-name-v25';
 function patchHtml(html){
+  html=html.replace("(()=>{'use strict';","(()=>{'use strict';try{localStorage.setItem('gym-fix-test','1')}catch(e){};");
   html=html.replaceAll('上斜胸托反向飞鸟','坐姿俯身飞鸟');
   html=html.replaceAll('俯身反向飞鸟','坐姿俯身飞鸟');
   html=html.replaceAll('./images/pull_4.jpg','./images/pull_4.svg?v=25');
