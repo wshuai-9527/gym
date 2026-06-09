@@ -1,7 +1,14 @@
-const CACHE='gym-vault-title-fix-v23';
+const CACHE='gym-vault-action-fix-v24';
 function patchHtml(html){
   html=html.replace(".hero h2{font-size:54px;line-height:.94;letter-spacing:-.09em;margin:0 0 14px;font-weight:1000}",".hero h2{font-size:54px;line-height:.96;letter-spacing:-.035em;margin:0 0 14px;font-weight:1000;white-space:nowrap}.hero-title-en{display:inline-block;letter-spacing:-.045em}.hero-title-cn{display:inline-block;margin-left:.16em;letter-spacing:-.02em}");
   html=html.replace("$('#planTitle').textContent=ctx.label;","$('#planTitle').innerHTML=(ctx.type==='Push'?'<span class=\"hero-title-en\">Push</span><span class=\"hero-title-cn\">日</span>':ctx.type==='Pull'?'<span class=\"hero-title-en\">Pull</span><span class=\"hero-title-cn\">日</span>':'<span class=\"hero-title-en\">Legs</span><span class=\"hero-title-cn\">日</span>');");
+  html=html.replaceAll('上斜胸托反向飞鸟','俯身反向飞鸟');
+  html=html.replaceAll('./images/pull_4.jpg','./images/pull_4.svg?v=24');
+  html=html.replaceAll('胸托凳面，手臂微弯打开，顶峰停顿，不借腰摆。','屈髋俯身，背部中立；手臂微弯向两侧打开，轻重量找后束发力。');
+  html=html.replaceAll('胸口贴住斜凳','髋向后坐，背部中立');
+  html=html.replaceAll('肩膀远离耳朵','手臂微弯向两侧打开');
+  html=html.replaceAll('重量轻，动作打开','肩胛稳定，不要耸肩');
+  html=html.replaceAll('重点感受后束发力','轻重量，找后束发力');
   return html;
 }
 self.addEventListener('install',e=>{self.skipWaiting()});
@@ -18,4 +25,4 @@ self.addEventListener('fetch',e=>{
   }
   e.respondWith(caches.match(e.request,{ignoreSearch:true}).then(r=>r||fetch(e.request).then(res=>{const copy=res.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return res})));
 });
-self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(cs=>{for(const c of cs){if('focus' in c)return c.focus()}if(clients.openWindow)return clients.openWindow('./index.html?v=23')}))});
+self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(cs=>{for(const c of cs){if('focus' in c)return c.focus()}if(clients.openWindow)return clients.openWindow('./index.html?v=24')}))});
