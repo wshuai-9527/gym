@@ -1,0 +1,16 @@
+{
+  "name": "Gym Vault V31 Cloud Analysis",
+  "short_name": "GymV31",
+  "start_url": "./index.html?v=31",
+  "display": "standalone",
+  "background_color": "#eef9ff",
+  "theme_color": "#f5fbff",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
