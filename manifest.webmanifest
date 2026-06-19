@@ -1,0 +1,16 @@
+{
+  "name": "Gym Vault V30 Plan Fix",
+  "short_name": "GymV30",
+  "start_url": "./index.html?v=30",
+  "display": "standalone",
+  "background_color": "#eef9ff",
+  "theme_color": "#f5fbff",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
