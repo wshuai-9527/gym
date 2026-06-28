@@ -1,10 +1,10 @@
 {
-  "name": "Gym Vault V31 Cloud Analysis",
-  "short_name": "GymV31",
-  "start_url": "./index.html?v=31",
+  "name": "Gym Vault V44 Clean",
+  "short_name": "GymV44",
+  "start_url": "./index.html?v=44",
   "display": "standalone",
   "background_color": "#eef9ff",
-  "theme_color": "#f5fbff",
+  "theme_color": "#f3fbff",
   "icons": [
     {
       "src": "./icon.svg",
