@@ -1,31 +1,37 @@
-const CACHE='gym-vault-v38-professional-analysis';
-const ASSETS=["./", "./index.html?v=36", "./manifest.webmanifest?v=36", "./icon.svg", "./v38-analysis.js?v=38", "./images/push_1.png", "./images/push_2.png", "./images/push_3.png", "./images/push_4.png", "./images/push_5.png", "./images/pull_1.png", "./images/pull_2.png", "./images/pull_3.png", "./images/pull_4.png", "./images/pull_5.png", "./images/legs_1.png", "./images/legs_2.png", "./images/legs_3.png", "./images/legs_4.png", "./images/legs_5.png"];
-function injectAnalysis(html){
+const CACHE='gym-vault-v39-clean-analysis';
+const ASSETS=['./','./index.html?v=39','./manifest.webmanifest?v=39','./icon.svg','./analysis.js?v=39'];
+function inject(html){
   if(!html) return html;
-  html=html.replace(/<script src="\.\/v37-analysis\.js\?v=37"><\/script>/g,'');
-  if(html.includes('v38-analysis.js')) return html;
-  return html.replace('</body>','<script src="./v38-analysis.js?v=38"></script></body>');
+  html=html.split('v37-analysis.js').join('disabled-v37-analysis.js');
+  html=html.split('v38-analysis.js').join('disabled-v38-analysis.js');
+  if(html.includes('analysis.js?v=39')) return html;
+  return html.replace('</body>','<scr'+'ipt src="./analysis.js?v=39"></scr'+'ipt></body>');
 }
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
-self.addEventListener('activate',e=>e.waitUntil((async()=>{const ks=await caches.keys();await Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim()})()));
-self.addEventListener('fetch',e=>{
-  if(e.request.method!=='GET') return;
-  if(e.request.mode==='navigate'){
-    e.respondWith((async()=>{
+self.addEventListener('install',event=>{
+  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
+});
+self.addEventListener('activate',event=>{
+  event.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));
+    await self.clients.claim();
+  })());
+});
+self.addEventListener('fetch',event=>{
+  if(event.request.method!=='GET') return;
+  if(event.request.mode==='navigate'){
+    event.respondWith((async()=>{
       try{
-        const res=await fetch(e.request,{cache:'no-store'});
+        const res=await fetch(event.request,{cache:'no-store'});
         const text=await res.text();
-        return new Response(injectAnalysis(text),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}});
+        return new Response(inject(text),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}});
       }catch(err){
-        const cached=await caches.match('./index.html?v=36',{ignoreSearch:true});
-        if(cached){
-          const text=await cached.text();
-          return new Response(injectAnalysis(text),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}});
-        }
+        const cached=await caches.match('./index.html?v=39',{ignoreSearch:true})||await caches.match('./index.html?v=36',{ignoreSearch:true});
+        if(cached){const text=await cached.text();return new Response(inject(text),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}})}
         throw err;
       }
     })());
     return;
   }
-  e.respondWith(caches.match(e.request,{ignoreSearch:true}).then(r=>r||fetch(e.request).then(res=>{const copy=res.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return res}).catch(()=>caches.match('./index.html?v=36',{ignoreSearch:true}))));
+  event.respondWith(fetch(event.request,{cache:'no-store'}).catch(()=>caches.match(event.request,{ignoreSearch:true})));
 });
