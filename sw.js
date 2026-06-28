@@ -1,8 +1,10 @@
-const CACHE='gym-vault-v37-analysis';
-const ASSETS=["./", "./index.html?v=36", "./manifest.webmanifest?v=36", "./icon.svg", "./v37-analysis.js?v=37", "./images/push_1.png", "./images/push_2.png", "./images/push_3.png", "./images/push_4.png", "./images/push_5.png", "./images/pull_1.png", "./images/pull_2.png", "./images/pull_3.png", "./images/pull_4.png", "./images/pull_5.png", "./images/legs_1.png", "./images/legs_2.png", "./images/legs_3.png", "./images/legs_4.png", "./images/legs_5.png"];
-function injectV37(html){
-  if(!html || html.includes('v37-analysis.js')) return html;
-  return html.replace('</body>','<script src="./v37-analysis.js?v=37"></script></body>');
+const CACHE='gym-vault-v38-professional-analysis';
+const ASSETS=["./", "./index.html?v=36", "./manifest.webmanifest?v=36", "./icon.svg", "./v38-analysis.js?v=38", "./images/push_1.png", "./images/push_2.png", "./images/push_3.png", "./images/push_4.png", "./images/push_5.png", "./images/pull_1.png", "./images/pull_2.png", "./images/pull_3.png", "./images/pull_4.png", "./images/pull_5.png", "./images/legs_1.png", "./images/legs_2.png", "./images/legs_3.png", "./images/legs_4.png", "./images/legs_5.png"];
+function injectAnalysis(html){
+  if(!html) return html;
+  html=html.replace(/<script src="\.\/v37-analysis\.js\?v=37"><\/script>/g,'');
+  if(html.includes('v38-analysis.js')) return html;
+  return html.replace('</body>','<script src="./v38-analysis.js?v=38"></script></body>');
 }
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil((async()=>{const ks=await caches.keys();await Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim()})()));
@@ -13,12 +15,12 @@ self.addEventListener('fetch',e=>{
       try{
         const res=await fetch(e.request,{cache:'no-store'});
         const text=await res.text();
-        return new Response(injectV37(text),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}});
+        return new Response(injectAnalysis(text),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}});
       }catch(err){
         const cached=await caches.match('./index.html?v=36',{ignoreSearch:true});
         if(cached){
           const text=await cached.text();
-          return new Response(injectV37(text),{headers:{'content-type':'text/html; charset=utf-8'}});
+          return new Response(injectAnalysis(text),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}});
         }
         throw err;
       }
