@@ -1,11 +1,11 @@
-const CACHE='gym-vault-v39-clean-analysis';
-const ASSETS=['./','./index.html?v=39','./manifest.webmanifest?v=39','./icon.svg','./analysis.js?v=39'];
+const CACHE='gym-vault-v40-compat-clean';
+const ASSETS=['./','./index.html?v=40','./manifest.webmanifest?v=40','./icon.svg','./compat.js?v=40','./analysis.js?v=40'];
 function inject(html){
   if(!html) return html;
   html=html.split('v37-analysis.js').join('disabled-v37-analysis.js');
   html=html.split('v38-analysis.js').join('disabled-v38-analysis.js');
-  if(html.includes('analysis.js?v=39')) return html;
-  return html.replace('</body>','<scr'+'ipt src="./analysis.js?v=39"></scr'+'ipt></body>');
+  if(html.includes('compat.js?v=40')) return html;
+  return html.replace('</body>','<scr'+'ipt src="./compat.js?v=40"></scr'+'ipt><scr'+'ipt src="./analysis.js?v=40"></scr'+'ipt></body>');
 }
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
@@ -26,7 +26,7 @@ self.addEventListener('fetch',event=>{
         const text=await res.text();
         return new Response(inject(text),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}});
       }catch(err){
-        const cached=await caches.match('./index.html?v=39',{ignoreSearch:true})||await caches.match('./index.html?v=36',{ignoreSearch:true});
+        const cached=await caches.match('./index.html?v=40',{ignoreSearch:true})||await caches.match('./index.html?v=36',{ignoreSearch:true});
         if(cached){const text=await cached.text();return new Response(inject(text),{headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}})}
         throw err;
       }
