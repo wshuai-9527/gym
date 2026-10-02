@@ -18,6 +18,10 @@ export class Sync {
     }
   }
   async run() {
+    if (this.store.owner === "guest") {
+      this.status("已保存在本机 · 登录后可同步云端");
+      return;
+    }
     if (!this.client) return;
     if (globalThis.navigator?.locks)
       return navigator.locks.request(

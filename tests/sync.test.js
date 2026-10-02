@@ -52,6 +52,23 @@ function fixture() {
     loseResponse: () => (fail = true),
   };
 }
+test("guest saves remain local without authentication requests", async () => {
+  const f = fixture();
+  const s = new Store(f.s.storage, "guest");
+  s.put("draft:active", { rows: { a: { done: true } } });
+  let authCalls = 0,
+    message;
+  f.client.auth.getUser = async () => {
+    authCalls++;
+    throw Error("unexpected auth");
+  };
+  await new Sync(f.client, s, (m) => {
+    message = m;
+  }).run();
+  assert.equal(authCalls, 0);
+  assert.equal(s.state.pending.length, 1);
+  assert.match(message, /登录后/);
+});
 test("network retry uses same mutation and acknowledges exactly once", async () => {
   const f = fixture(),
     status = [];
