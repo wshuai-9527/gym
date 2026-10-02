@@ -1,4 +1,4 @@
-const CACHE = "gym-vault-v49.0.1";
+const CACHE = "gym-vault-v49.0.2";
 const SHELL = [
   "./",
   "./index.html",
@@ -17,7 +17,13 @@ const SHELL = [
   "./images/v41/plan_legs.svg",
 ];
 self.addEventListener("install", (e) =>
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL))),
+  e.waitUntil(
+    (async () => {
+      const c = await caches.open(CACHE);
+      await c.addAll(SHELL.map((url) => new Request(url, { cache: "reload" })));
+      await self.skipWaiting();
+    })(),
+  ),
 );
 self.addEventListener("activate", (e) =>
   e.waitUntil(
@@ -40,7 +46,7 @@ self.addEventListener("fetch", (e) => {
     (async () => {
       const c = await caches.open(CACHE);
       try {
-        const response = await fetch(e.request);
+        const response = await fetch(e.request, { cache: "no-cache" });
         if (response.ok) await c.put(e.request, response.clone());
         return response;
       } catch {
