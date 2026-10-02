@@ -1,33 +1,182 @@
 <!doctype html>
 <html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<meta name="theme-color" content="#f3fbff">
-<link rel="manifest" href="./manifest.webmanifest?v=49">
-<title>Gym Vault V49</title>
-<link rel="stylesheet" href="./src/styles.css">
-
-</head>
-<body>
-<div class="app">
-<section class="screen active" id="check">
-  <header class="head"><div><h1>今日训练</h1><p class="sub" id="today-sub">自动保存 · 自动补休</p></div><div class="chip" id="date-chip">--</div></header>
-  <article class="glass hero"><div><div class="kicker">FOCUS</div><h2 id="focus-title">读取中</h2><p id="focus-desc">根据档案生成计划。</p><div class="tags" id="focus-tags"></div></div><div class="ring" id="ring"><span id="progress-text">0%</span></div></article>
-  <div class="autosave"><i></i><span id="autosave-text">本次进度会自动保存</span></div>
-  <article class="glass card"><label>训练日期 <input type="date" id="plan-date"></label> <select id="plan-module"><option>Push</option><option>Pull</option><option>Legs</option></select><div class="schedule" id="schedule"></div></article><div class="section-title"><h2>打卡清单</h2><span id="set-count">0/0 组</span></div><div id="check-list"></div>
-  <div class="actions"><button class="btn primary full" id="finish-day">完成训练并归档</button><button class="btn" id="clear-day">清空本次进度</button><button class="btn" id="basketball-day">今天篮球/有氧</button><button class="btn" id="rest-day">今天休息</button></div>
-</section>
-<section class="screen" id="timer"><header class="head"><div><h1>训练计时</h1><p class="sub">组间休息</p></div><div class="chip">Timer</div></header><article class="glass card"><div class="kicker">REST</div><div style="font-size:54px;font-weight:1000" id="timer-display">01:30</div><div class="actions"><button class="btn primary" data-timer="90">90s</button><button class="btn" data-timer="120">120s</button><button class="btn" id="timer-toggle">开始</button><button class="btn" id="timer-reset">重置</button></div></article></section>
-<section class="screen" id="analysis"><header class="head"><div><h1>训练分析</h1><p class="sub" id="ana-range">--</p></div><div class="chip">PRO</div></header><div id="analysis-body"></div></section>
-<section class="screen" id="archive"><header class="head"><div><h1>训练档案</h1><p class="sub">历史编辑 · 离线同步</p></div><button class="chip" id="archive-refresh">ARCHIVE</button></header>
-  <article class="glass card cloud"><div class="kicker">SUPABASE</div><h2 style="margin:0 0 8px">云端同步</h2><p class="status" id="cloud-status">未登录。</p><input id="email" type="email" placeholder="邮箱" autocomplete="email"><input id="password" type="password" placeholder="密码" autocomplete="current-password"><div class="cloud-row"><button class="btn primary" id="login-pass">密码登录</button><button class="btn" id="logout">退出云端</button><button class="btn" id="cloud-read">从云端读取</button><button class="btn" id="cloud-upload">同步待上传修改</button></div><button class="btn full" id="adopt-local" hidden>将升级前本机数据关联当前账号</button></article>
-  <article class="glass card"><div class="kicker">AUTOMATION</div><label class="toggle"><span>2AM 后自动补记前一天休息<br><em class="mini">回到页面时检查昨天；关闭 App 后执行需要启用云端定时任务。未归档草稿会阻止自动补休。</em></span><input type="checkbox" id="auto-rest-toggle"></label><button class="btn full" id="manual-yesterday-rest">手动补记昨天休息</button></article>
-  <article class="glass card"><div class="kicker">MANUAL</div><textarea id="manual-input" placeholder="新增记录示例：&#10;6.28&#10;平板卧推&#10;15kg*12*3"></textarea><div class="actions"><button class="btn primary" id="manual-add">添加记录</button><button class="btn" id="export-json">导出 JSON</button></div></article>
-  <article class="glass card" id="conflicts" hidden></article><article class="glass card" id="editor" hidden><h2>编辑记录</h2><input type="date" id="edit-date"><textarea id="edit-text"></textarea><div class="actions"><button class="btn primary" id="edit-save">保存修改</button><button class="btn" id="edit-cancel">取消</button></div></article><div class="section-title"><h2>历史记录</h2><span id="archive-total">0 天</span></div><div id="archive-list"></div>
-</section>
-<nav class="nav"><button class="active" data-go="check"><b>✓</b>打卡</button><button data-go="timer"><b>◴</b>计时</button><button data-go="analysis"><b>◇</b>分析</button><button data-go="archive"><b>▤</b>档案</button></nav></div><div class="toast" id="toast"></div>
-<script src="./vendor/supabase/supabase.js"></script>
-<script type="module" src="./src/app.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"
+    />
+    <meta name="theme-color" content="#f3fbff" />
+    <link rel="manifest" href="./manifest.webmanifest?v=49" />
+    <title>Gym Vault V49</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <section class="screen active" id="check">
+        <header class="head">
+          <div>
+            <h1>今日训练</h1>
+            <p class="sub" id="today-sub">自动保存 · 自动补休</p>
+          </div>
+          <div class="chip" id="date-chip">--</div>
+        </header>
+        <article class="glass hero">
+          <div>
+            <div class="kicker">FOCUS</div>
+            <h2 id="focus-title">读取中</h2>
+            <p id="focus-desc">根据档案生成计划。</p>
+            <div class="tags" id="focus-tags"></div>
+          </div>
+          <div class="ring" id="ring"><span id="progress-text">0%</span></div>
+        </article>
+        <div class="autosave">
+          <i></i><span id="autosave-text">本次进度会自动保存</span>
+        </div>
+        <article class="glass card">
+          <label>训练日期 <input type="date" id="plan-date" /></label>
+          <select id="plan-module">
+            <option>Push</option>
+            <option>Pull</option>
+            <option>Legs</option>
+          </select>
+          <div class="schedule" id="schedule"></div>
+        </article>
+        <div class="section-title">
+          <h2>打卡清单</h2>
+          <span id="set-count">0/0 组</span>
+        </div>
+        <div id="check-list"></div>
+        <div class="actions">
+          <button class="btn primary full" id="finish-day">
+            完成训练并归档</button
+          ><button class="btn" id="clear-day">清空本次进度</button
+          ><button class="btn" id="basketball-day">今天篮球/有氧</button
+          ><button class="btn" id="rest-day">今天休息</button>
+        </div>
+      </section>
+      <section class="screen" id="timer">
+        <header class="head">
+          <div>
+            <h1>训练计时</h1>
+            <p class="sub">组间休息</p>
+          </div>
+          <div class="chip">Timer</div>
+        </header>
+        <article class="glass card">
+          <div class="kicker">REST</div>
+          <div style="font-size: 54px; font-weight: 1000" id="timer-display">
+            01:30
+          </div>
+          <div class="actions">
+            <button class="btn primary" data-timer="90">90s</button
+            ><button class="btn" data-timer="120">120s</button
+            ><button class="btn" id="timer-toggle">开始</button
+            ><button class="btn" id="timer-reset">重置</button>
+          </div>
+        </article>
+      </section>
+      <section class="screen" id="analysis">
+        <header class="head">
+          <div>
+            <h1>训练分析</h1>
+            <p class="sub" id="ana-range">--</p>
+          </div>
+          <div class="chip">PRO</div>
+        </header>
+        <div id="analysis-body"></div>
+      </section>
+      <section class="screen" id="archive">
+        <header class="head">
+          <div>
+            <h1>训练档案</h1>
+            <p class="sub">历史编辑 · 离线同步</p>
+          </div>
+          <button class="chip" id="archive-refresh">ARCHIVE</button>
+        </header>
+        <article class="glass card cloud">
+          <div class="kicker">SUPABASE</div>
+          <h2 style="margin: 0 0 8px">云端同步</h2>
+          <p class="status" id="cloud-status">未登录。</p>
+          <input
+            id="email"
+            type="email"
+            placeholder="邮箱"
+            autocomplete="email"
+          /><input
+            id="password"
+            type="password"
+            placeholder="密码"
+            autocomplete="current-password"
+          />
+          <div class="cloud-row">
+            <button class="btn primary" id="login-pass">密码登录</button
+            ><button class="btn" id="logout">退出云端</button
+            ><button class="btn" id="cloud-read">从云端读取</button
+            ><button class="btn" id="cloud-upload">同步待上传修改</button>
+          </div>
+          <button class="btn full" id="adopt-local" hidden>
+            将升级前本机数据关联当前账号
+          </button>
+        </article>
+        <article class="glass card">
+          <div class="kicker">AUTOMATION</div>
+          <label class="toggle"
+            ><span
+              >每天 02:05 自动补记前一天休息<br /><em class="mini"
+                >回到页面时检查昨天；关闭 App
+                后执行需要启用云端定时任务。未归档草稿会阻止自动补休。</em
+              ></span
+            ><input type="checkbox" id="auto-rest-toggle" /></label
+          ><button class="btn full" id="manual-yesterday-rest">
+            手动补记昨天休息
+          </button>
+        </article>
+        <article class="glass card">
+          <div class="kicker">MANUAL</div>
+          <textarea
+            id="manual-input"
+            placeholder="新增记录示例：&#10;6.28&#10;平板卧推&#10;15kg*12*3"
+          ></textarea>
+          <div class="actions">
+            <button class="btn primary" id="manual-add">添加记录</button
+            ><button class="btn" id="export-json">导出 JSON</button
+            ><label class="btn full" style="display: grid; place-items: center"
+              >导入 JSON 备份<input
+                type="file"
+                id="import-json"
+                accept="application/json,.json"
+                hidden
+            /></label>
+          </div>
+        </article>
+        <article class="glass card" id="conflicts" hidden></article>
+        <article class="glass card" id="editor" hidden>
+          <h2>编辑记录</h2>
+          <input type="date" id="edit-date" /><textarea
+            id="edit-text"
+          ></textarea>
+          <div class="actions">
+            <button class="btn primary" id="edit-save">保存修改</button
+            ><button class="btn" id="edit-cancel">取消</button>
+          </div>
+        </article>
+        <article class="glass card" id="undo-deleted" hidden></article>
+        <div class="section-title">
+          <h2>历史记录</h2>
+          <span id="archive-total">0 天</span>
+        </div>
+        <div id="archive-list"></div>
+      </section>
+      <nav class="nav">
+        <button class="active" data-go="check"><b>✓</b>打卡</button
+        ><button data-go="timer"><b>◴</b>计时</button
+        ><button data-go="analysis"><b>◇</b>分析</button
+        ><button data-go="archive"><b>▤</b>档案</button>
+      </nav>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script src="./vendor/supabase/supabase.js"></script>
+    <script type="module" src="./src/app.js"></script>
+  </body>
 </html>

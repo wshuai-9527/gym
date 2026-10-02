@@ -1,9 +1,88 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {Store} from '../src/storage.js';
-const memory=()=>{const m=new Map();return {getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v)};};
-test('unsent edits coalesce and persist across reload',()=>{const m=memory(),s=new Store(m);s.put('draft:active',{a:1});s.put('draft:active',{a:2});const re=new Store(m);assert.equal(re.state.pending.length,1);assert.equal(re.get('draft:active').a,2);});
-test('a write failure leaves old state intact',()=>{const s=new Store({getItem:()=>null,setItem:()=>{throw Error('quota');}});assert.throws(()=>s.put('draft:active',{}));assert.equal(s.state.pending.length,0);});
-test('remote never overwrites pending data and resolution rebases',()=>{const s=new Store(memory());s.put('record:2026-10-02',{local:true});s.merge([{key:'record:2026-10-02',value:{remote:true},version:2}]);assert.equal(s.get('record:2026-10-02').local,true);s.resolve('record:2026-10-02',true);assert.equal(s.state.pending[0].base,2);});
-test('edits during in-flight save survive acknowledgement',()=>{const s=new Store(memory());s.put('draft:active',{a:1});const op=structuredClone(s.state.pending[0]);s.transaction(x=>x.pending[0].sent=true);s.put('draft:active',{a:2});s.acknowledge(op,{value:{a:1},version:1});assert.equal(s.get('draft:active').a,2);assert.equal(s.state.pending[0].base,1);});
-test('lost response is replayable despite newer read',()=>{const s=new Store(memory());s.put('draft:active',{a:1});s.transaction(x=>x.pending[0].sent=true);s.merge([{key:'draft:active',value:{a:1},version:1}]);assert.equal(Object.keys(s.state.conflicts).length,0);assert.equal(s.state.pending.length,1);});
-test('tombstone survives cloud merge and separates accounts',()=>{const m=memory(),s=new Store(m,'a');s.put('record:2026-10-02',null);assert.equal(new Store(m,'b').state.pending.length,0);s.merge([{key:'record:2026-10-02',value:{items:[]},version:4}]);assert.equal(s.get('record:2026-10-02'),null);assert.ok(s.state.conflicts['record:2026-10-02']);});
-test('legacy local migration preserves old keys',()=>{const m=memory();m.setItem('gym-vault-v36-cloud',JSON.stringify({records:[{date:'6.28',items:[{name:'平板卧推',sets:['15kg*12*3']}]}]}));const s=new Store(m);s.migrateLegacy();assert.equal(s.records()[0].date,'2026-06-28');assert.ok(m.getItem('gym-vault-v36-cloud'));});
+import test from "node:test";
+import assert from "node:assert/strict";
+import { Store } from "../src/storage.js";
+const memory = () => {
+  const m = new Map();
+  return { getItem: (k) => m.get(k) || null, setItem: (k, v) => m.set(k, v) };
+};
+test("unsent edits coalesce and persist across reload", () => {
+  const m = memory(),
+    s = new Store(m);
+  s.put("draft:active", { a: 1 });
+  s.put("draft:active", { a: 2 });
+  const re = new Store(m);
+  assert.equal(re.state.pending.length, 1);
+  assert.equal(re.get("draft:active").a, 2);
+});
+test("a write failure leaves old state intact", () => {
+  const s = new Store({
+    getItem: () => null,
+    setItem: () => {
+      throw Error("quota");
+    },
+  });
+  assert.throws(() => s.put("draft:active", {}));
+  assert.equal(s.state.pending.length, 0);
+});
+test("remote never overwrites pending data and resolution rebases", () => {
+  const s = new Store(memory());
+  s.put("record:2026-10-02", { local: true });
+  s.merge([{ key: "record:2026-10-02", value: { remote: true }, version: 2 }]);
+  assert.equal(s.get("record:2026-10-02").local, true);
+  s.resolve("record:2026-10-02", true);
+  assert.equal(s.state.pending[0].base, 2);
+});
+test("edits during in-flight save survive acknowledgement", () => {
+  const s = new Store(memory());
+  s.put("draft:active", { a: 1 });
+  const op = structuredClone(s.state.pending[0]);
+  s.transaction((x) => (x.pending[0].sent = true));
+  s.put("draft:active", { a: 2 });
+  s.acknowledge(op, { value: { a: 1 }, version: 1 });
+  assert.equal(s.get("draft:active").a, 2);
+  assert.equal(s.state.pending[0].base, 1);
+});
+test("lost response is replayable despite newer read", () => {
+  const s = new Store(memory());
+  s.put("draft:active", { a: 1 });
+  s.transaction((x) => (x.pending[0].sent = true));
+  s.merge([{ key: "draft:active", value: { a: 1 }, version: 1 }]);
+  assert.equal(Object.keys(s.state.conflicts).length, 0);
+  assert.equal(s.state.pending.length, 1);
+});
+test("tombstone survives cloud merge and separates accounts", () => {
+  const m = memory(),
+    s = new Store(m, "a");
+  s.put("record:2026-10-02", null);
+  assert.equal(new Store(m, "b").state.pending.length, 0);
+  s.merge([{ key: "record:2026-10-02", value: { items: [] }, version: 4 }]);
+  assert.equal(s.get("record:2026-10-02"), null);
+  assert.ok(s.state.conflicts["record:2026-10-02"]);
+});
+test("legacy local migration preserves old keys", () => {
+  const m = memory();
+  m.setItem(
+    "gym-vault-v36-cloud",
+    JSON.stringify({
+      records: [
+        { date: "6.28", items: [{ name: "平板卧推", sets: ["15kg*12*3"] }] },
+      ],
+    }),
+  );
+  const s = new Store(m);
+  s.migrateLegacy();
+  assert.equal(s.records()[0].date, "2026-06-28");
+  assert.ok(m.getItem("gym-vault-v36-cloud"));
+});
+test("deleted records remain recoverable after reload", () => {
+  const m = memory(),
+    s = new Store(m),
+    r = { date: "2026-10-02", items: [{ name: "休息", sets: [] }] };
+  s.put("record:2026-10-02", r);
+  s.put("record:2026-10-02", null);
+  const re = new Store(m);
+  assert.deepEqual(re.state.deleted["record:2026-10-02"], r);
+  re.put("record:2026-10-02", re.state.deleted["record:2026-10-02"]);
+  assert.equal(re.records().length, 1);
+  assert.equal(Object.keys(re.state.deleted).length, 0);
+});

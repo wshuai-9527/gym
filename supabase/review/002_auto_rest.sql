@@ -1,8 +1,9 @@
--- PROPOSAL ONLY; approve separately after 001 and integration tests.
+-- Approved and applied 2026-10-02. Historical review snapshot; do not rerun.
 -- Requires pg_cron extension already enabled. Fixed Asia/Brisbane-equivalent zone:
 -- Australia/Brisbane. Never guesses current travel timezone.
 begin;
-create function public.gym_auto_rest()
+create extension if not exists pg_cron;
+create function gym_private.auto_rest()
 returns integer language plpgsql security definer set search_path='' as $$
 declare u uuid; cfg jsonb; draft jsonb; y date; wrote integer:=0; local_time timestamp;
 begin
@@ -17,14 +18,12 @@ begin
   if exists(select 1 from jsonb_each(coalesce(draft->'rows','{}'::jsonb)) r where r.value->>'done'='true' or r.value->>'edited'='true') then continue; end if;
   -- Once yesterday has any document, including a deletion tombstone, never recreate it.
   if exists(select 1 from public.gym_documents where user_id=u and key='record:'||y::text) then continue; end if;
-  -- Match frontend: only immediately following observed activity, or the active plan.
-  if draft->>'date' is distinct from y::text and not exists(select 1 from public.gym_documents where user_id=u and key='record:'||(y-1)::text and value is not null) then continue; end if;
   insert into public.gym_documents(user_id,key,value) values(u,'record:'||y::text,jsonb_build_object('date',y::text,'module','Rest','source','auto-rest','items',jsonb_build_array(jsonb_build_object('name','休息','sets','[]'::jsonb)))) on conflict do nothing;
   if found then wrote:=wrote+1;end if;
  end loop;
  return wrote;
 end $$;
-revoke all on function public.gym_auto_rest() from public,anon,authenticated;
+revoke all on function gym_private.auto_rest() from public,anon,authenticated;
 -- Run shortly after 02:00 Brisbane (16:05 UTC on previous UTC date), once daily.
-select cron.schedule('gym-v49-auto-rest','5 16 * * *','select public.gym_auto_rest();');
+select cron.schedule('gym-v49-auto-rest','5 16 * * *','select gym_private.auto_rest();');
 commit;
