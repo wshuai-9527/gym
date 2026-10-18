@@ -1,6 +1,10 @@
-# Gym Vault · V53
+# Gym Vault · V55
 
 移动优先的训练记录应用，部署在 GitHub Pages，Supabase 提供账号与文档同步。日期固定 Australia/Brisbane。
+
+## V55
+
+启动会话恢复暂时失败后，联网、前台与手动操作可重新恢复；并发恢复合并，账号隔离不变。详见 [会话恢复说明](docs/V55-session-recovery.md)。
 
 ## V53
 

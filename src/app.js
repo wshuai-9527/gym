@@ -65,6 +65,8 @@ let store,
   archiveFingerprint,
   analysisFingerprint,
   restTimer;
+let accountRecoveryNeeded = !!client;
+let accountRecovery;
 const status = (m) => {
   $("#cloud-status").textContent = m;
   $("#autosave-text").textContent = m;
@@ -150,7 +152,7 @@ function renderCheck(force = false) {
   $("#focus-desc").textContent =
     `计划日期 ${d.date} · ${p.items.length} 个动作 · ${d.planVersion !== 53 && hasProgress(d) ? "继续旧版草稿；完成或清空后使用新计划" : d.module === "Legs" ? "少量腿部基础＋腹部训练，动作控制优先" : "按动作质量完成，保留约 2 次余力"}`;
   $("#focus-tags").innerHTML =
-    "<span>V54</span><span>小器械训练</span><span>自动保存</span>";
+    "<span>V55</span><span>小器械训练</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
@@ -566,11 +568,26 @@ bind("login-pass", async () => {
   await activateAccount();
 });
 async function activateAccount() {
+  if (accountRecovery) return accountRecovery;
+  accountRecovery = restoreAccount();
+  try {
+    await accountRecovery;
+  } catch (error) {
+    accountRecoveryNeeded = true;
+    $("#account-state").textContent =
+      "登录恢复暂未完成 · 联网后自动重试，也可点恢复登录；本机数据保留";
+    throw error;
+  } finally {
+    accountRecovery = null;
+  }
+}
+async function restoreAccount() {
   const {
     data: { session },
     error,
   } = await client.auth.getSession();
   if (error) throw error;
+  accountRecoveryNeeded = false;
   $("#login-fields").hidden = !!session;
   $("#logout").hidden = !session;
   $("#account-state").textContent = session
@@ -597,9 +614,18 @@ bind("logout", async () => {
   $("#account-state").textContent = "已退出此设备，其他设备不受影响";
   status("已退出 · 当前显示本机访客档案");
 });
+bind("restore-session", async () => {
+  capture();
+  if (!client) throw Error("云端组件未加载；请联网后重新打开，勿清除本机数据");
+  await activateAccount();
+});
 for (const id of ["cloud-read", "cloud-upload", "archive-refresh"])
   bind(id, async () => {
     capture();
+    if (client && (accountRecoveryNeeded || store.owner === "guest")) {
+      await activateAccount();
+      return;
+    }
     await sync.run();
     renderAll();
   });
@@ -726,6 +752,7 @@ document.addEventListener(
     if (document.hidden) capture();
     else {
       showTimer();
+      if (client && accountRecoveryNeeded) await activateAccount();
       autoRest();
       await sync.run();
       renderAll();
@@ -735,6 +762,7 @@ document.addEventListener(
 window.addEventListener(
   "online",
   guarded(async () => {
+    if (client && accountRecoveryNeeded) await activateAccount();
     await sync.run();
     renderAll();
   }),
@@ -760,6 +788,10 @@ autoRest();
 restTimer = setInterval(guarded(autoRest), 60000);
 setInterval(
   guarded(async () => {
+    if (!document.hidden && client && accountRecoveryNeeded) {
+      await activateAccount();
+      return;
+    }
     if (
       !document.hidden &&
       (store.state.pending.length || store.owner !== "guest")
