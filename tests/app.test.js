@@ -60,6 +60,16 @@ test("real UI handlers preserve draft, edit history and escape user content", as
   await Promise.resolve();
   await Promise.resolve();
   assert.equal($(".set-row"), originalRow);
+  click('[data-go="analysis"]');
+  assert.equal(
+    document.querySelector("#analysis-body .report-card").open,
+    true,
+  );
+  assert.match(
+    document.querySelector("#analysis-body .report-card summary").textContent,
+    /上一周期/,
+  );
+  click('[data-go="check"]');
 
   assert.equal(document.querySelectorAll(".set-row").length, 12);
   click(".set-check");

@@ -1,6 +1,10 @@
-# Gym Vault · V56
+# Gym Vault · V57
 
 移动优先的训练记录应用，部署在 GitHub Pages，Supabase 提供账号与文档同步。日期固定 Australia/Brisbane。
+
+## V57
+
+大字号、训练颜色区分、上一周期直接展开、离线动作简图及谨慎负荷建议。AI私有报告收件箱已接前端，SQL提案尚未执行：`supabase/review/ai_reports_proposal.sql`；未启用时不假冒AI送达。定时任务以Brisbane每3天回顾完整周期，需报告表启用及任务具备连接权限后才能写入App。
 
 ## V56
 

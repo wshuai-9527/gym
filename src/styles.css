@@ -629,10 +629,14 @@ details.card a {
   margin: 7px auto 0;
   border-radius: 50%;
 }
-.calendar-day.Push i,
-.calendar-day.Pull i,
+.calendar-day.Push i {
+  background: #167e73;
+}
+.calendar-day.Pull i {
+  background: #4263c7;
+}
 .calendar-day.Legs i {
-  background: var(--a);
+  background: #9553ab;
 }
 .calendar-day.Basketball i {
   background: #d09b48;
@@ -1036,6 +1040,137 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .screen.active:has(#training-rest:not([hidden])) {
   padding-bottom: calc(var(--nav) + 120px + env(safe-area-inset-bottom));
+}
+
+/* Readable defaults, including large phones; these intentionally follow old compact overrides. */
+html,
+body {
+  font-size: 17px;
+}
+.sub,
+.chip,
+.autosave,
+.ex-meta,
+.history-reference,
+.mini,
+.note,
+.kicker,
+.eyebrow,
+.tags span,
+.schedule small,
+.section-title > span {
+  font-size: 14px;
+}
+.btn,
+.exercise-guide summary,
+details.card summary,
+.nav button,
+.report-card summary small,
+.stat > span,
+.calendar-day,
+.rowbar {
+  font-size: 15px;
+}
+.ex-name {
+  font-size: 21px;
+}
+.hero p,
+.report-overview > p,
+.report-content p,
+.plan-review p,
+details.card p,
+details.card a {
+  font-size: 16px;
+  line-height: 1.7;
+}
+.calendar-day {
+  min-height: 68px;
+}
+.calendar-day i {
+  width: 10px;
+  height: 10px;
+  margin-top: 6px;
+}
+.calendar-day em {
+  display: block;
+  font-size: 12px;
+  font-style: normal;
+  margin-top: 5px;
+}
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 14px;
+}
+.calendar-legend span:before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+  background: var(--dot);
+}
+.schedule .Push {
+  border-bottom: 3px solid #167e73;
+}
+.schedule .Pull {
+  border-bottom: 3px solid #4263c7;
+}
+.schedule .Legs {
+  border-bottom: 3px solid #9553ab;
+}
+.movement-figure {
+  margin: 12px 0;
+  padding: 12px;
+  background: #f1f6f5;
+  border-radius: 12px;
+}
+.movement-figure svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.movement-figure figcaption {
+  font-size: 16px;
+  text-align: center;
+  margin-top: 8px;
+}
+.ai-content {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.report-content {
+  overflow-wrap: anywhere;
+}
+.report-card[open] > summary .report-arrow {
+  transform: rotate(45deg);
+}
+.load-advice {
+  margin-top: 12px;
+}
+#ai-reports:empty {
+  display: none;
+}
+.ex-meta,
+.history-reference,
+.set-columns,
+.load-advice {
+  font-size: 16px;
+}
+.calendar-day em {
+  font-size: 14px;
+}
+.rowbar.Push .bar i {
+  background: #167e73;
+}
+.rowbar.Pull .bar i {
+  background: #4263c7;
+}
+.rowbar.Legs .bar i {
+  background: #9553ab;
 }
 
 /* iPhone 16 Pro Max is 440 CSS px in portrait, not the 430px legacy breakpoint. */

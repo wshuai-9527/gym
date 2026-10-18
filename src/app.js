@@ -25,6 +25,9 @@ import {
 import { Store } from "./storage.js";
 import { Sync } from "./sync.js";
 import { threeDayReports, calendarDays } from "./reports.js";
+import { exerciseVisual } from "./exercise-visuals.js";
+import { progressionAdvice } from "./progression.js";
+import { fetchAIReports, reportFresh } from "./report-inbox.js";
 import {
   historyReference,
   historyPreset,
@@ -69,6 +72,7 @@ let store,
   restTimer;
 let accountRecoveryNeeded = !!client;
 let accountRecovery;
+let aiInboxSig = null;
 const status = (m) => {
   $("#cloud-status").textContent = m;
   $("#autosave-text").textContent = m;
@@ -92,6 +96,7 @@ function startStore(owner) {
   sync = new Sync(client, store, status);
   renderedSig = null;
   checkFingerprint = archiveFingerprint = analysisFingerprint = null;
+  aiInboxSig = null;
   renderAll();
 }
 function scheduleSync() {
@@ -151,19 +156,17 @@ function renderCheck(force = false) {
   $("#date-chip").textContent = iso() + " · Brisbane";
   $("#focus-title").textContent =
     d.module === "Legs" ? "腿＋核心" : d.module + " 日";
-  $("#focus-desc").textContent =
-    `计划日期 ${d.date} · ${p.items.length} 个动作 · ${d.planVersion !== 53 && hasProgress(d) ? "继续旧版草稿；完成或清空后使用新计划" : d.module === "Legs" ? "少量腿部基础＋腹部训练，动作控制优先" : "按动作质量完成，保留约 2 次余力"}`;
-  $("#focus-tags").innerHTML =
-    "<span>V56</span><span>小器械训练</span><span>自动保存</span>";
+  $("#focus-desc").textContent = `${d.date} · ${p.items.length} 个动作`;
+  $("#focus-tags").innerHTML = "<span>V57</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
   $("#schedule").innerHTML = Array.from(
     { length: 3 },
     (_, i) =>
-      `<span class="${i === 0 ? "current" : ""}"><small>第 ${i + 1} 次力量</small><b>${seq[(seq.indexOf(d.module) + i) % 3]}</b></span>`,
+      `<span class="${seq[(seq.indexOf(d.module) + i) % 3]} ${i === 0 ? "current" : ""}"><small>第 ${i + 1} 次力量</small><b>${seq[(seq.indexOf(d.module) + i) % 3]}</b></span>`,
   ).join("");
-  let html = `<p class="mini routine-note">目标每周 6 练：Push / Pull / Legs 两轮＋休息 1 天。篮球与休息不推进轮转，疲劳时可顺延。</p>`;
+  let html = "";
   html += `<details class="glass card"><summary>训练前 · 热身与进阶</summary><p>先做约5分钟轻活动，再用轻负荷完成首个主项的1–3组递增热身；热身不计入工作组。今天疼痛或明显疲劳时降低训练量或暂停，不强追计划。</p><p>先保持最近重量，把各工作组逐步做到次数范围上限；连续两次同动作都完成目标、动作稳定且仍约有2次余力，再考虑最小可用档位加重。没有余力/动作质量信息，App不自动加重。腿部以维持与控制为主，不必须追求加重；核心姿势失控即结束，不把长时间硬撑当唯一进步指标。</p><p>休息按钮仅启动计时，不会勾选完成或归档。计时只是提醒，未恢复就多休息；系统后台不保证声音通知。</p></details>`;
   p.items.forEach((ex, i) => {
     const n =
@@ -175,14 +178,14 @@ function renderCheck(force = false) {
       time = loggingMode(ex[0]) === "seconds",
       body = loggingMode(ex[0]) !== "weighted",
       previous = historyReference(store.records(), ex[0]);
-    html += `<article class="glass card exercise-card"><div class="exercise-head"><span class="exercise-index">${String(i + 1).padStart(2, "0")}</span><div><h3 class="ex-name">${ex[0]}</h3><div class="ex-meta">${ex[3]} · ${ex[1]}</div></div></div><p class="history-reference">${previous ? `上次 ${previous.date} · ${previous.rawSets.map((s) => escape(s).replace(/\*/g, " × ")).join(" / ")}${previous.canPrefill ? " · 本次先参考" : " · 记录较早或无法解析，请重新确认"}` : "暂无同动作历史 · 不套用其他动作的重量"}</p><details class="exercise-guide"><summary>动作要点与填写口径</summary><p>${escape(CUES[ex[0]] || "控制动作、保留余力；重量按每只器械填写。")}</p><p>${escape(measurementHint(ex[0]))}${d.module === "Legs" && p === PLAN.Legs ? "负重分腿蹲每轮两侧做完后休息2–3分钟，左右换侧可按呼吸恢复适当休息；臀桥90–120秒、核心约60秒，未恢复可延长。" : "主项休息2–3分钟，孤立动作约60–120秒。"}</p></details><div class="set-columns"><span>组</span><span>${body ? "负重" : "重量 kg"}</span><span>${time ? "时间 s" : "次数"}</span><span>完成</span></div><div class="set-list">`;
+    html += `<article class="glass card exercise-card"><div class="exercise-head"><span class="exercise-index">${String(i + 1).padStart(2, "0")}</span><div><h3 class="ex-name">${ex[0]}</h3><div class="ex-meta">${ex[3]} · ${ex[1]}</div></div></div><p class="history-reference">${previous ? `上次 ${previous.date} · ${previous.rawSets.map((s) => escape(s).replace(/\*/g, " × ")).join(" / ")}${previous.canPrefill ? " · 本次先参考" : " · 记录较早或无法解析，请重新确认"}` : "暂无同动作历史 · 不套用其他动作的重量"}</p><details class="exercise-guide"><summary>动作示意与要点</summary>${exerciseVisual(ex[0])}<p class="mini">动作简图不用于测量角度。<a href="https://www.nasm.org/resource-center/exercise-library" target="_blank" rel="noopener">专业动作库 ↗</a></p><p>${escape(CUES[ex[0]] || "控制动作、保留余力；重量按每只器械填写。")}</p><p>${escape(measurementHint(ex[0]))}${d.module === "Legs" && p === PLAN.Legs ? "负重分腿蹲每轮两侧做完后休息2–3分钟，左右换侧可按呼吸恢复适当休息；臀桥90–120秒、核心约60秒，未恢复可延长。" : "主项休息2–3分钟，孤立动作约60–120秒。"}</p></details><div class="set-columns"><span>组</span><span>${body ? "负重" : "重量 kg"}</span><span>${time ? "时间 s" : "次数"}</span><span>完成</span></div><div class="set-list">`;
     for (let j = 0; j < n; j++) {
       const key = `${i}-${j}`,
         x = d.rows[key] || {},
         preset = historyPreset(previous, j, loggingMode(ex[0]));
       html += `<div class="set-row ${x.done ? "checked" : ""}" data-key="${key}" data-ex="${i}" data-edited="${!!x.edited}"><button class="set-check" aria-label="完成${ex[0]}第${j + 1}组" aria-pressed="${!!x.done}">✓</button><b>${j + 1}</b><div class="field"><input type="number" inputmode="decimal" min="0" max="1000" step="0.5" class="kg" aria-label="重量" placeholder="${body ? "自重" : "—"}" ${body ? "disabled" : ""} value="${escape(x.kg ?? (body ? "" : (preset.kg ?? "")))}"><span class="unit">${body ? "" : "kg"}</span></div><div class="field"><input type="number" inputmode="numeric" min="1" max="${time ? 86400 : 1000}" class="reps" aria-label="${time ? "秒数" : "次数"}" value="${escape(x.reps ?? preset.reps ?? (p === PLAN[d.module] ? defaultTarget(ex[0]) : time ? (d.planVersion === 50 ? 40 : d.planVersion === 51 ? defaultTarget(ex[0]) : 80) : 12))}"><span class="unit">${time ? "s" : ""}</span></div></div>`;
     }
-    html += `</div><button class="btn full exercise-rest" data-rest="${restSeconds(ex[0])}">组间休息 · ${restSeconds(ex[0])} 秒</button></article>`;
+    html += `</div><button class="btn full exercise-rest" data-rest="${restSeconds(ex[0])}">组间休息 · ${restSeconds(ex[0])} 秒</button><details class="load-advice"><summary>负荷建议</summary><p>${escape(progressionAdvice(store.records(), ex[0], ex[1], iso()).text)}</p></details></article>`;
   });
   $("#check-list").innerHTML = html;
   count();
@@ -225,17 +228,31 @@ function bar(values) {
   return Object.entries(values)
     .map(
       ([k, v]) =>
-        `<div class="rowbar"><b>${escape(k)}</b><div class="bar"><i style="width:${(v / max) * 100}%"></i></div><span>${Number(v).toFixed(1)}</span></div>`,
+        `<div class="rowbar ${["Push", "Pull", "Legs", "Rest", "Basketball"].includes(k) ? k : ""}"><b>${escape(k)}</b><div class="bar"><i style="width:${(v / max) * 100}%"></i></div><span>${Number(v).toFixed(1)}</span></div>`,
     )
     .join("");
 }
 function renderAnalysis() {
+  void renderAIInbox();
   const fingerprint = JSON.stringify([store.records(), iso()]);
   if (fingerprint === analysisFingerprint) return;
   analysisFingerprint = fingerprint;
   const records = store.records(),
     a = analyse(records),
-    reports = threeDayReports(records),
+    reports = threeDayReports(
+      records,
+      iso(),
+      Math.min(
+        180,
+        Math.max(
+          8,
+          Math.ceil(
+            (Date.parse(iso()) - Date.parse(records[0]?.date || iso())) /
+              259200000,
+          ),
+        ),
+      ),
+    ),
     current = reports.current;
   $("#ana-range").textContent = `Brisbane · ${addDays(iso(), -6)} — ${iso()}`;
   const recentStrength = records.filter(
@@ -246,25 +263,53 @@ function renderAnalysis() {
   ).length;
   const metric = (label, value, unit = "") =>
     `<div class="stat"><span>${label}</span><strong>${value}<small>${unit}</small></strong></div>`;
-  const reportHTML = (r) =>
-    `<details class="report-card"><summary><span><small>三日结算 · ${r.start.slice(5)} — ${r.end.slice(5)}</small><b>${r.strength} 次力量 · ${r.sets} 记录组</b></span><span class="report-arrow">＋</span></summary><div class="report-content"><div class="stats-row">${metric("篮球 / 有氧", r.basketball, "天")}${metric("明确休息", r.rest, "天")}${metric("未记录", r.unlogged, "天")}</div><p>Push ${r.modules.Push} · Pull ${r.modules.Pull} · Legs ${r.modules.Legs} 次。记录负荷 ${Math.round(r.volume)} kg·次，计时 ${r.seconds} 秒。</p><p>${r.strength === 0 ? "本周期没有力量记录；不把缺失数据当成休息或训练退步。" : "三天只用于回顾执行情况，训练效果需要看数周趋势。"}</p>${r.comparable.length ? "<h4>同动作最高记录重量</h4>" + r.comparable.map((e) => `<p class="compare-row"><span>${escape(e.name)}</span><b>${e.previousKg} → ${e.kg} kg</b></p>`).join("") + '<p class="mini">次数、器械和余力不一定相同，重量变化不等于力量变化。</p>' : '<p class="mini">前后周期没有可比较的负重动作，不计算进步百分比。</p>'}${r.unknown ? `<p>有 ${r.unknown} 组无法解析，未纳入数值。</p>` : ""}</div></details>`;
+  const reportHTML = (r, index) =>
+    `<details class="report-card" ${index === 0 ? "open" : ""}><summary><span><small>${index === 0 ? "上一周期" : "历史周期"} · ${r.start} — ${r.end}</small><b>${r.strength} 次力量 · ${r.sets} 记录组</b></span><span class="report-arrow">＋</span></summary><div class="report-content"><h3>执行概览</h3><p>力量 ${r.strength} 次；篮球/有氧 ${r.basketball} 天；明确休息 ${r.rest} 天；未记录 ${r.unlogged} 天。</p><p>Push ${r.modules.Push} / Pull ${r.modules.Pull} / Legs ${r.modules.Legs} 次。负重 ${r.weightedSets} 组、自重次数 ${r.bodySets} 组、计时 ${r.timedSets} 组（${r.seconds} 秒）。</p><h3>数据解读</h3><p>${r.strength === 0 ? "本期没有力量记录，不能据此判定退步。" : "三天用于检查执行，肌肉增长与长期力量趋势不能由单个周期确定。"}</p><p>${r.unlogged ? "存在未记录日期，不按休息处理。" : "本期每天都有记录。"}</p>${r.comparable.length ? "<h3>同动作负荷快照</h3>" + r.comparable.map((e) => `<p>${escape(e.name)}：${e.previousKg} → ${e.kg} kg</p>`).join("") + "<p>这里只比较记录最高重量；次数、器械、余力可能不同，不称为力量增幅，也不据此自动加重。</p>" : "<p>前后周期缺少同动作可比负重，不计算进步百分比。</p>"}<details><summary>统计口径</summary><p>外部负荷 ${Math.round(r.volume)} kg·次，按原记录口径，不擅自乘2；自重与秒数不换算进吨位。这是统计报告，不是AI解读或医疗评估。${r.unknown ? `无法解析${r.unknown}组。` : ""}</p></details></div></details>`;
   $("#analysis-body").innerHTML = `
-  <article class="glass card report-overview"><div class="eyebrow">YOUR TRAINING, IN FOCUS</div><h2>三天，一次回顾。</h2><p>当前周期 ${current.start} — ${current.scheduledEnd}</p><div class="stats-row">${metric("力量", current.strength, "次")}${metric("已记录", current.sets, "组")}${metric("待记录", current.unlogged, "天")}</div><p class="mini">本期进行中 · ${current.nextAt} 00:00 Brisbane 后结算。报告根据历史记录计算，编辑后会同步更新；未记录不视为休息。</p></article>
+  <article class="glass card report-overview"><div class="eyebrow">YOUR TRAINING, IN FOCUS</div><h2>三天，一次回顾。</h2><p>当前周期 ${current.start} — ${current.scheduledEnd}</p><div class="stats-row">${metric("力量", current.strength, "次")}${metric("已记录", current.sets, "组")}${metric("待记录", current.unlogged, "天")}</div><p>下期结算：${current.nextAt} · Brisbane</p></article>
   <div class="section-title"><h2>最近 7 天</h2><span>记录概览</span></div><div class="metric-grid">${metric("记录组数", a.sets, "组")}${metric("外部负荷", Math.round(a.volume), "kg·次")}${metric("计时训练", a.seconds, "秒")}${metric("下一次力量", nextModule(records.filter((r) => r.date <= iso())))}</div>
   <article class="glass card"><div class="section-title"><h2>训练节奏</h2><span>14 天</span></div><div class="activity-calendar">${calendarDays(
     records,
   )
     .map(
       (d) =>
-        `<div class="calendar-day ${d.module}" title="${d.date} · ${d.module === "Unlogged" ? "未记录" : d.module}"><span>${d.date.slice(8)}</span><i></i></div>`,
+        `<div class="calendar-day ${d.module}" title="${d.date} · ${d.module === "Unlogged" ? "未记录" : d.module}"><span>${d.date.slice(8)}</span><i></i><em>${{ Push: "推", Pull: "拉", Legs: "腿", Basketball: "球", Rest: "休", Unlogged: "—", Other: "其他" }[d.module] || "其他"}</em></div>`,
     )
     .join(
       "",
-    )}</div><p class="mini">● 力量　● 篮球　○ 休息　· 未记录</p>${bar(a.modules)}<p class="mini">显示模块记录组数；单侧按每侧组数记一次，不擅自翻倍。</p></article>
-  <div class="section-title"><h2>三日报告</h2><span>最近 8 期</span></div><p class="mini">固定日历周期，不按登录时间重置；打开分析即可查看。</p>${reports.completed.map(reportHTML).join("")}
+    )}</div><div class="calendar-legend"><span style="--dot:#167e73">推</span><span style="--dot:#4263c7">拉</span><span style="--dot:#9553ab">腿</span><span style="--dot:#d09b48">篮球</span><span style="--dot:#8998a4">休息</span></div>${bar(a.modules)}<p class="mini">显示模块记录组数；单侧按每侧组数记一次，不擅自翻倍。</p></article>
+  <div class="section-title"><h2>三日报告</h2><span>可查看 ${reports.completed.length} 期</span></div>${reports.completed.map(reportHTML).join("")}
   <details class="glass card plan-review"><summary>训练计划 · 为什么这样调整？</summary><p>以上肢力量/肌肉发展、低量腿部训练与核心为当前目标：Push 12 组、Pull 12 组；腿＋核心日为腿部 4 组、核心 6 组。按你不追求腿围增大的目标，减少原腿部增肌训练量，保留你已经在做的负重保加利亚分腿蹲和哑铃臀桥，优先减少组数，不强制清零负荷；卷腹、平板支撑、屈膝侧桥覆盖腹部屈曲、抗伸展和抗侧屈。</p><p>近 28 天已记录 ${recentStrength} 次力量训练。你当前目标为每周 6 练：Push → Pull → Legs → Push → Pull → Legs → 休息。胸部两轮约 10 组、背部拉类约 12 组；腿部基础 8 组、核心 12 组；这些是计划记录组，单侧动作按每侧记一次。本次负重参考你最近一次同动作、同器械记录；不知道RIR或动作质量时不自动加重。较少腿部组数可降低增肌导向，但不能保证腿围完全不变。</p><p>频率比三分化的名字更重要。每周只练 3 天时，各模块约一次，不一定是最适合的安排；可考虑全身 3 练或上下肢交替，分散同肌群的周训练量。当前六练目标适合 PPL 两轮，但若近期训练频率低，应逐渐恢复，不要一次把周训练量加到六练。高强度篮球算额外负荷，腿部疲劳明显时顺延腿日。</p><p>上肢主项休息约 2–3 分钟；负重分腿蹲约 2–3 分钟、臀桥约 90–120 秒、核心约 60 秒，呼吸未恢复就多休息。上肢多数工作组保留约 2 次余力；腿部不追求力竭，核心以姿势和呼吸为准。相同重量下，全部工作组稳定达到次数上限、姿势和余力仍合格，再小幅加重。</p><p>腹肌可见度取决于腹肌发展、体脂与个体差异。练腹不能保证只减肚子，也不承诺练几周一定显腹肌；不为了显腹肌极端节食。</p><p>这不是全下肢均衡方案：臀桥主要练臀，不能视为完整腘绳肌训练，小腿也未直接安排；这是你的腿围偏好下的取舍，不是篮球能替代抗阻训练。若以后希望补全，可在一轮腿日将臀桥替换为已学会的哑铃罗马尼亚硬拉2组，先确认技术与腰腿耐受，不自动套用臀桥重量。这是起始模板。缺少睡眠、疼痛、RIR 和训练时长数据时，不推算恢复分数或伤病风险；肩、腰或膝疼痛不应硬做。</p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12965823/" target="_blank" rel="noopener">依据：ACSM 2026 阻力训练立场声明 ↗</a><br><a href="https://www.mayoclinic.org/healthy-lifestyle/fitness/in-depth/core-strength/art-20546851" target="_blank" rel="noopener">Mayo Clinic 核心训练动作 ↗</a><br><a href="https://www.nasm.org/resource-center/exercise-library/bulgarian-split-squat" target="_blank" rel="noopener">NASM 保加利亚分腿蹲动作说明 ↗</a></details>
   <details class="glass card"><summary>两个“飞鸟”怎么分？</summary><p><b>站姿哑铃侧平举：</b>站立向身体两侧抬臂，练中肩，归入 Push；日常说的“站立飞鸟”若是这个动作，就按侧平举记录。</p><p><b>坐姿俯身反向飞鸟：</b>躯干前折、手臂向侧后方打开，练后肩，归入 Pull。</p><p>若站立时是在胸前夹合，那是绳索胸部飞鸟，不等于侧平举。不要站直拿哑铃向胸前夹合来代替水平抗阻的胸飞鸟；胸部飞鸟单独记名。</p></details>
   <details class="glass card"><summary>历史估算 1RM 与统计口径</summary>${bar(a.pr)}<p class="note">Epley 估算仅取 1–10 次的部分主项。非最大努力组可能低估；只比较同动作、同器械、同填写方式。双臂和单臂划船分别保留历史，不混算。</p><p class="note">kg·次不等于增肌刺激，计时与自重单列，未录入 RIR 时不判断有效组。无法解析 ${a.unknown} 组。</p></details>`;
+}
+async function renderAIInbox() {
+  const owner = store.owner;
+  const el = $("#ai-reports");
+  if (!client || owner === "guest") {
+    el.innerHTML =
+      '<article class="glass card"><h2>AI 三日复盘</h2><p>登录后查看私人报告。</p></article>';
+    return;
+  }
+  const sig = JSON.stringify([
+    owner,
+    store.state.docs,
+    store.state.pending,
+    Math.floor(Date.now() / 60000),
+  ]);
+  if (sig === aiInboxSig) return;
+  aiInboxSig = sig;
+  try {
+    const reports = await fetchAIReports(client, owner);
+    if (owner !== store.owner) return;
+    el.innerHTML = reports.length
+      ? `<h2>AI 三日复盘</h2>${reports.map((r, i) => `<details class="report-card ai-report" ${i === 0 ? "open" : ""}><summary><span><small>${escape(r.period_start)} — ${escape(r.period_end)}</small><b>${escape(r.title)}</b></span><span>${reportFresh(r, store) ? "AI解读" : "待更新"}</span></summary><div class="report-content">${!reportFresh(r, store) ? "<p>训练记录已有修改，以下是生成时的快照。</p>" : ""}<p class="ai-content">${escape(r.content)}</p><small>生成：${escape(r.generated_at)} · AI建议需结合实际状态</small></div></details>`).join("")}`
+      : '<article class="glass card"><h2>AI 三日复盘</h2><p>暂无已送达报告。</p></article>';
+  } catch (error) {
+    if (owner !== store.owner) return;
+    el.innerHTML =
+      '<article class="glass card"><h2>AI 三日复盘</h2><p>报告收件箱暂未接通。下方统计回顾仍可使用。</p></article>';
+  }
 }
 function renderArchive() {
   const fingerprint = JSON.stringify([
