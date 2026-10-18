@@ -116,3 +116,21 @@ test("scheduled rest starts from enabled date without historical backfill", () =
     null,
   );
 });
+
+test("empty old drafts upgrade while real progress keeps its template version", () => {
+  const emptyDraft = {
+    date: "2026-10-18",
+    module: "Legs",
+    planVersion: 50,
+    rows: {},
+  };
+  assert.equal(currentPlan([], emptyDraft, "2026-10-18").planVersion, 52);
+  assert.equal(
+    currentPlan(
+      [],
+      { ...emptyDraft, rows: { a: { done: true } } },
+      "2026-10-18",
+    ).planVersion,
+    50,
+  );
+});
