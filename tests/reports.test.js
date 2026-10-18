@@ -6,6 +6,7 @@ import {
   LEGACY_PLAN,
   V50_PLAN,
   V51_PLAN,
+  V52_PLAN,
   templateFor,
   loggingMode,
 } from "../src/catalog.js";
@@ -125,7 +126,7 @@ test("leg plus core plan separates bodyweight reps and per-side seconds, preserv
   assert.equal(
     templateFor({
       module: "Legs",
-      planVersion: 52,
+      planVersion: 53,
       rows: { "1-0": { done: true } },
     }),
     PLAN.Legs,
@@ -134,7 +135,7 @@ test("leg plus core plan separates bodyweight reps and per-side seconds, preserv
 });
 
 test("retain Bulgarian and plank without remapping an unfinished V51 draft", () => {
-  assert(PLAN.Legs.items.some((x) => x[0] === "自重保加利亚分腿蹲"));
+  assert(PLAN.Legs.items.some((x) => x[0] === "保加利亚分腿蹲"));
   assert.equal(loggingMode("自重保加利亚分腿蹲"), "bodyweight");
   assert.equal(
     templateFor({
@@ -146,4 +147,17 @@ test("retain Bulgarian and plank without remapping an unfinished V51 draft", () 
   );
   assert.equal(V51_PLAN.Legs.items[3][0], "死虫式");
   assert.equal(PLAN.Legs.items[3][0], "平板支撑");
+});
+
+test("weighted new plan never rewrites a V52 bodyweight draft", () => {
+  assert.equal(
+    templateFor({
+      module: "Legs",
+      planVersion: 52,
+      rows: { "0-0": { done: true } },
+    }),
+    V52_PLAN.Legs,
+  );
+  assert.equal(loggingMode(PLAN.Legs.items[0][0]), "weighted");
+  assert.equal(loggingMode(PLAN.Legs.items[1][0]), "weighted");
 });

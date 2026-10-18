@@ -991,3 +991,14 @@ input[type="number"]::-webkit-outer-spin-button {
     padding-right: 8px;
   }
 }
+
+.history-reference {
+  font-size: 11px;
+  line-height: 1.65;
+  color: var(--a);
+  padding: 9px 10px;
+  margin: 12px 0 3px;
+  border-radius: 7px;
+  background: #eef7f3;
+  overflow-wrap: anywhere;
+}

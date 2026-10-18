@@ -1,6 +1,10 @@
-# Gym Vault · V52
+# Gym Vault · V53
 
 移动优先的训练记录应用，部署在 GitHub Pages，Supabase 提供账号与文档同步。日期固定 Australia/Brisbane。
+
+## V53
+
+按最近同动作逐组预填重量/次数/时长，显示日期与原始记录；腿日保留负重分腿蹲和哑铃臀桥，优先减少组数。详见 `docs/V53-history-informed-plan.md`。
 
 ## V52
 

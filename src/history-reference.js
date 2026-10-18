@@ -1,0 +1,53 @@
+import { canon, iso, parseSet } from "./core.js";
+// User data stays in the account store; never seed personal loads into templates.
+export function historyReference(records, name, today = iso()) {
+  for (const record of records
+    .filter((r) => r.date <= today)
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date))) {
+    const item = record.items.find((i) => canon(i.name) === canon(name));
+    if (!item) continue;
+    const entries = [];
+    let invalid = 0;
+    for (const raw of item.sets) {
+      try {
+        const p = parseSet(raw);
+        for (let i = 0; i < Math.min(p.count, 100); i++)
+          entries.push({ ...p, weighted: /kg/i.test(raw) });
+      } catch {
+        invalid++;
+      }
+    }
+    const ageDays = Math.round(
+      (Date.parse(today + "T00:00:00Z") -
+        Date.parse(record.date + "T00:00:00Z")) /
+        86400000,
+    );
+    return {
+      date: record.date,
+      rawSets: item.sets,
+      entries,
+      ageDays,
+      canPrefill: ageDays <= 28 && entries.length > 0,
+      invalid,
+    };
+  }
+  return null;
+}
+export function historyPreset(reference, index, mode) {
+  if (!reference?.canPrefill) return {};
+  const p = reference.entries[index] || reference.entries.at(-1);
+  if (mode === "seconds") return p.sec > 0 ? { reps: p.sec } : {};
+  if (mode === "weighted") return p.weighted ? { kg: p.kg, reps: p.reps } : {};
+  return !p.weighted && p.reps > 0 ? { reps: p.reps } : {};
+}
+export function measurementHint(name) {
+  if (name === "保加利亚分腿蹲")
+    return "kg填单只哑铃重量，不填双手相加值。次数按每侧，完成两侧后勾选1组。";
+  if (name === "地面哑铃臀桥")
+    return "沿用你的原记录kg口径，器械数量不自动乘2；记录重量不等于已知的总外部负荷。";
+  if (name === "单臂哑铃划船")
+    return "每只哑铃重量、每侧次数；与双臂划船分别记录。";
+  if (name === "屈膝侧桥") return "秒数按每侧填写，两侧都完成后勾选1组。";
+  return "与上次保持相同器械和填写口径；参考值需要按本次实际完成情况修改。";
+}

@@ -125,9 +125,9 @@ export function currentPlan(records, draft, today = iso()) {
     ["Push", "Pull", "Legs"].includes(draft.module) &&
     (hasProgress(draft) || draft.dateExplicit || draft.date === today)
   )
-    return hasProgress(draft) ? draft : { ...draft, planVersion: 52 };
+    return hasProgress(draft) ? draft : { ...draft, planVersion: 53 };
   return {
-    planVersion: 52,
+    planVersion: 53,
     date: today,
     module: nextModule(records.filter((r) => r.date <= today)),
     rows: {},

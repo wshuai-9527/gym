@@ -115,7 +115,7 @@ test("real UI handlers preserve draft, edit history and escape user content", as
   click('[data-go="check"]');
   const legRows = [...document.querySelectorAll(".set-row")];
   assert.equal(legRows.length, 10);
-  assert.equal(document.querySelectorAll(".kg:disabled").length, 10);
+  assert.equal(document.querySelectorAll(".kg:disabled").length, 6);
   assert.equal(legRows[6].querySelector(".reps").value, "30");
   assert.equal(
     legRows[8].querySelector(".reps").getAttribute("aria-label"),
