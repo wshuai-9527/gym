@@ -24,9 +24,11 @@ export class Store {
     return s;
   }
   transaction(fn) {
-    const next = structuredClone(this.read());
+    const previous = this.read();
+    const next = structuredClone(previous);
     fn(next);
-    this.storage.setItem(this.key, JSON.stringify(next));
+    if (JSON.stringify(previous) !== JSON.stringify(next))
+      this.storage.setItem(this.key, JSON.stringify(next));
     this.state = next;
   }
   get(key) {

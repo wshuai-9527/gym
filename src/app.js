@@ -1,4 +1,4 @@
-import { PLAN } from "./catalog.js";
+import { PLAN, CUES, templateFor } from "./catalog.js";
 import {
   iso,
   addDays,
@@ -11,9 +11,12 @@ import {
   hasProgress,
   restCandidate,
   analyse,
+  currentPlan,
+  TIME_ZONE,
 } from "./core.js";
 import { Store } from "./storage.js";
 import { Sync } from "./sync.js";
+import { threeDayReports, calendarDays } from "./reports.js";
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
 const escape = (s) =>
@@ -47,6 +50,9 @@ let store,
   editing = null,
   syncTimeout,
   renderedSig,
+  checkFingerprint,
+  archiveFingerprint,
+  analysisFingerprint,
   restTimer;
 const status = (m) => {
   $("#cloud-status").textContent = m;
@@ -70,6 +76,7 @@ function startStore(owner) {
   store.migrateLegacy();
   sync = new Sync(client, store, status);
   renderedSig = null;
+  checkFingerprint = archiveFingerprint = analysisFingerprint = null;
   renderAll();
 }
 function scheduleSync() {
@@ -88,18 +95,7 @@ function put(key, value) {
   scheduleSync();
 }
 function plan() {
-  const d = store.get("draft:active");
-  const last = store
-    .records()
-    .filter((r) => r.date <= iso())
-    .at(-1);
-  return d?.date && PLAN[d.module]
-    ? d
-    : {
-        date: last?.date === iso() ? addDays(iso(), 1) : iso(),
-        module: nextModule(store.records().filter((r) => r.date <= iso())),
-        rows: {},
-      };
+  return currentPlan(store.records(), store.get("draft:active"));
 }
 function capture() {
   if (!renderedSig) return;
@@ -115,8 +111,16 @@ function capture() {
         reps: row.querySelector(".reps").value,
       }),
   );
-  const next = { ...d, rows, updatedAt: Date.now() };
-  if (JSON.stringify(next.rows) !== JSON.stringify(d.rows)) {
+  const next = {
+    ...d,
+    planVersion: d.planVersion ?? (hasProgress(d) ? 49 : 50),
+    rows,
+    updatedAt: Date.now(),
+  };
+  if (
+    (hasProgress(next) || hasProgress(d)) &&
+    JSON.stringify(next.rows) !== JSON.stringify(d.rows)
+  ) {
     put("draft:active", next);
   }
   return next;
@@ -139,35 +143,43 @@ function lastKg(name) {
       }
   return "";
 }
-function renderCheck() {
+function renderCheck(force = false) {
   const d = plan(),
-    p = PLAN[d.module];
+    p = templateFor(d);
+  const fingerprint = JSON.stringify([d, store.records(), iso()]);
+  if (!force && fingerprint === checkFingerprint) return;
+  checkFingerprint = fingerprint;
   renderedSig = d.date + "|" + d.module;
   $("#today-sub").textContent = p.sub + " · 本机自动保存";
-  $("#date-chip").textContent = d.date;
+  $("#date-chip").textContent = iso() + " · Brisbane";
   $("#focus-title").textContent = d.module + " 日";
   $("#focus-desc").textContent =
-    `计划日期 ${d.date} · 篮球/休息不推进三分化；有未归档草稿时继续原计划。`;
+    `计划日期 ${d.date} · ${p.items.length} 个动作 · ${d.planVersion !== 50 && hasProgress(d) ? "继续旧版草稿；完成或清空后使用新计划" : "按动作质量完成，保留约 2 次余力"}`;
   $("#focus-tags").innerHTML =
-    "<span>V49</span><span>离线队列</span><span>草稿保护</span>";
+    "<span>V50</span><span>增肌基础</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
   $("#schedule").innerHTML = Array.from(
-    { length: 7 },
+    { length: 3 },
     (_, i) =>
-      `<span>${addDays(d.date, i).slice(5)}<br>${seq[(seq.indexOf(d.module) + i) % 3]}</span>`,
+      `<span class="${i === 0 ? "current" : ""}"><small>第 ${i + 1} 次力量</small><b>${seq[(seq.indexOf(d.module) + i) % 3]}</b></span>`,
   ).join("");
-  let html = `<p class="mini">7 天为力量轮转预览，实际篮球或休息后顺延；可改日期与训练类型。</p><img class="plan-img" src="${p.img}" alt="${p.title}">`;
+  let html = `<p class="mini routine-note">按力量训练次数轮转；篮球与休息不推进计划。上方日期固定为 Brisbane 当天。</p>`;
   p.items.forEach((ex, i) => {
-    const n = ["侧平举", "上斜划船"].includes(ex[0]) ? 4 : +ex[1][0],
+    const n =
+        p === PLAN[d.module]
+          ? +ex[1][0]
+          : ["侧平举", "上斜划船"].includes(ex[0])
+            ? 4
+            : +ex[1][0],
       time = ex[0] === "平板支撑",
       body = time || ex[0] === "平板支撑肩触碰";
-    html += `<article class="glass card"><div class="ex-name">${ex[0]}</div><div class="ex-meta">${ex[3]} · ${ex[1]}</div><p class="mini">重量按每只器械填写；单侧动作次数按每侧填写。</p><div class="set-list">`;
+    html += `<article class="glass card exercise-card"><div class="exercise-head"><span class="exercise-index">${String(i + 1).padStart(2, "0")}</span><div><h3 class="ex-name">${ex[0]}</h3><div class="ex-meta">${ex[3]} · ${ex[1]}</div></div></div><details class="exercise-guide"><summary>动作要点 · 上次 ${lastKg(ex[0]) || "—"} kg</summary><p>${escape(CUES[ex[0]] || "控制动作、保留余力；重量按每只器械填写。")}</p><p>重量按每只器械；单侧动作记录每侧次数。主项休息 2–3 分钟，孤立动作约 60–120 秒。</p></details><div class="set-columns"><span>组</span><span>重量 kg</span><span>${time ? "时间 s" : "次数"}</span><span>完成</span></div><div class="set-list">`;
     for (let j = 0; j < n; j++) {
       const key = `${i}-${j}`,
         x = d.rows[key] || {};
-      html += `<div class="set-row ${x.done ? "checked" : ""}" data-key="${key}" data-ex="${i}" data-edited="${!!x.edited}"><button class="set-check" aria-label="完成${ex[0]}第${j + 1}组" aria-pressed="${!!x.done}">✓</button><b>第${j + 1}组</b><div class="field"><input type="number" inputmode="decimal" min="0" max="1000" step="0.5" class="kg" aria-label="重量" ${body ? "disabled" : ""} value="${escape(x.kg ?? (body ? "" : lastKg(ex[0])))}"><span class="unit">${body ? "" : "kg"}</span></div><div class="field"><input type="number" inputmode="numeric" min="1" max="${time ? 86400 : 1000}" class="reps" aria-label="${time ? "秒数" : "次数"}" value="${escape(x.reps ?? (time ? 80 : 12))}"><span class="unit">${time ? "s" : ""}</span></div></div>`;
+      html += `<div class="set-row ${x.done ? "checked" : ""}" data-key="${key}" data-ex="${i}" data-edited="${!!x.edited}"><button class="set-check" aria-label="完成${ex[0]}第${j + 1}组" aria-pressed="${!!x.done}">✓</button><b>${j + 1}</b><div class="field"><input type="number" inputmode="decimal" min="0" max="1000" step="0.5" class="kg" aria-label="重量" ${body ? "disabled" : ""} value="${escape(x.kg ?? (body ? "" : lastKg(ex[0])))}"><span class="unit">${body ? "" : "kg"}</span></div><div class="field"><input type="number" inputmode="numeric" min="1" max="${time ? 86400 : 1000}" class="reps" aria-label="${time ? "秒数" : "次数"}" value="${escape(x.reps ?? (time ? (p === PLAN[d.module] ? 40 : 80) : 12))}"><span class="unit">${time ? "s" : ""}</span></div></div>`;
     }
     html += "</div></article>";
   });
@@ -184,7 +196,7 @@ function count() {
 }
 function archive(d) {
   const items = [];
-  PLAN[d.module].items.forEach((ex, i) => {
+  templateFor(d).items.forEach((ex, i) => {
     const sets = [];
     for (const [key, x] of Object.entries(d.rows))
       if (key.startsWith(i + "-") && x.done) {
@@ -216,21 +228,79 @@ function bar(values) {
     .join("");
 }
 function renderAnalysis() {
-  const a = analyse(store.records());
-  $("#ana-range").textContent = `最近 7 天 ${addDays(iso(), -6)}–${iso()}`;
-  $("#analysis-body").innerHTML =
-    `<div class="metric-grid"><article class="glass card metric"><small>记录组数（含自重/计时）</small><b>${a.sets}</b></article><article class="glass card metric"><small>记录外部负荷 kg·次</small><b>${Math.round(a.volume)}</b></article><article class="glass card metric"><small>计时训练秒数</small><b>${a.seconds}</b></article><article class="glass card metric"><small>下一次力量轮转</small><b>${nextModule(store.records().filter((r) => r.date <= iso()))}</b></article></div><article class="glass card"><h2>模块记录组数</h2>${bar(a.modules)}<p class="note">组数不等于有效增肌组。未记录 RIR/RPE、动作幅度或接近力竭程度，不能判断训练刺激或恢复风险。</p></article><article class="glass card"><h2>估算 1RM · 历史最高</h2>${bar(a.pr)}<p class="note">Epley：重量 × (1 + 次数 / 30)，仅显示 1–10 次的主项。按原记录每只器械重量估算；只用于同动作、同器械、同填写规则的趋势比较。非最大努力组可能低估。</p></article><article class="glass card"><h2>数据解读</h2><p class="note">kg·次不擅自乘双侧系数，不跨动作比较“刺激量”。计时和自重训练单列。篮球属于训练负荷，不视为恢复日。无心率、时长、主观疲劳数据时不计算 ACWR 或伤病风险。无法解析组：${a.unknown}。</p></article>`;
+  const fingerprint = JSON.stringify([store.records(), iso()]);
+  if (fingerprint === analysisFingerprint) return;
+  analysisFingerprint = fingerprint;
+  const records = store.records(),
+    a = analyse(records),
+    reports = threeDayReports(records),
+    current = reports.current;
+  $("#ana-range").textContent = `Brisbane · ${addDays(iso(), -6)} — ${iso()}`;
+  const recentStrength = records.filter(
+    (r) =>
+      r.date >= addDays(iso(), -27) &&
+      r.date <= iso() &&
+      ["Push", "Pull", "Legs"].includes(moduleOf(r.items)),
+  ).length;
+  const metric = (label, value, unit = "") =>
+    `<div class="stat"><span>${label}</span><strong>${value}<small>${unit}</small></strong></div>`;
+  const reportHTML = (r) =>
+    `<details class="report-card"><summary><span><small>三日结算 · ${r.start.slice(5)} — ${r.end.slice(5)}</small><b>${r.strength} 次力量 · ${r.sets} 记录组</b></span><span class="report-arrow">＋</span></summary><div class="report-content"><div class="stats-row">${metric("篮球 / 有氧", r.basketball, "天")}${metric("明确休息", r.rest, "天")}${metric("未记录", r.unlogged, "天")}</div><p>Push ${r.modules.Push} · Pull ${r.modules.Pull} · Legs ${r.modules.Legs} 次。记录负荷 ${Math.round(r.volume)} kg·次，计时 ${r.seconds} 秒。</p><p>${r.strength === 0 ? "本周期没有力量记录；不把缺失数据当成休息或训练退步。" : "三天只用于回顾执行情况，训练效果需要看数周趋势。"}</p>${r.comparable.length ? "<h4>同动作最高记录重量</h4>" + r.comparable.map((e) => `<p class="compare-row"><span>${escape(e.name)}</span><b>${e.previousKg} → ${e.kg} kg</b></p>`).join("") + '<p class="mini">次数、器械和余力不一定相同，重量变化不等于力量变化。</p>' : '<p class="mini">前后周期没有可比较的负重动作，不计算进步百分比。</p>'}${r.unknown ? `<p>有 ${r.unknown} 组无法解析，未纳入数值。</p>` : ""}</div></details>`;
+  $("#analysis-body").innerHTML = `
+  <article class="glass card report-overview"><div class="eyebrow">YOUR TRAINING, IN FOCUS</div><h2>三天，一次回顾。</h2><p>当前周期 ${current.start} — ${current.scheduledEnd}</p><div class="stats-row">${metric("力量", current.strength, "次")}${metric("已记录", current.sets, "组")}${metric("待记录", current.unlogged, "天")}</div><p class="mini">本期进行中 · ${current.nextAt} 00:00 Brisbane 后结算。报告根据历史记录计算，编辑后会同步更新；未记录不视为休息。</p></article>
+  <div class="section-title"><h2>最近 7 天</h2><span>记录概览</span></div><div class="metric-grid">${metric("记录组数", a.sets, "组")}${metric("外部负荷", Math.round(a.volume), "kg·次")}${metric("计时训练", a.seconds, "秒")}${metric("下一次力量", nextModule(records.filter((r) => r.date <= iso())))}</div>
+  <article class="glass card"><div class="section-title"><h2>训练节奏</h2><span>14 天</span></div><div class="activity-calendar">${calendarDays(
+    records,
+  )
+    .map(
+      (d) =>
+        `<div class="calendar-day ${d.module}" title="${d.date} · ${d.module === "Unlogged" ? "未记录" : d.module}"><span>${d.date.slice(8)}</span><i></i></div>`,
+    )
+    .join(
+      "",
+    )}</div><p class="mini">● 力量　● 篮球　○ 休息　· 未记录</p>${bar(a.modules)}<p class="mini">显示模块记录组数；单侧按每侧组数记一次，不擅自翻倍。</p></article>
+  <div class="section-title"><h2>三日报告</h2><span>最近 8 期</span></div><p class="mini">固定日历周期，不按登录时间重置；打开分析即可查看。</p>${reports.completed.map(reportHTML).join("")}
+  <details class="glass card plan-review"><summary>训练计划 · 为什么这样调整？</summary><p>以增肌和一般力量为默认目标：Push 12 组、Pull 12 组、Legs 13 组。减少重复划船，补入罗马尼亚硬拉和提踵；核心先保姿势，不必每组硬撑 80 秒。</p><p>近 28 天已记录 ${recentStrength} 次力量训练。若日志完整且每周仅练 2–3 次，优先考虑全身训练，单个肌群更容易得到反复练习。</p><p>频率比三分化的名字更重要。每周只练 3 天时，各模块约一次，不一定是最适合的安排；可考虑全身 3 练或上下肢交替，分散同肌群的周训练量。每周能稳定练 4–6 次时再选择 PPL 轮转，结合篮球安排休息，不必为了凑周期连续训练。</p><p>主项休息约 2–3 分钟、孤立动作约 60–120 秒；多数工作组保留约 2 次余力。相同重量下，全部工作组稳定达到次数上限、姿势和余力仍合格，再小幅加重。</p><p>这是起始模板。缺少睡眠、疼痛、RIR 和训练时长数据时，不推算恢复分数或伤病风险；肩、腰或膝疼痛不应硬做。</p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12965823/" target="_blank" rel="noopener">依据：ACSM 2026 阻力训练立场声明 ↗</a></details>
+  <details class="glass card"><summary>两个“飞鸟”怎么分？</summary><p><b>站姿哑铃侧平举：</b>站立向身体两侧抬臂，练中肩，归入 Push；日常说的“站立飞鸟”若是这个动作，就按侧平举记录。</p><p><b>坐姿俯身反向飞鸟：</b>躯干前折、手臂向侧后方打开，练后肩，归入 Pull。</p><p>若站立时是在胸前夹合，那是绳索胸部飞鸟，不等于侧平举。不要站直拿哑铃向胸前夹合来代替水平抗阻的胸飞鸟；胸部飞鸟单独记名。</p></details>
+  <details class="glass card"><summary>历史估算 1RM 与统计口径</summary>${bar(a.pr)}<p class="note">Epley 估算仅取 1–10 次的部分主项。非最大努力组可能低估；只比较同动作、同器械、同填写方式。双臂和单臂划船分别保留历史，不混算。</p><p class="note">kg·次不等于增肌刺激，计时与自重单列，未录入 RIR 时不判断有效组。无法解析 ${a.unknown} 组。</p></details>`;
 }
 function renderArchive() {
-  const rs = store.records().slice().reverse();
-  $("#auto-rest-toggle").checked = !!store.get("settings:main")?.autoRest;
-  $("#archive-total").textContent = rs.length + " 天";
-  $("#archive-list").innerHTML = rs
-    .map(
+  const fingerprint = JSON.stringify([
+    store.state.docs,
+    store.state.conflicts,
+    store.state.deleted,
+    store.owner,
+    $("#archive-search")?.value,
+    $("#archive-module")?.value,
+  ]);
+  if (fingerprint === archiveFingerprint) return;
+  archiveFingerprint = fingerprint;
+  const query = ($("#archive-search")?.value || "").trim().toLowerCase();
+  const selected = $("#archive-module")?.value || "all";
+  const rs = store
+    .records()
+    .slice()
+    .reverse()
+    .filter(
       (r) =>
-        `<div class="archive-day"><h3>${r.date} · ${escape(moduleOf(r.items))}</h3><div class="archive-item"><button data-edit="${r.date}">编辑</button><button data-delete="${r.date}">删除整天</button>${r.items.map((i) => `<p><b>${escape(i.name)}</b><br>${i.sets.map(escape).join(" / ")}</p>`).join("")}</div></div>`,
-    )
-    .join("");
+        (selected === "all" || moduleOf(r.items) === selected) &&
+        (!query ||
+          (r.date + " " + r.items.map((i) => i.name).join(" "))
+            .toLowerCase()
+            .includes(query)),
+    );
+  $("#auto-rest-toggle").checked =
+    !!store.get("settings:main")?.autoRest &&
+    store.get("settings:main")?.autoRestConsent === true;
+  $("#archive-total").textContent = rs.length + " 天";
+  $("#archive-list").innerHTML = rs.length
+    ? rs
+        .map(
+          (r) =>
+            `<div class="archive-day"><h3>${r.date} · ${escape(moduleOf(r.items))}</h3><div class="archive-item"><button data-edit="${r.date}">编辑</button><button data-delete="${r.date}">删除整天</button>${r.items.map((i) => `<p><b>${escape(i.name)}</b><br>${i.sets.map(escape).join(" / ")}</p>`).join("")}</div></div>`,
+        )
+        .join("")
+    : '<div class="empty-state">没有匹配的记录。完成一次训练，或在下方添加历史。</div>';
   const keys = Object.keys(store.state.conflicts);
   $("#conflicts").hidden = !keys.length;
   $("#conflicts").innerHTML =
@@ -243,7 +313,10 @@ function renderArchive() {
       .join("");
   $("#adopt-local").hidden =
     store.owner === "guest" || !localStorage.getItem("gym-vault-v49:guest");
-  const deleted = Object.entries(store.state.deleted || {});
+  const deleted = Object.entries({
+    ...(store.get("settings:main")?.recoveredAutoRest || {}),
+    ...(store.state.deleted || {}),
+  }).filter(([key]) => !store.get(key));
   $("#undo-deleted").hidden = !deleted.length;
   $("#undo-deleted").innerHTML =
     "<h2>最近删除 · 可恢复</h2>" +
@@ -261,13 +334,18 @@ function renderAll() {
 }
 function autoRest() {
   const cfg = store.get("settings:main");
-  if (!cfg?.autoRest || cfg.enabledFrom > addDays(iso(), -1)) return;
+  if (
+    !cfg?.autoRest ||
+    cfg.autoRestConsent !== true ||
+    cfg.enabledFrom > addDays(iso(), -1)
+  )
+    return;
   capture();
   const r = restCandidate(
     store.records(),
     store.get("draft:active"),
     new Date(),
-    cfg.timezone,
+    TIME_ZONE,
     cfg.enabledFrom,
   );
   if (r && !Object.hasOwn(store.state.docs, "record:" + r.date)) {
@@ -290,6 +368,7 @@ $$(".nav button").forEach(
 document.addEventListener(
   "input",
   guarded((e) => {
+    if (e.target.id === "archive-search") renderArchive();
     if (e.target.closest(".set-row")) {
       e.target.closest(".set-row").dataset.edited = "true";
       capture();
@@ -312,7 +391,10 @@ document.addEventListener(
     if (restore) {
       put(
         restore.dataset.restore,
-        store.state.deleted[restore.dataset.restore],
+        store.state.deleted[restore.dataset.restore] ||
+          store.get("settings:main")?.recoveredAutoRest?.[
+            restore.dataset.restore
+          ],
       );
       renderAll();
       toast("已恢复记录");
@@ -348,13 +430,21 @@ for (const id of ["plan-date", "plan-module"])
       hasProgress(store.get("draft:active")) &&
       !confirm("切换计划将清空当前草稿，确认？")
     ) {
-      renderCheck();
+      renderCheck(true);
       return;
     }
     const date = $("#plan-date").value,
       module = $("#plan-module").value;
     if (!date) throw Error("请选择日期");
-    put("draft:active", { date, module, rows: {}, updatedAt: Date.now() });
+    put("draft:active", {
+      date,
+      module,
+      planVersion: 50,
+      dateExplicit:
+        id === "plan-date" || !!store.get("draft:active")?.dateExplicit,
+      rows: {},
+      updatedAt: Date.now(),
+    });
     renderCheck();
   });
 bind("finish-day", () => {
@@ -433,7 +523,9 @@ bind("manual-yesterday-rest", () => {
 });
 $("#auto-rest-toggle").onchange = guarded((e) => {
   put("settings:main", {
+    ...store.get("settings:main"),
     autoRest: e.target.checked,
+    autoRestConsent: e.target.checked,
     timezone: "Australia/Brisbane",
     enabledFrom: iso(),
   });
@@ -480,7 +572,7 @@ async function activateAccount() {
   const {
     data: { session },
   } = await client.auth.getSession();
-  if (session?.user.id !== store.owner) {
+  if ((session?.user.id || "guest") !== store.owner) {
     clearTimeout(syncTimeout);
     startStore(session?.user.id || "guest");
   }
@@ -650,9 +742,10 @@ window.addEventListener(
 );
 startStore("guest");
 if (client)
-  client.auth.onAuthStateChange(() =>
-    setTimeout(() => activateAccount().catch((e) => status(e.message)), 0),
-  );
+  client.auth.onAuthStateChange((_event, session) => {
+    if ((session?.user.id || "guest") !== store.owner)
+      setTimeout(() => activateAccount().catch((e) => status(e.message)), 0);
+  });
 if (client) activateAccount().catch((e) => status(e.message));
 autoRest();
 restTimer = setInterval(guarded(autoRest), 60000);
@@ -673,3 +766,5 @@ if ("serviceWorker" in navigator)
   navigator.serviceWorker
     .register("./sw.js", { scope: "./" })
     .catch(() => status("离线缓存未启用；训练数据仍可本机保存"));
+
+$("#archive-module").onchange = renderArchive;

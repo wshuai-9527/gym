@@ -1,10 +1,10 @@
 {
-  "name": "Gym Vault V49",
-  "short_name": "GymV49",
-  "start_url": "./index.html?v=49",
+  "name": "Gym Vault",
+  "short_name": "Gym Vault",
+  "start_url": "./index.html?v=50",
   "display": "standalone",
-  "background_color": "#eef9ff",
-  "theme_color": "#f3fbff",
+  "background_color": "#f5f6f8",
+  "theme_color": "#f5f6f8",
   "icons": [
     {
       "src": "./icon.svg",

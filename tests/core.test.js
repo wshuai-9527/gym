@@ -9,7 +9,40 @@ import {
   restCandidate,
   analyse,
   iso,
+  currentPlan,
 } from "../src/core.js";
+test("Brisbane date changes at UTC 14:00 including year rollover", () => {
+  assert.equal(iso(new Date("2026-10-08T13:59:59Z")), "2026-10-08");
+  assert.equal(iso(new Date("2026-10-08T14:00:00Z")), "2026-10-09");
+  assert.equal(iso(new Date("2026-12-31T14:00:00Z")), "2027-01-01");
+});
+test("today stays today after archive and inherited empty future drafts reset", () => {
+  const records = [
+    normalizeRecord({
+      date: "2026-10-08",
+      items: [{ name: "平板卧推", sets: ["15kg*8"] }],
+    }),
+  ];
+  assert.equal(currentPlan(records, null, "2026-10-08").date, "2026-10-08");
+  const draft = {
+    date: "2026-10-09",
+    module: "Pull",
+    rows: { a: { done: false, edited: false, kg: "15", reps: "12" } },
+  };
+  assert.equal(currentPlan(records, draft, "2026-10-08").date, "2026-10-08");
+  assert.equal(
+    currentPlan(records, { ...draft, dateExplicit: true }, "2026-10-08").date,
+    "2026-10-09",
+  );
+  assert.equal(
+    currentPlan(
+      records,
+      { ...draft, rows: { a: { edited: true } } },
+      "2026-10-08",
+    ).date,
+    "2026-10-09",
+  );
+});
 test("dates survive year rollover and reject invalid dates", () => {
   assert.equal(addDays("2026-12-31", 1), "2027-01-01");
   assert.equal(dateKey("6.28"), "2026-06-28");

@@ -1,7 +1,8 @@
 import { ALIAS, EX } from "./catalog.js";
 export const canon = (n) =>
   ALIAS[String(n || "").trim()] || String(n || "").trim();
-export function iso(date = new Date(), zone = "Australia/Brisbane") {
+export const TIME_ZONE = "Australia/Brisbane";
+export function iso(date = new Date(), zone = TIME_ZONE) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: zone,
     year: "numeric",
@@ -95,7 +96,7 @@ export function parseText(text, date) {
     .map((x) => x.trim())
     .filter(Boolean)) {
     if (/^(\d{4}-\d{2}-\d{2}|\d{1,2}\.\d{1,2})$/.test(line)) {
-      date = dateKey(line, new Date().getFullYear());
+      date = dateKey(line, Number(iso().slice(0, 4)));
       continue;
     }
     if (/^\d/.test(line) && cur) {
@@ -105,7 +106,7 @@ export function parseText(text, date) {
       items.push(cur);
     }
   }
-  return normalizeRecord({ date, items }, new Date().getFullYear());
+  return normalizeRecord({ date, items }, Number(iso().slice(0, 4)));
 }
 export function nextModule(records) {
   const last = [...records]
@@ -117,6 +118,20 @@ export function nextModule(records) {
 }
 export function hasProgress(d) {
   return !!d && Object.values(d.rows || {}).some((x) => x.done || x.edited);
+}
+export function currentPlan(records, draft, today = iso()) {
+  if (
+    draft?.date &&
+    ["Push", "Pull", "Legs"].includes(draft.module) &&
+    (hasProgress(draft) || draft.dateExplicit || draft.date === today)
+  )
+    return draft;
+  return {
+    planVersion: 50,
+    date: today,
+    module: nextModule(records.filter((r) => r.date <= today)),
+    rows: {},
+  };
 }
 export function restCandidate(
   records,
