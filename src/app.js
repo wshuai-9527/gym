@@ -165,7 +165,7 @@ function renderCheck(force = false) {
     (_, i) =>
       `<span class="${i === 0 ? "current" : ""}"><small>第 ${i + 1} 次力量</small><b>${seq[(seq.indexOf(d.module) + i) % 3]}</b></span>`,
   ).join("");
-  let html = `<p class="mini routine-note">按力量训练次数轮转；篮球与休息不推进计划。上方日期固定为 Brisbane 当天。</p>`;
+  let html = `<p class="mini routine-note">目标每周 6 练：Push / Pull / Legs 两轮＋休息 1 天。篮球与休息不推进轮转，疲劳时可顺延。</p>`;
   p.items.forEach((ex, i) => {
     const n =
         p === PLAN[d.module]
@@ -260,7 +260,7 @@ function renderAnalysis() {
       "",
     )}</div><p class="mini">● 力量　● 篮球　○ 休息　· 未记录</p>${bar(a.modules)}<p class="mini">显示模块记录组数；单侧按每侧组数记一次，不擅自翻倍。</p></article>
   <div class="section-title"><h2>三日报告</h2><span>最近 8 期</span></div><p class="mini">固定日历周期，不按登录时间重置；打开分析即可查看。</p>${reports.completed.map(reportHTML).join("")}
-  <details class="glass card plan-review"><summary>训练计划 · 为什么这样调整？</summary><p>以增肌和一般力量为默认目标：Push 12 组、Pull 12 组、Legs 13 组。减少重复划船，补入罗马尼亚硬拉和提踵；核心先保姿势，不必每组硬撑 80 秒。</p><p>近 28 天已记录 ${recentStrength} 次力量训练。若日志完整且每周仅练 2–3 次，优先考虑全身训练，单个肌群更容易得到反复练习。</p><p>频率比三分化的名字更重要。每周只练 3 天时，各模块约一次，不一定是最适合的安排；可考虑全身 3 练或上下肢交替，分散同肌群的周训练量。每周能稳定练 4–6 次时再选择 PPL 轮转，结合篮球安排休息，不必为了凑周期连续训练。</p><p>主项休息约 2–3 分钟、孤立动作约 60–120 秒；多数工作组保留约 2 次余力。相同重量下，全部工作组稳定达到次数上限、姿势和余力仍合格，再小幅加重。</p><p>这是起始模板。缺少睡眠、疼痛、RIR 和训练时长数据时，不推算恢复分数或伤病风险；肩、腰或膝疼痛不应硬做。</p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12965823/" target="_blank" rel="noopener">依据：ACSM 2026 阻力训练立场声明 ↗</a></details>
+  <details class="glass card plan-review"><summary>训练计划 · 为什么这样调整？</summary><p>以增肌和一般力量为默认目标：Push 12 组、Pull 12 组、Legs 15 组。减少重复划船，补入高脚杯深蹲、罗马尼亚硬拉和提踵；核心先保姿势，不必每组硬撑 80 秒。</p><p>近 28 天已记录 ${recentStrength} 次力量训练。你当前目标为每周 6 练：Push → Pull → Legs → Push → Pull → Legs → 休息。胸部两轮约 10 组、股四头约 10 组、背部拉类约 12 组；这些是计划工作组，实际有效组还取决于动作和余力。</p><p>频率比三分化的名字更重要。每周只练 3 天时，各模块约一次，不一定是最适合的安排；可考虑全身 3 练或上下肢交替，分散同肌群的周训练量。当前六练目标适合 PPL 两轮，但若近期训练频率低，应逐渐恢复，不要一次把周训练量加到六练。高强度篮球算额外负荷，腿部疲劳明显时顺延腿日。</p><p>主项休息约 2–3 分钟、孤立动作约 60–120 秒；多数工作组保留约 2 次余力。相同重量下，全部工作组稳定达到次数上限、姿势和余力仍合格，再小幅加重。</p><p>这是起始模板。缺少睡眠、疼痛、RIR 和训练时长数据时，不推算恢复分数或伤病风险；肩、腰或膝疼痛不应硬做。</p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12965823/" target="_blank" rel="noopener">依据：ACSM 2026 阻力训练立场声明 ↗</a></details>
   <details class="glass card"><summary>两个“飞鸟”怎么分？</summary><p><b>站姿哑铃侧平举：</b>站立向身体两侧抬臂，练中肩，归入 Push；日常说的“站立飞鸟”若是这个动作，就按侧平举记录。</p><p><b>坐姿俯身反向飞鸟：</b>躯干前折、手臂向侧后方打开，练后肩，归入 Pull。</p><p>若站立时是在胸前夹合，那是绳索胸部飞鸟，不等于侧平举。不要站直拿哑铃向胸前夹合来代替水平抗阻的胸飞鸟；胸部飞鸟单独记名。</p></details>
   <details class="glass card"><summary>历史估算 1RM 与统计口径</summary>${bar(a.pr)}<p class="note">Epley 估算仅取 1–10 次的部分主项。非最大努力组可能低估；只比较同动作、同器械、同填写方式。双臂和单臂划船分别保留历史，不混算。</p><p class="note">kg·次不等于增肌刺激，计时与自重单列，未录入 RIR 时不判断有效组。无法解析 ${a.unknown} 组。</p></details>`;
 }
