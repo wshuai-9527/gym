@@ -1031,6 +1031,9 @@ input[type="number"]::-webkit-outer-spin-button {
   font-variant-numeric: tabular-nums;
   margin-left: 6px;
 }
+.training-rest .btn {
+  color: var(--ink);
+}
 .screen.active:has(#training-rest:not([hidden])) {
   padding-bottom: calc(var(--nav) + 120px + env(safe-area-inset-bottom));
 }
