@@ -1,6 +1,10 @@
-# Gym Vault · V55
+# Gym Vault · V56
 
 移动优先的训练记录应用，部署在 GitHub Pages，Supabase 提供账号与文档同步。日期固定 Australia/Brisbane。
+
+## V56
+
+按动作一键休息、训练页倒计时、工作组勾选校验；补充热身/进阶规则和低量腿日的局限。保留既有负重与草稿映射。详见 [实用性与科学性复核](docs/V56-practical-scientific-review.md)。
 
 ## V55
 

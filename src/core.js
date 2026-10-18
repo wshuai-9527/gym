@@ -2,6 +2,29 @@ import { ALIAS, EX } from "./catalog.js";
 export const canon = (n) =>
   ALIAS[String(n || "").trim()] || String(n || "").trim();
 export const TIME_ZONE = "Australia/Brisbane";
+export function validateWorkSet({ kg, reps }, mode) {
+  const n = Number(reps);
+  if (
+    String(reps ?? "").trim() === "" ||
+    !Number.isFinite(n) ||
+    n <= 0 ||
+    n > (mode === "seconds" ? 86400 : 1000) ||
+    (mode !== "seconds" && !Number.isInteger(n))
+  )
+    throw Error(
+      mode === "seconds"
+        ? "请填写有效的完成秒数"
+        : "请填写1–1000之间的整数次数",
+    );
+  if (
+    mode === "weighted" &&
+    (String(kg ?? "").trim() === "" ||
+      !Number.isFinite(Number(kg)) ||
+      Number(kg) < 0 ||
+      Number(kg) > 1000)
+  )
+    throw Error("请先填写本组重量，再勾选完成");
+}
 export function iso(date = new Date(), zone = TIME_ZONE) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: zone,

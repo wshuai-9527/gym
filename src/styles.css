@@ -1005,6 +1005,35 @@ input[type="number"]::-webkit-outer-spin-button {
   background: #eef7f3;
   overflow-wrap: anywhere;
 }
+.exercise-rest {
+  margin-top: 12px;
+  color: var(--a);
+  background: #eef7f3;
+}
+.training-rest {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(calc(100% - 28px), 440px);
+  bottom: calc(var(--nav) + env(safe-area-inset-bottom) + 8px);
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #162d36;
+  color: white;
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 20px #17233430;
+}
+.training-rest b {
+  font-variant-numeric: tabular-nums;
+  margin-left: 6px;
+}
+.screen.active:has(#training-rest:not([hidden])) {
+  padding-bottom: calc(var(--nav) + 120px + env(safe-area-inset-bottom));
+}
 
 /* iPhone 16 Pro Max is 440 CSS px in portrait, not the 430px legacy breakpoint. */
 @media (min-width: 431px) and (max-width: 480px) {

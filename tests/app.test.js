@@ -62,6 +62,22 @@ test("real UI handlers preserve draft, edit history and escape user content", as
   assert.equal($(".set-row"), originalRow);
 
   assert.equal(document.querySelectorAll(".set-row").length, 12);
+  click(".set-check");
+  assert.equal(document.querySelectorAll(".checked").length, 0);
+  const recordsBeforeRest = JSON.parse(
+    localStorage.getItem("gym-vault-v49:guest"),
+  ).docs;
+  click("[data-rest]");
+  assert.equal($("#training-rest").hidden, false);
+  assert.equal($("#training-rest-time").textContent, "02:30");
+  t.mock.timers.tick(2000);
+  assert.equal($("#training-rest-time").textContent, "02:28");
+  assert.deepEqual(
+    JSON.parse(localStorage.getItem("gym-vault-v49:guest")).docs,
+    recordsBeforeRest,
+  );
+  click("#training-rest-stop");
+  assert.equal($("#training-rest").hidden, true);
   $(".kg").value = "15";
   $(".kg").dispatchEvent(new window.Event("input", { bubbles: true }));
   $(".reps").value = "8";

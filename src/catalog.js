@@ -225,6 +225,28 @@ export function defaultTarget(name) {
     }[name] || 12
   );
 }
+export function restSeconds(name) {
+  if (
+    loggingMode(name) === "seconds" ||
+    ["仰卧小幅卷腹", "死虫式"].includes(name)
+  )
+    return 60;
+  if (
+    [
+      "平板卧推",
+      "上斜卧推",
+      "坐姿推肩",
+      "高位下拉",
+      "单臂哑铃划船",
+      "双臂哑铃俯身划船",
+      "保加利亚分腿蹲",
+      "罗马尼亚硬拉",
+      "高脚杯深蹲",
+    ].includes(name)
+  )
+    return 150;
+  return 90;
+}
 export const CUES = {
   平板卧推: "肩胛稳定，手腕在肘部上方；保留约 2 次余力，主项休息 2–3 分钟。",
   上斜卧推: "较小上斜角，控制下放；与平板卧推分开看进步，不硬凑总重量。",

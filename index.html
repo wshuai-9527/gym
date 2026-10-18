@@ -10,8 +10,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Gym Vault" />
-    <link rel="manifest" href="./manifest.webmanifest?v=55" />
-    <title>Gym Vault · V55</title>
+    <link rel="manifest" href="./manifest.webmanifest?v=56" />
+    <title>Gym Vault · V56</title>
     <link rel="stylesheet" href="./src/styles.css" />
   </head>
   <body>
@@ -50,6 +50,10 @@
           <span id="set-count">0/0 组</span>
         </div>
         <div id="check-list"></div>
+        <aside class="training-rest" id="training-rest" hidden>
+          <span>组间休息 <b id="training-rest-time">00:00</b></span>
+          <button class="btn" id="training-rest-stop">结束休息</button>
+        </aside>
         <div class="actions">
           <button class="btn primary full" id="finish-day">
             完成训练并归档</button
