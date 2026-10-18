@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>Gym Vault 手机宽度验收</title
+  ><style>
+    body {
+      margin: 20px;
+      font: 14px system-ui;
+      background: #e5e9ed;
+      color: #172334;
+    }
+    main {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      width: max-content;
+    }
+    section h2 {
+      font-size: 14px;
+    }
+    iframe {
+      height: 860px;
+      border: 1px solid #b6c2cc;
+      border-radius: 12px;
+      background: white;
+    }
+    p {
+      max-width: 1000px;
+    }
+  </style>
+  <h1>真实页面 · 手机宽度验收</h1>
+  <p>
+    同一正式页面分别在 320、375、430 CSS
+    像素宽度渲染，用于检查溢出与触控布局；不替代 iPhone 真机键盘、Safari
+    与系统缩放验收。
+  </p>
+  <main>
+    <section>
+      <h2>紧凑屏 · 320px</h2>
+      <iframe title="320像素训练页" width="320" src="../index.html"></iframe>
+    </section>
+    <section>
+      <h2>标准屏 · 375px</h2>
+      <iframe title="375像素训练页" width="375" src="../index.html"></iframe>
+    </section>
+    <section>
+      <h2>宽屏 · 430px</h2>
+      <iframe title="430像素训练页" width="430" src="../index.html"></iframe>
+    </section>
+  </main>
+</html>

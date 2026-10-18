@@ -1,7 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { threeDayReports, summarize, calendarDays } from "../src/reports.js";
-import { PLAN, LEGACY_PLAN, templateFor } from "../src/catalog.js";
+import {
+  PLAN,
+  LEGACY_PLAN,
+  V50_PLAN,
+  templateFor,
+  loggingMode,
+} from "../src/catalog.js";
 const record = (date, name = "平板卧推", sets = ["20kg*8*3"]) => ({
   date,
   items: [{ name, sets }],
@@ -66,7 +72,7 @@ test("new template replaces double arm rows and preserves in-progress legacy sem
   assert(!PLAN.Pull.items.some((x) => x[0] === "双臂哑铃俯身划船"));
   assert(PLAN.Push.items.some((x) => x[0] === "站姿哑铃侧平举"));
   assert(PLAN.Pull.items.some((x) => x[0] === "坐姿俯身反向飞鸟"));
-  assert(PLAN.Legs.items.some((x) => x[0] === "罗马尼亚硬拉"));
+  assert(PLAN.Legs.items.some((x) => x[0] === "死虫式"));
   assert.equal(
     templateFor({
       module: "Pull",
@@ -94,4 +100,34 @@ test("calendar distinguishes missing dates from explicit rest", () => {
     days.map((x) => x.module),
     ["Rest", "Unlogged"],
   );
+});
+
+test("leg plus core plan separates bodyweight reps and per-side seconds, preserving V50 drafts", () => {
+  assert.equal(
+    PLAN.Legs.items.reduce((sum, x) => sum + Number(x[1][0]), 0),
+    10,
+  );
+  assert.equal(
+    PLAN.Legs.items.slice(0, 2).reduce((sum, x) => sum + Number(x[1][0]), 0),
+    4,
+  );
+  assert.equal(loggingMode("死虫式"), "bodyweight");
+  assert.equal(loggingMode("屈膝侧桥"), "seconds");
+  assert.equal(
+    templateFor({
+      module: "Legs",
+      planVersion: 50,
+      rows: { "1-0": { done: true } },
+    }),
+    V50_PLAN.Legs,
+  );
+  assert.equal(
+    templateFor({
+      module: "Legs",
+      planVersion: 51,
+      rows: { "1-0": { done: true } },
+    }),
+    PLAN.Legs,
+  );
+  assert(V50_PLAN.Legs.items.some((x) => x[0] === "高脚杯深蹲"));
 });

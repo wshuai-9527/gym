@@ -108,6 +108,31 @@ test("real UI handlers preserve draft, edit history and escape user content", as
   );
   assert.equal(document.querySelectorAll("[data-edit]").length, 0);
   assert.ok($("#archive-list").textContent.includes("没有匹配"));
+  $("#plan-module").value = "Legs";
+  $("#plan-module").dispatchEvent(
+    new window.Event("change", { bubbles: true }),
+  );
+  click('[data-go="check"]');
+  const legRows = [...document.querySelectorAll(".set-row")];
+  assert.equal(legRows.length, 10);
+  assert.equal(document.querySelectorAll(".kg:disabled").length, 10);
+  assert.equal(legRows[6].querySelector(".reps").value, "6");
+  assert.equal(
+    legRows[8].querySelector(".reps").getAttribute("aria-label"),
+    "秒数",
+  );
+  assert.equal(legRows[8].querySelector(".reps").value, "20");
+  legRows[4].querySelector(".set-check").click();
+  legRows[6].querySelector(".set-check").click();
+  legRows[8].querySelector(".set-check").click();
+  click("#finish-day");
+  const saved = JSON.parse(localStorage.getItem("gym-vault-v49:guest")).docs[
+    "record:2026-10-08"
+  ].value;
+  assert.deepEqual(
+    saved.items.map((i) => i.sets),
+    [["10"], ["6"], ["20s"]],
+  );
   const keys = Object.keys(
     JSON.parse(localStorage.getItem("gym-vault-v49:guest")).docs,
   );

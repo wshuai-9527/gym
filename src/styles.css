@@ -844,3 +844,150 @@ textarea {
     transition: none !important;
   }
 }
+
+/* Phone-first: 320px layouts, safe areas, large targets and no forced zoom lock. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-bottom: 100px;
+}
+.app {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.head > div:first-child,
+.hero > div:first-child {
+  min-width: 0;
+}
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.field input::placeholder {
+  font-weight: 500;
+  color: var(--muted);
+  font-size: 12px;
+}
+.archive-item button {
+  min-height: 44px;
+}
+.exercise-guide summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.exercise-guide summary:before {
+  content: "＋";
+  margin-right: 6px;
+}
+.exercise-guide[open] summary:before {
+  content: "−";
+}
+@media (max-width: 430px) {
+  .head {
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .head .chip {
+    max-width: 135px;
+    font-size: 10px;
+  }
+  .head h1 {
+    font-size: 26px;
+  }
+  .hero {
+    padding: 18px;
+    grid-template-columns: minmax(0, 1fr) 64px;
+  }
+  .hero h2 {
+    font-size: 34px;
+  }
+  .ring {
+    width: 64px;
+    height: 64px;
+  }
+  .screen {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .card {
+    padding: 14px;
+  }
+  .exercise-card {
+    padding: 14px;
+  }
+  .report-card summary {
+    padding: 14px;
+  }
+  .metric-grid .stat {
+    padding: 12px;
+  }
+  .stat > strong {
+    font-size: 23px;
+  }
+  .stats-row {
+    gap: 5px;
+  }
+  .stats-row .stat {
+    padding: 9px;
+  }
+  .stats-row .stat strong {
+    font-size: 21px;
+  }
+  .rowbar {
+    grid-template-columns: 76px minmax(0, 1fr) 30px;
+    gap: 7px;
+  }
+  .compare-row {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 350px) {
+  .head h1 {
+    font-size: 24px;
+  }
+  .head .chip {
+    max-width: 122px;
+  }
+  .hero {
+    grid-template-columns: minmax(0, 1fr) 56px;
+    padding: 16px;
+  }
+  .hero h2 {
+    font-size: 31px;
+  }
+  .ring {
+    width: 56px;
+    height: 56px;
+  }
+  .ring span {
+    font-size: 14px;
+  }
+  .hero p {
+    font-size: 11px;
+  }
+  .tags {
+    gap: 4px;
+  }
+  .tags span {
+    font-size: 9px;
+  }
+  .activity-calendar {
+    gap: 4px;
+  }
+  .archive-filters {
+    gap: 5px;
+  }
+  .archive-filters select {
+    width: 90px;
+  }
+  .nav {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}

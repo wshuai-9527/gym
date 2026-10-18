@@ -121,7 +121,7 @@ export const EX = {
 };
 
 // Versioned templates: never reinterpret an in-progress V49 draft by row index.
-export const PLAN = {
+export const V50_PLAN = {
   Push: {
     title: "Push 日",
     sub: "胸 · 肩 · 三头",
@@ -156,6 +156,46 @@ export const PLAN = {
     ],
   },
 };
+export const PLAN = {
+  ...V50_PLAN,
+  Legs: {
+    title: "腿＋核心",
+    sub: "腿部基础 · 腹部 · 核心稳定",
+    items: [
+      ["坐凳深蹲", "2 × 8–12", "腿部基础", "股四头 / 臀"],
+      ["自重臀桥", "2 × 10–15", "腿部基础", "臀 / 后链"],
+      ["仰卧小幅卷腹", "2 × 10–15", "腹部", "腹直肌"],
+      ["死虫式", "2 × 6–10 / 侧", "抗伸展", "核心 / 控制"],
+      ["屈膝侧桥", "2 × 15–30s / 侧", "抗侧屈", "腹斜肌 / 稳定"],
+    ],
+  },
+};
+export function loggingMode(name) {
+  if (["平板支撑", "屈膝侧桥"].includes(name)) return "seconds";
+  if (
+    [
+      "平板支撑肩触碰",
+      "坐凳深蹲",
+      "自重臀桥",
+      "仰卧小幅卷腹",
+      "死虫式",
+    ].includes(name)
+  )
+    return "bodyweight";
+  return "weighted";
+}
+export function defaultTarget(name) {
+  return (
+    {
+      坐凳深蹲: 10,
+      自重臀桥: 12,
+      仰卧小幅卷腹: 10,
+      死虫式: 6,
+      屈膝侧桥: 20,
+      平板支撑: 40,
+    }[name] || 12
+  );
+}
 export const CUES = {
   平板卧推: "肩胛稳定，手腕在肘部上方；保留约 2 次余力，主项休息 2–3 分钟。",
   上斜卧推: "较小上斜角，控制下放；与平板卧推分开看进步，不硬凑总重量。",
@@ -186,12 +226,33 @@ EX["站姿提踵"] = { m: "Legs" };
 EX["哑铃胸部飞鸟"] = { m: "Push" };
 EX["坐姿反向飞鸟"] = { m: "Pull" };
 export function templateFor(draft) {
-  return draft?.planVersion !== 50 &&
-    Object.values(draft?.rows || {}).some((x) => x.done || x.edited)
-    ? LEGACY_PLAN[draft.module]
-    : PLAN[draft.module];
+  if (Object.values(draft?.rows || {}).some((x) => x.done || x.edited)) {
+    if (draft.planVersion === 51) return PLAN[draft.module];
+    if (draft.planVersion === 50) return V50_PLAN[draft.module];
+    return LEGACY_PLAN[draft.module];
+  }
+  return PLAN[draft.module];
 }
 
 EX["高脚杯深蹲"] = { m: "Legs" };
 CUES["高脚杯深蹲"] =
   "哑铃抱在胸前、全脚掌稳定，下蹲至能控制的舒适深度；膝盖跟随脚尖方向，不为深度牺牲躯干稳定。";
+
+for (const name of [
+  "坐凳深蹲",
+  "自重臀桥",
+  "仰卧小幅卷腹",
+  "死虫式",
+  "屈膝侧桥",
+])
+  EX[name] = { m: "Legs" };
+CUES["坐凳深蹲"] =
+  "用稳定、不滑动的训练凳，先自重。脚掌踩稳、缓慢坐下再站起，不向后砸坐；选舒适凳高。先控制动作，不追求加重量。";
+CUES["自重臀桥"] =
+  "仰卧屈膝，呼气收紧腹部，用臀部抬起骨盆；不拱腰、不追求过高。无哑铃也能做，腰部不舒服则缩小幅度。";
+CUES["仰卧小幅卷腹"] =
+  "屈膝、脚掌踩地，双手交叉放胸前，呼气将头肩小幅抬离垫子；不拉脖子、不甩动，也不需要坐起。腰颈不适时暂停。";
+CUES["死虫式"] =
+  "仰卧髋膝约90度，呼气控制肋骨与腰部；对侧手脚慢慢伸出再收回，腰背不离开可控位置。每侧6次起，腰拱起时减小伸展范围。";
+CUES["屈膝侧桥"] =
+  "侧卧屈膝、肘在肩下，前臂和膝盖支撑，抬髋保持身体一线并自然呼吸。左右各15–30秒记1组，先较弱侧；肩部不适可换死虫式。";

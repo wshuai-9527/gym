@@ -127,7 +127,7 @@ export function currentPlan(records, draft, today = iso()) {
   )
     return draft;
   return {
-    planVersion: 50,
+    planVersion: 51,
     date: today,
     module: nextModule(records.filter((r) => r.date <= today)),
     rows: {},

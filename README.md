@@ -1,6 +1,10 @@
-# Gym Vault · V50
+# Gym Vault · V51
 
 移动优先的训练记录应用，部署在 GitHub Pages，Supabase 提供账号与文档同步。日期固定 Australia/Brisbane。
+
+## V51
+
+腿＋核心轻量模板、320/375/430px手机样式与自重/计时记录；旧草稿与历史保留。详见 `docs/V51-leg-core-mobile.md`。
 
 ## V50
 
