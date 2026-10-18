@@ -150,7 +150,7 @@ function renderCheck(force = false) {
   $("#focus-desc").textContent =
     `计划日期 ${d.date} · ${p.items.length} 个动作 · ${d.planVersion !== 53 && hasProgress(d) ? "继续旧版草稿；完成或清空后使用新计划" : d.module === "Legs" ? "少量腿部基础＋腹部训练，动作控制优先" : "按动作质量完成，保留约 2 次余力"}`;
   $("#focus-tags").innerHTML =
-    "<span>V53</span><span>小器械训练</span><span>自动保存</span>";
+    "<span>V54</span><span>小器械训练</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
@@ -568,7 +568,14 @@ bind("login-pass", async () => {
 async function activateAccount() {
   const {
     data: { session },
+    error,
   } = await client.auth.getSession();
+  if (error) throw error;
+  $("#login-fields").hidden = !!session;
+  $("#logout").hidden = !session;
+  $("#account-state").textContent = session
+    ? "此设备已登录 · 下次打开自动恢复，联网后自动同步"
+    : "首次在此入口登录一次，之后自动恢复；未登录时仍可本机记录";
   if ((session?.user.id || "guest") !== store.owner) {
     clearTimeout(syncTimeout);
     startStore(session?.user.id || "guest");
@@ -582,8 +589,12 @@ async function activateAccount() {
 bind("logout", async () => {
   capture();
   clearTimeout(syncTimeout);
-  await client?.auth.signOut();
+  const result = await client?.auth.signOut({ scope: "local" });
+  if (result?.error) throw result.error;
   startStore("guest");
+  $("#login-fields").hidden = false;
+  $("#logout").hidden = true;
+  $("#account-state").textContent = "已退出此设备，其他设备不受影响";
   status("已退出 · 当前显示本机访客档案");
 });
 for (const id of ["cloud-read", "cloud-upload", "archive-refresh"])
@@ -744,6 +755,7 @@ if (client)
       setTimeout(() => activateAccount().catch((e) => status(e.message)), 0);
   });
 if (client) activateAccount().catch((e) => status(e.message));
+else $("#account-state").textContent = "云端组件不可用 · 本机记录可正常使用";
 autoRest();
 restTimer = setInterval(guarded(autoRest), 60000);
 setInterval(

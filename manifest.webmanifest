@@ -1,7 +1,7 @@
 {
   "name": "Gym Vault",
   "short_name": "Gym Vault",
-  "start_url": "./index.html?v=53",
+  "start_url": "./index.html?v=54",
   "display": "standalone",
   "background_color": "#f5f6f8",
   "theme_color": "#f5f6f8",

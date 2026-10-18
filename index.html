@@ -7,8 +7,11 @@
       content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content"
     />
     <meta name="theme-color" content="#f5f6f8" />
-    <link rel="manifest" href="./manifest.webmanifest?v=53" />
-    <title>Gym Vault · V53</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Gym Vault" />
+    <link rel="manifest" href="./manifest.webmanifest?v=54" />
+    <title>Gym Vault · V54</title>
     <link rel="stylesheet" href="./src/styles.css" />
   </head>
   <body>
@@ -98,20 +101,34 @@
           <div class="kicker">SUPABASE</div>
           <h2 style="margin: 0 0 8px">云端同步</h2>
           <p class="status" id="cloud-status">未登录。</p>
-          <input
-            id="email"
-            type="email"
-            placeholder="邮箱"
-            autocomplete="email"
-          /><input
-            id="password"
-            type="password"
-            placeholder="密码"
-            autocomplete="current-password"
-          />
+          <p class="mini" id="account-state" aria-live="polite">
+            正在恢复登录状态…
+          </p>
+          <div id="login-fields">
+            <input
+              id="email"
+              type="email"
+              placeholder="邮箱"
+              autocomplete="username"
+              autocapitalize="none"
+              spellcheck="false"
+            /><input
+              id="password"
+              type="password"
+              placeholder="密码"
+              autocomplete="current-password"
+            />
+            <button class="btn primary full" id="login-pass">
+              首次登录并记住此设备
+            </button>
+            <p class="mini">
+              同一浏览器或主屏幕 App
+              中自动保持登录；无需每次输密码。不保存明文密码。Safari 和主屏幕
+              App 可能需要分别首次登录，请固定使用一个入口。
+            </p>
+          </div>
           <div class="cloud-row">
-            <button class="btn primary" id="login-pass">密码登录</button
-            ><button class="btn" id="logout">退出云端</button
+            <button class="btn" id="logout" hidden>退出此设备</button
             ><button class="btn" id="cloud-read">从云端读取</button
             ><button class="btn" id="cloud-upload">同步待上传修改</button>
           </div>

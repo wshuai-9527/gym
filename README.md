@@ -31,3 +31,6 @@ Node 24：`npm ci` → `npm test` → `npm run check`。纯静态 ES modules，�
 旧 training_days / training_sets 保留；gym_documents 是 V49+ 文档与版本同步层。公开客户端仅含 publishable key。离线数据先存本机，联网后事务确认。账号隔离、版本冲突和删除恢复由同步层处理。不要清除浏览器数据代替同步。
 
 本次 V50 前端升级无新 SQL。`supabase/review` 是过往授权变更的历史记录，不是应重新执行的安装脚本。
+## V54 手机与持久登录
+
+适配 iPhone 16 Pro Max 的 440px 竖屏布局、安全区与大号训练输入。已登录隐藏密码框，沿用原会话自动恢复和续期；退出只影响当前设备。详见 [V54 说明](docs/V54-phone-session.md)。

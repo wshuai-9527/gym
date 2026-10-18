@@ -16,6 +16,9 @@
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
+[hidden] {
+  display: none !important;
+}
 html,
 body {
   margin: 0;
@@ -1001,4 +1004,34 @@ input[type="number"]::-webkit-outer-spin-button {
   border-radius: 7px;
   background: #eef7f3;
   overflow-wrap: anywhere;
+}
+
+/* iPhone 16 Pro Max is 440 CSS px in portrait, not the 430px legacy breakpoint. */
+@media (min-width: 431px) and (max-width: 480px) {
+  .screen {
+    padding-left: max(18px, env(safe-area-inset-left));
+    padding-right: max(18px, env(safe-area-inset-right));
+  }
+  .hero {
+    padding: 20px;
+  }
+  .head .chip {
+    max-width: 145px;
+  }
+  .field input {
+    min-height: 50px;
+    font-size: 18px;
+  }
+  .set-check {
+    min-height: 50px;
+  }
+  .nav button {
+    font-size: 12px;
+  }
+}
+@media (display-mode: standalone) {
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
 }
