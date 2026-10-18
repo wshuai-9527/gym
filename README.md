@@ -1,6 +1,10 @@
-# Gym Vault · V51
+# Gym Vault · V52
 
 移动优先的训练记录应用，部署在 GitHub Pages，Supabase 提供账号与文档同步。日期固定 Australia/Brisbane。
+
+## V52
+
+根据用户补充，保留自重保加利亚分腿蹲和平板支撑；每次腿部4组、核心6组。V49/V50/V51在练草稿保留原动作映射。
 
 ## V51
 

@@ -156,7 +156,7 @@ export const V50_PLAN = {
     ],
   },
 };
-export const PLAN = {
+export const V51_PLAN = {
   ...V50_PLAN,
   Legs: {
     title: "腿＋核心",
@@ -170,12 +170,27 @@ export const PLAN = {
     ],
   },
 };
+export const PLAN = {
+  ...V51_PLAN,
+  Legs: {
+    title: "腿＋核心",
+    sub: "腿部基础 · 腹部 · 核心稳定",
+    items: [
+      ["自重保加利亚分腿蹲", "2 × 8–10 / 侧", "腿部基础", "股四头 / 臀"],
+      ["自重臀桥", "2 × 10–15", "腿部基础", "臀 / 后链"],
+      ["仰卧小幅卷腹", "2 × 10–15", "腹部", "腹直肌"],
+      ["平板支撑", "2 × 20–40s", "抗伸展", "核心 / 稳定"],
+      ["屈膝侧桥", "2 × 15–30s / 侧", "抗侧屈", "腹斜肌 / 稳定"],
+    ],
+  },
+};
 export function loggingMode(name) {
   if (["平板支撑", "屈膝侧桥"].includes(name)) return "seconds";
   if (
     [
       "平板支撑肩触碰",
       "坐凳深蹲",
+      "自重保加利亚分腿蹲",
       "自重臀桥",
       "仰卧小幅卷腹",
       "死虫式",
@@ -188,11 +203,12 @@ export function defaultTarget(name) {
   return (
     {
       坐凳深蹲: 10,
+      自重保加利亚分腿蹲: 8,
       自重臀桥: 12,
       仰卧小幅卷腹: 10,
       死虫式: 6,
       屈膝侧桥: 20,
-      平板支撑: 40,
+      平板支撑: 30,
     }[name] || 12
   );
 }
@@ -227,7 +243,8 @@ EX["哑铃胸部飞鸟"] = { m: "Push" };
 EX["坐姿反向飞鸟"] = { m: "Pull" };
 export function templateFor(draft) {
   if (Object.values(draft?.rows || {}).some((x) => x.done || x.edited)) {
-    if (draft.planVersion === 51) return PLAN[draft.module];
+    if (draft.planVersion === 52) return PLAN[draft.module];
+    if (draft.planVersion === 51) return V51_PLAN[draft.module];
     if (draft.planVersion === 50) return V50_PLAN[draft.module];
     return LEGACY_PLAN[draft.module];
   }
@@ -256,3 +273,9 @@ CUES["死虫式"] =
   "仰卧髋膝约90度，呼气控制肋骨与腰部；对侧手脚慢慢伸出再收回，腰背不离开可控位置。每侧6次起，腰拱起时减小伸展范围。";
 CUES["屈膝侧桥"] =
   "侧卧屈膝、肘在肩下，前臂和膝盖支撑，抬髋保持身体一线并自然呼吸。左右各15–30秒记1组，先较弱侧；肩部不适可换死虫式。";
+
+EX["自重保加利亚分腿蹲"] = { m: "Legs" };
+CUES["自重保加利亚分腿蹲"] =
+  "用稳定训练凳放后脚，可轻扶固定支撑；先自重，每侧8次起。前脚踩稳、缓慢下蹲至舒适范围，不跳跃、不追求力竭；平衡困难时后脚落地做原地分腿蹲，膝髋锐痛时停止。两侧完成后勾选1组。";
+CUES["平板支撑"] =
+  "肘在肩下，腹臀轻收、躯干保持一线并自然呼吸。先20–40秒，不塌腰、不耸肩；姿势失控就结束，不必硬撑80秒。腰部无法控制时可缩短时间或改死虫式。";

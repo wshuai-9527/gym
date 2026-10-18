@@ -5,6 +5,7 @@ import {
   PLAN,
   LEGACY_PLAN,
   V50_PLAN,
+  V51_PLAN,
   templateFor,
   loggingMode,
 } from "../src/catalog.js";
@@ -72,7 +73,7 @@ test("new template replaces double arm rows and preserves in-progress legacy sem
   assert(!PLAN.Pull.items.some((x) => x[0] === "双臂哑铃俯身划船"));
   assert(PLAN.Push.items.some((x) => x[0] === "站姿哑铃侧平举"));
   assert(PLAN.Pull.items.some((x) => x[0] === "坐姿俯身反向飞鸟"));
-  assert(PLAN.Legs.items.some((x) => x[0] === "死虫式"));
+  assert(PLAN.Legs.items.some((x) => x[0] === "平板支撑"));
   assert.equal(
     templateFor({
       module: "Pull",
@@ -124,10 +125,25 @@ test("leg plus core plan separates bodyweight reps and per-side seconds, preserv
   assert.equal(
     templateFor({
       module: "Legs",
-      planVersion: 51,
+      planVersion: 52,
       rows: { "1-0": { done: true } },
     }),
     PLAN.Legs,
   );
   assert(V50_PLAN.Legs.items.some((x) => x[0] === "高脚杯深蹲"));
+});
+
+test("retain Bulgarian and plank without remapping an unfinished V51 draft", () => {
+  assert(PLAN.Legs.items.some((x) => x[0] === "自重保加利亚分腿蹲"));
+  assert.equal(loggingMode("自重保加利亚分腿蹲"), "bodyweight");
+  assert.equal(
+    templateFor({
+      module: "Legs",
+      planVersion: 51,
+      rows: { "3-0": { done: true } },
+    }),
+    V51_PLAN.Legs,
+  );
+  assert.equal(V51_PLAN.Legs.items[3][0], "死虫式");
+  assert.equal(PLAN.Legs.items[3][0], "平板支撑");
 });

@@ -116,7 +116,7 @@ test("real UI handlers preserve draft, edit history and escape user content", as
   const legRows = [...document.querySelectorAll(".set-row")];
   assert.equal(legRows.length, 10);
   assert.equal(document.querySelectorAll(".kg:disabled").length, 10);
-  assert.equal(legRows[6].querySelector(".reps").value, "6");
+  assert.equal(legRows[6].querySelector(".reps").value, "30");
   assert.equal(
     legRows[8].querySelector(".reps").getAttribute("aria-label"),
     "秒数",
@@ -131,7 +131,7 @@ test("real UI handlers preserve draft, edit history and escape user content", as
   ].value;
   assert.deepEqual(
     saved.items.map((i) => i.sets),
-    [["10"], ["6"], ["20s"]],
+    [["10"], ["30s"], ["20s"]],
   );
   const keys = Object.keys(
     JSON.parse(localStorage.getItem("gym-vault-v49:guest")).docs,

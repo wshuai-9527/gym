@@ -119,7 +119,7 @@ function capture() {
   );
   const next = {
     ...d,
-    planVersion: d.planVersion ?? (hasProgress(d) ? 49 : 51),
+    planVersion: d.planVersion ?? (hasProgress(d) ? 49 : 52),
     rows,
     updatedAt: Date.now(),
   };
@@ -161,9 +161,9 @@ function renderCheck(force = false) {
   $("#focus-title").textContent =
     d.module === "Legs" ? "腿＋核心" : d.module + " 日";
   $("#focus-desc").textContent =
-    `计划日期 ${d.date} · ${p.items.length} 个动作 · ${d.planVersion !== 51 && hasProgress(d) ? "继续旧版草稿；完成或清空后使用新计划" : d.module === "Legs" ? "少量腿部基础＋腹部训练，动作控制优先" : "按动作质量完成，保留约 2 次余力"}`;
+    `计划日期 ${d.date} · ${p.items.length} 个动作 · ${d.planVersion !== 52 && hasProgress(d) ? "继续旧版草稿；完成或清空后使用新计划" : d.module === "Legs" ? "少量腿部基础＋腹部训练，动作控制优先" : "按动作质量完成，保留约 2 次余力"}`;
   $("#focus-tags").innerHTML =
-    "<span>V51</span><span>小器械训练</span><span>自动保存</span>";
+    "<span>V52</span><span>小器械训练</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
@@ -186,7 +186,7 @@ function renderCheck(force = false) {
     for (let j = 0; j < n; j++) {
       const key = `${i}-${j}`,
         x = d.rows[key] || {};
-      html += `<div class="set-row ${x.done ? "checked" : ""}" data-key="${key}" data-ex="${i}" data-edited="${!!x.edited}"><button class="set-check" aria-label="完成${ex[0]}第${j + 1}组" aria-pressed="${!!x.done}">✓</button><b>${j + 1}</b><div class="field"><input type="number" inputmode="decimal" min="0" max="1000" step="0.5" class="kg" aria-label="重量" placeholder="${body ? "自重" : "—"}" ${body ? "disabled" : ""} value="${escape(x.kg ?? (body ? "" : lastKg(ex[0])))}"><span class="unit">${body ? "" : "kg"}</span></div><div class="field"><input type="number" inputmode="numeric" min="1" max="${time ? 86400 : 1000}" class="reps" aria-label="${time ? "秒数" : "次数"}" value="${escape(x.reps ?? (p === PLAN[d.module] ? defaultTarget(ex[0]) : time ? 80 : 12))}"><span class="unit">${time ? "s" : ""}</span></div></div>`;
+      html += `<div class="set-row ${x.done ? "checked" : ""}" data-key="${key}" data-ex="${i}" data-edited="${!!x.edited}"><button class="set-check" aria-label="完成${ex[0]}第${j + 1}组" aria-pressed="${!!x.done}">✓</button><b>${j + 1}</b><div class="field"><input type="number" inputmode="decimal" min="0" max="1000" step="0.5" class="kg" aria-label="重量" placeholder="${body ? "自重" : "—"}" ${body ? "disabled" : ""} value="${escape(x.kg ?? (body ? "" : lastKg(ex[0])))}"><span class="unit">${body ? "" : "kg"}</span></div><div class="field"><input type="number" inputmode="numeric" min="1" max="${time ? 86400 : 1000}" class="reps" aria-label="${time ? "秒数" : "次数"}" value="${escape(x.reps ?? (p === PLAN[d.module] ? defaultTarget(ex[0]) : time ? (d.planVersion === 50 ? 40 : d.planVersion === 51 ? defaultTarget(ex[0]) : 80) : 12))}"><span class="unit">${time ? "s" : ""}</span></div></div>`;
     }
     html += "</div></article>";
   });
@@ -267,7 +267,7 @@ function renderAnalysis() {
       "",
     )}</div><p class="mini">● 力量　● 篮球　○ 休息　· 未记录</p>${bar(a.modules)}<p class="mini">显示模块记录组数；单侧按每侧组数记一次，不擅自翻倍。</p></article>
   <div class="section-title"><h2>三日报告</h2><span>最近 8 期</span></div><p class="mini">固定日历周期，不按登录时间重置；打开分析即可查看。</p>${reports.completed.map(reportHTML).join("")}
-  <details class="glass card plan-review"><summary>训练计划 · 为什么这样调整？</summary><p>以增肌和一般力量为默认目标：Push 12 组、Pull 12 组；腿＋核心日为腿部 4 组、核心 6 组。按你不追求腿围增大的目标，减少原腿部增肌训练量，用坐凳深蹲和自重臀桥保留基础力量；卷腹、死虫式、屈膝侧桥覆盖腹部屈曲、抗伸展和抗侧屈。</p><p>近 28 天已记录 ${recentStrength} 次力量训练。你当前目标为每周 6 练：Push → Pull → Legs → Push → Pull → Legs → 休息。胸部两轮约 10 组、背部拉类约 12 组；腿部基础 8 组、核心 12 组；这些是计划记录组，单侧动作按每侧记一次。较少腿部训练量可降低增肌导向，但不能保证腿围完全不变。</p><p>频率比三分化的名字更重要。每周只练 3 天时，各模块约一次，不一定是最适合的安排；可考虑全身 3 练或上下肢交替，分散同肌群的周训练量。当前六练目标适合 PPL 两轮，但若近期训练频率低，应逐渐恢复，不要一次把周训练量加到六练。高强度篮球算额外负荷，腿部疲劳明显时顺延腿日。</p><p>上肢主项休息约 2–3 分钟；腿部基础约 60–90 秒、核心约 45–60 秒，呼吸未恢复就多休息。上肢多数工作组保留约 2 次余力；腿部不追求力竭，核心以姿势和呼吸为准。相同重量下，全部工作组稳定达到次数上限、姿势和余力仍合格，再小幅加重。</p><p>腹肌可见度取决于腹肌发展、体脂与个体差异。练腹不能保证只减肚子，也不承诺练几周一定显腹肌；不为了显腹肌极端节食。</p><p>这是起始模板。缺少睡眠、疼痛、RIR 和训练时长数据时，不推算恢复分数或伤病风险；肩、腰或膝疼痛不应硬做。</p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12965823/" target="_blank" rel="noopener">依据：ACSM 2026 阻力训练立场声明 ↗</a><br><a href="https://www.mayoclinic.org/healthy-lifestyle/fitness/in-depth/core-strength/art-20546851" target="_blank" rel="noopener">Mayo Clinic 核心训练动作 ↗</a><br><a href="https://www.nasm.org/resource-center/exercise-library/dead-bug" target="_blank" rel="noopener">NASM 死虫式动作说明 ↗</a></details>
+  <details class="glass card plan-review"><summary>训练计划 · 为什么这样调整？</summary><p>以增肌和一般力量为默认目标：Push 12 组、Pull 12 组；腿＋核心日为腿部 4 组、核心 6 组。按你不追求腿围增大的目标，减少原腿部增肌训练量，保留你熟悉的保加利亚分腿蹲（先自重）和自重臀桥；卷腹、平板支撑、屈膝侧桥覆盖腹部屈曲、抗伸展和抗侧屈。</p><p>近 28 天已记录 ${recentStrength} 次力量训练。你当前目标为每周 6 练：Push → Pull → Legs → Push → Pull → Legs → 休息。胸部两轮约 10 组、背部拉类约 12 组；腿部基础 8 组、核心 12 组；这些是计划记录组，单侧动作按每侧记一次。较少腿部训练量可降低增肌导向，但不能保证腿围完全不变。</p><p>频率比三分化的名字更重要。每周只练 3 天时，各模块约一次，不一定是最适合的安排；可考虑全身 3 练或上下肢交替，分散同肌群的周训练量。当前六练目标适合 PPL 两轮，但若近期训练频率低，应逐渐恢复，不要一次把周训练量加到六练。高强度篮球算额外负荷，腿部疲劳明显时顺延腿日。</p><p>上肢主项休息约 2–3 分钟；腿部基础约 60–90 秒、核心约 45–60 秒，呼吸未恢复就多休息。上肢多数工作组保留约 2 次余力；腿部不追求力竭，核心以姿势和呼吸为准。相同重量下，全部工作组稳定达到次数上限、姿势和余力仍合格，再小幅加重。</p><p>腹肌可见度取决于腹肌发展、体脂与个体差异。练腹不能保证只减肚子，也不承诺练几周一定显腹肌；不为了显腹肌极端节食。</p><p>这是起始模板。缺少睡眠、疼痛、RIR 和训练时长数据时，不推算恢复分数或伤病风险；肩、腰或膝疼痛不应硬做。</p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12965823/" target="_blank" rel="noopener">依据：ACSM 2026 阻力训练立场声明 ↗</a><br><a href="https://www.mayoclinic.org/healthy-lifestyle/fitness/in-depth/core-strength/art-20546851" target="_blank" rel="noopener">Mayo Clinic 核心训练动作 ↗</a><br><a href="https://www.nasm.org/resource-center/exercise-library/bulgarian-split-squat" target="_blank" rel="noopener">NASM 保加利亚分腿蹲动作说明 ↗</a></details>
   <details class="glass card"><summary>两个“飞鸟”怎么分？</summary><p><b>站姿哑铃侧平举：</b>站立向身体两侧抬臂，练中肩，归入 Push；日常说的“站立飞鸟”若是这个动作，就按侧平举记录。</p><p><b>坐姿俯身反向飞鸟：</b>躯干前折、手臂向侧后方打开，练后肩，归入 Pull。</p><p>若站立时是在胸前夹合，那是绳索胸部飞鸟，不等于侧平举。不要站直拿哑铃向胸前夹合来代替水平抗阻的胸飞鸟；胸部飞鸟单独记名。</p></details>
   <details class="glass card"><summary>历史估算 1RM 与统计口径</summary>${bar(a.pr)}<p class="note">Epley 估算仅取 1–10 次的部分主项。非最大努力组可能低估；只比较同动作、同器械、同填写方式。双臂和单臂划船分别保留历史，不混算。</p><p class="note">kg·次不等于增肌刺激，计时与自重单列，未录入 RIR 时不判断有效组。无法解析 ${a.unknown} 组。</p></details>`;
 }
@@ -447,7 +447,7 @@ for (const id of ["plan-date", "plan-module"])
     put("draft:active", {
       date,
       module,
-      planVersion: 51,
+      planVersion: 52,
       dateExplicit:
         id === "plan-date" || !!store.get("draft:active")?.dateExplicit,
       rows: {},
