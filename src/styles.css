@@ -1172,6 +1172,9 @@ details.card a {
 .rowbar.Legs .bar i {
   background: #9553ab;
 }
+.exercise-guide p, .load-advice p { font-size:16px;line-height:1.7; }
+.unit,.set-row>b,.stat strong small { font-size:14px; }
+.hero .kicker,.report-overview .eyebrow { display:none; }
 
 /* iPhone 16 Pro Max is 440 CSS px in portrait, not the 430px legacy breakpoint. */
 @media (min-width: 431px) and (max-width: 480px) {

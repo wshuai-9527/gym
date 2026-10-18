@@ -159,24 +159,25 @@ const visuals = {
   保加利亚分腿蹲: [
     [
       [60, 15, 60, 30],
-      [60, 30, 64, 58],
+      [60, 30, 64, 55],
     ],
     [
-      [64, 58, 37, 78],
+      [64, 55, 37, 78],
       [37, 78, 25, 106],
-      [64, 58, 95, 78],
-      [95, 78, 115, 65],
+      [64, 55, 95, 58],
+      [95, 58, 115, 65],
       [60, 35, 49, 60],
     ],
     [
-      [64, 58, 38, 63],
-      [38, 63, 22, 106],
-      [64, 58, 98, 68],
-      [98, 68, 115, 65],
-      [60, 35, 49, 60],
+      [64, 75, 35, 80],
+      [35, 80, 25, 106],
+      [64, 75, 93, 98],
+      [93, 98, 115, 65],
+      [60, 55, 49, 80],
     ],
     "后脚放稳；前脚全掌踩地",
     "split",
+    [[60, 35, 60, 50], [60, 50, 64, 75]],
   ],
   地面哑铃臀桥: [
     [[15, 85, 30, 85]],
@@ -266,5 +267,5 @@ function pose(base, limbs, equipment) {
 export function exerciseVisual(name) {
   const v = visuals[name];
   if (!v) return "";
-  return `<figure class="movement-figure"><svg viewBox="0 0 300 135" role="img" aria-label="${name}起始与结束姿势简图"><g transform="translate(5,8)">${pose(v[0], v[1], v[4])}</g><text x="145" y="65" text-anchor="middle" fill="#687888" font-size="20">→</text><g transform="translate(160,8)">${pose(v[0], v[2], v[4])}</g><text x="65" y="132" text-anchor="middle" font-size="13" fill="#687888">${v[4] === "hold" ? "保持" : "起始"}</text><text x="225" y="132" text-anchor="middle" font-size="13" fill="#687888">${v[4] === "hold" ? "保持" : "结束"}</text></svg><figcaption>${v[3]}</figcaption></figure>`;
+  return `<figure class="movement-figure"><svg viewBox="0 0 300 135" role="img" aria-label="${name}起始与结束姿势简图"><g transform="translate(5,8)">${pose(v[0], v[1], v[4])}</g><text x="145" y="65" text-anchor="middle" fill="#687888" font-size="20">→</text><g transform="translate(160,8)">${pose(v[5] || v[0], v[2], v[4])}</g><text x="65" y="132" text-anchor="middle" font-size="13" fill="#687888">${v[4] === "hold" ? "保持" : "起始"}</text><text x="225" y="132" text-anchor="middle" font-size="13" fill="#687888">${v[4] === "hold" ? "保持" : "结束"}</text></svg><figcaption>${v[3]}</figcaption></figure>`;
 }
