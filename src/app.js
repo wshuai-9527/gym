@@ -363,6 +363,7 @@ $$(".nav button").forEach(
         s.classList.toggle("active", s.id === b.dataset.go),
       );
       renderAll();
+      window.scrollTo(0, 0);
     })),
 );
 document.addEventListener(

@@ -13,6 +13,7 @@ test("real UI handlers preserve draft, edit history and escape user content", as
   );
   const dom = new JSDOM(html, { url: "http://localhost/" });
   const { window } = dom;
+  window.scrollTo = () => {};
   Object.assign(globalThis, {
     window,
     document: window.document,
