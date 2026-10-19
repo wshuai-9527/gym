@@ -1,4 +1,12 @@
+import { trainingCycles } from "./cycles.js";
 export function reportFresh(report, store) {
+  if (
+    report.cycle_id &&
+    !trainingCycles(store.records()).completed.some(
+      (c) => c.id === report.cycle_id,
+    )
+  )
+    return false;
   const expected = report.source_versions || {};
   const actual = Object.fromEntries(
     Object.entries(store.state.docs)
@@ -32,7 +40,7 @@ export async function fetchAIReports(client, owner) {
   const { data, error } = await client
     .from("gym_ai_reports")
     .select(
-      "period_start,period_end,source_start,source_versions,title,content,generated_at",
+      "cycle_id,period_start,period_end,source_start,source_versions,title,content,generated_at",
     )
     .eq("user_id", owner)
     .order("period_end", { ascending: false })

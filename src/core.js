@@ -100,7 +100,24 @@ export function normalizeRecord(r, year = 2026) {
     });
     if (!sets.length && !["休息", "篮球", "有氧"].includes(name))
       throw Error("动作至少需要一组");
-    return { name, sets };
+    const f = i.feedback;
+    const feedback =
+      f &&
+      typeof f.rir === "number" &&
+      f.rir >= 0 &&
+      f.rir <= 5 &&
+      typeof f.quality === "boolean" &&
+      typeof f.pain === "boolean"
+        ? {
+            rir: f.rir,
+            quality: f.quality,
+            pain: f.pain,
+            ...(typeof f.rating === "string"
+              ? { rating: f.rating.slice(0, 20) }
+              : {}),
+          }
+        : null;
+    return { name, sets, ...(feedback ? { feedback } : {}) };
   });
   return {
     date,
@@ -140,7 +157,11 @@ export function nextModule(records) {
   return seq[(seq.indexOf(last ? moduleOf(last.items) : "Legs") + 1) % 3];
 }
 export function hasProgress(d) {
-  return !!d && Object.values(d.rows || {}).some((x) => x.done || x.edited);
+  return (
+    !!d &&
+    (Object.values(d.rows || {}).some((x) => x.done || x.edited) ||
+      Object.values(d.feedback || {}).some(Boolean))
+  );
 }
 export function currentPlan(records, draft, today = iso()) {
   if (
@@ -148,9 +169,9 @@ export function currentPlan(records, draft, today = iso()) {
     ["Push", "Pull", "Legs"].includes(draft.module) &&
     (hasProgress(draft) || draft.dateExplicit || draft.date === today)
   )
-    return hasProgress(draft) ? draft : { ...draft, planVersion: 53 };
+    return hasProgress(draft) ? draft : { ...draft, planVersion: 58 };
   return {
-    planVersion: 53,
+    planVersion: 58,
     date: today,
     module: nextModule(records.filter((r) => r.date <= today)),
     rows: {},

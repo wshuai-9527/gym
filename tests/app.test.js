@@ -61,17 +61,10 @@ test("real UI handlers preserve draft, edit history and escape user content", as
   await Promise.resolve();
   assert.equal($(".set-row"), originalRow);
   click('[data-go="analysis"]');
-  assert.equal(
-    document.querySelector("#analysis-body .report-card").open,
-    true,
-  );
-  assert.match(
-    document.querySelector("#analysis-body .report-card summary").textContent,
-    /上一周期/,
-  );
+  assert.match($("#analysis-body").textContent, /完成一轮推、拉、腿/);
   click('[data-go="check"]');
 
-  assert.equal(document.querySelectorAll(".set-row").length, 12);
+  assert.equal(document.querySelectorAll(".set-row").length, 13);
   click(".set-check");
   assert.equal(document.querySelectorAll(".checked").length, 0);
   const recordsBeforeRest = JSON.parse(
@@ -140,17 +133,17 @@ test("real UI handlers preserve draft, edit history and escape user content", as
   );
   click('[data-go="check"]');
   const legRows = [...document.querySelectorAll(".set-row")];
-  assert.equal(legRows.length, 10);
+  assert.equal(legRows.length, 12);
   assert.equal(document.querySelectorAll(".kg:disabled").length, 6);
-  assert.equal(legRows[6].querySelector(".reps").value, "30");
+  assert.equal(legRows[8].querySelector(".reps").value, "30");
   assert.equal(
-    legRows[8].querySelector(".reps").getAttribute("aria-label"),
+    legRows[10].querySelector(".reps").getAttribute("aria-label"),
     "秒数",
   );
-  assert.equal(legRows[8].querySelector(".reps").value, "20");
-  legRows[4].querySelector(".set-check").click();
+  assert.equal(legRows[10].querySelector(".reps").value, "20");
   legRows[6].querySelector(".set-check").click();
   legRows[8].querySelector(".set-check").click();
+  legRows[10].querySelector(".set-check").click();
   click("#finish-day");
   const saved = JSON.parse(localStorage.getItem("gym-vault-v49:guest")).docs[
     "record:2026-10-08"

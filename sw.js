@@ -1,9 +1,15 @@
-const CACHE = "gym-vault-v57.0.2";
+const CACHE = "gym-vault-v58.0.0";
 const SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./icon.svg",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./apple-touch-icon.png",
+  "./src/cycles.js",
+  "./src/adaptive.js",
+  "./src/notifications.js",
   "./vendor/supabase/supabase.js",
   "./vendor/supabase/591.supabase.js",
   "./src/styles.css",
@@ -47,16 +53,41 @@ self.addEventListener("fetch", (e) => {
   e.respondWith(
     (async () => {
       const c = await caches.open(CACHE);
-      try {
-        const response = await fetch(e.request, { cache: "no-cache" });
-        if (response.ok) await c.put(e.request, response.clone());
-        return response;
-      } catch {
-        const cached = await c.match(e.request, { ignoreSearch: true });
-        if (cached) return cached;
-        if (e.request.mode === "navigate") return c.match("./index.html");
-        return Response.error();
-      }
+      // Use one atomically installed shell; never mix old HTML and new modules.
+      if (e.request.mode === "navigate")
+        return (await c.match("./index.html")) || fetch(e.request);
+      const canonical = new URL(u.pathname, self.location.origin);
+      const cached = await c.match(canonical.href, { ignoreSearch: true });
+      return cached || fetch(e.request);
+    })(),
+  );
+});
+self.addEventListener("push", (e) => {
+  let data = {};
+  try {
+    data = e.data?.json() || {};
+  } catch {}
+  e.waitUntil(
+    self.registration.showNotification(data.title || "休息结束", {
+      body: data.body || "准备好后开始下一组",
+      icon: "./icon-192.png",
+      badge: "./icon-192.png",
+      tag: "gym-rest",
+      data: { url: self.registration.scope },
+    }),
+  );
+});
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  e.waitUntil(
+    (async () => {
+      const tabs = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
+      const tab = tabs.find((t) => t.url.startsWith(self.registration.scope));
+      if (tab) return tab.focus();
+      return self.clients.openWindow(self.registration.scope);
     })(),
   );
 });

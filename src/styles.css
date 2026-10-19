@@ -1172,9 +1172,20 @@ details.card a {
 .rowbar.Legs .bar i {
   background: #9553ab;
 }
-.exercise-guide p, .load-advice p { font-size:16px;line-height:1.7; }
-.unit,.set-row>b,.stat strong small { font-size:14px; }
-.hero .kicker,.report-overview .eyebrow { display:none; }
+.exercise-guide p,
+.load-advice p {
+  font-size: 16px;
+  line-height: 1.7;
+}
+.unit,
+.set-row > b,
+.stat strong small {
+  font-size: 14px;
+}
+.hero .kicker,
+.report-overview .eyebrow {
+  display: none;
+}
 
 /* iPhone 16 Pro Max is 440 CSS px in portrait, not the 430px legacy breakpoint. */
 @media (min-width: 431px) and (max-width: 480px) {
@@ -1204,4 +1215,47 @@ details.card a {
   body {
     overscroll-behavior-y: none;
   }
+}
+
+.pain-notice {
+  color: #973b2e;
+  background: #fff1e8;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 17px;
+}
+.feedback-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  margin-top: 16px;
+  font-size: 17px;
+}
+.feedback-field select {
+  font-size: 17px;
+  max-width: 70%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #dce3e8;
+  background: white;
+}
+.update-banner {
+  position: fixed;
+  top: env(safe-area-inset-top, 8px);
+  left: 16px;
+  right: 16px;
+  z-index: 100;
+  background: #d8eee7;
+}
+.movement-figure figcaption {
+  font-size: 17px;
+}
+.movement-figure svg {
+  max-height: 220px;
+}
+.movement-tips {
+  font-size: 17px;
+  line-height: 1.7;
+  padding-left: 22px;
 }

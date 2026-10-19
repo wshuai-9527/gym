@@ -1,10 +1,10 @@
-# Gym Vault · V57
+# Gym Vault · V58
 
 移动优先的训练记录应用，部署在 GitHub Pages，Supabase 提供账号与文档同步。日期固定 Australia/Brisbane。
 
 ## V57
 
-大字号、训练颜色区分、上一周期直接展开、离线动作简图及谨慎负荷建议。AI私有报告收件箱已接前端，SQL提案尚未执行：`supabase/review/ai_reports_proposal.sql`；未启用时不假冒AI送达。定时任务以Brisbane每3天回顾完整周期，需报告表启用及任务具备连接权限后才能写入App。
+以下为历史版本说明。V58已启用私人AI报告表，改为完整PPL周期报告，并部署受平台JWT校验保护的Web Push提醒。最新架构、计划与验证见 [V58](docs/V58-cycle-pwa-adaptation.md)。
 
 ## V56
 

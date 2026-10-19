@@ -40,6 +40,40 @@ export class Store {
       .map(([, d]) => d.value)
       .sort((a, b) => a.date.localeCompare(b.date));
   }
+  importGuest(guest) {
+    if (this.owner === "guest") return 0;
+    let added = 0;
+    for (const [key, d] of Object.entries(guest.state.docs)) {
+      if (
+        !d.value ||
+        !(
+          key.startsWith("record:") ||
+          (key === "draft:active" &&
+            Object.values(d.value.rows || {}).some((x) => x.done || x.edited))
+        )
+      )
+        continue;
+      const stamp = JSON.stringify(d.value);
+      if (this.state.adoptedGuest?.[key] === stamp) continue;
+      const existing = this.state.docs[key];
+      if (!existing) this.put(key, d.value);
+      else if (JSON.stringify(existing.value) !== stamp)
+        this.transaction((s) => {
+          s.conflicts[key] = {
+            key,
+            value: d.value,
+            version: existing.version,
+            guestImport: true,
+          };
+        });
+      this.transaction((s) => {
+        s.adoptedGuest ||= {};
+        s.adoptedGuest[key] = stamp;
+      });
+      added++;
+    }
+    return added;
+  }
   put(key, value) {
     this.transaction((s) => {
       const old = s.docs[key];
@@ -108,11 +142,11 @@ export class Store {
         value: useLocal ? local : remote.value,
         version: remote.version,
       };
-      if (useLocal)
+      if (useLocal || remote.guestImport)
         s.pending.push({
           id: crypto.randomUUID(),
           key,
-          value: local,
+          value: useLocal ? local : remote.value,
           base: remote.version,
         });
       delete s.conflicts[key];

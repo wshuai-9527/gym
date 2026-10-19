@@ -64,34 +64,6 @@ export function summarize(records, start, end) {
     exercises,
   };
 }
-// Calendar blocks share an immutable Brisbane calendar anchor across devices.
-// Reports are derived, so a corrected history entry corrects its report as well.
-export function threeDayReports(records, today = iso(), limit = 8) {
-  const anchor = "2026-10-18";
-  const start = addDays(anchor, Math.floor(dayDiff(today, anchor) / 3) * 3);
-  const current = {
-    ...summarize(records, start, today),
-    complete: false,
-    scheduledEnd: addDays(start, 2),
-    nextAt: addDays(start, 3),
-  };
-  const completed = Array.from({ length: limit }, (_, i) => {
-    const s = addDays(start, -3 * (i + 1)),
-      end = addDays(s, 2);
-    const result = summarize(records, s, end),
-      previous = summarize(records, addDays(s, -3), addDays(s, -1));
-    const comparable = Object.entries(result.exercises)
-      .filter(([name, e]) => e.maxKg > 0 && previous.exercises[name]?.maxKg > 0)
-      .map(([name, e]) => ({
-        name,
-        kg: e.maxKg,
-        previousKg: previous.exercises[name].maxKg,
-        delta: e.maxKg - previous.exercises[name].maxKg,
-      }));
-    return { ...result, complete: true, comparable };
-  });
-  return { current, completed };
-}
 export function calendarDays(records, today = iso(), length = 14) {
   return Array.from({ length }, (_, i) => {
     const date = addDays(today, i - length + 1),

@@ -10,11 +10,15 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Gym Vault" />
-    <link rel="manifest" href="./manifest.webmanifest?v=57" />
-    <title>Gym Vault · V57</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <title>Gym Vault · V58</title>
     <link rel="stylesheet" href="./src/styles.css" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
   </head>
   <body>
+    <button class="btn update-banner" id="app-update" hidden>
+      新版已准备好 · 保存并更新
+    </button>
     <div class="app">
       <section class="screen active" id="check">
         <header class="head">
@@ -71,6 +75,11 @@
           <div class="chip">Timer</div>
         </header>
         <article class="glass card">
+          <button class="btn" id="enable-push">启用后台提醒</button>
+          <button class="btn" id="test-push">测试提醒</button>
+          <p class="note" id="push-status">
+            从主屏幕打开后允许通知；联网时可在其他 App 中收到提醒。
+          </p>
           <div class="kicker">REST</div>
           <div style="font-size: 54px; font-weight: 1000" id="timer-display">
             01:30
