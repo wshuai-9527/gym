@@ -102,9 +102,8 @@ export function normalizeRecord(r, year = 2026) {
     const f = i.feedback;
     const feedback =
       f &&
-      typeof f.rir === "number" &&
-      f.rir >= 0 &&
-      f.rir <= 5 &&
+      (f.rir === null ||
+        (typeof f.rir === "number" && f.rir >= 0 && f.rir <= 5)) &&
       (typeof f.quality === "boolean" || f.quality === null) &&
       (typeof f.pain === "boolean" || f.pain === null)
         ? {

@@ -7,10 +7,11 @@ export const FEEDBACK = {
   form: { rir: 0, quality: false, pain: false },
   pain: { rir: 0, quality: false, pain: true },
 };
-export function feedbackValue(value, state = "") {
+export function feedbackValue(value, state = "", mode = "weighted") {
   const f = FEEDBACK[value] ? { ...FEEDBACK[value], rating: value } : null;
   if (!f && !state) return null;
-  const result = f || { rir: 0, quality: null, pain: null };
+  const result = f || { rir: null, quality: null, pain: null };
+  if (mode.endsWith("seconds")) result.rir = null;
   // A reported symptom takes priority over a conflicting positive selector.
   if (result.pain === true) return { ...result, confirmed: true };
   if (result.quality === false && state === "stable")
@@ -93,7 +94,9 @@ export function adaptiveItems(records, items, module, today) {
             .slice(0, 2)
             .every(
               (h) =>
-                h.feedback?.rir <= 1 &&
+                (timed
+                  ? h.feedback?.rating === "hard"
+                  : Number.isFinite(h.feedback?.rir) && h.feedback.rir <= 1) &&
                 h.sets.every((s) => (s.sec || s.reps) < lo),
             )))
     ) {
@@ -111,7 +114,9 @@ export function adaptiveItems(records, items, module, today) {
       f?.confirmed &&
       f.quality &&
       f.pain === false &&
-      f.rir >= 2
+      (timed
+        ? ["easy", "steady"].includes(f.rating)
+        : Number.isFinite(f.rir) && f.rir >= 2)
     ) {
       const two = valid.slice(0, 2);
       const same =

@@ -9,6 +9,16 @@ import { Sync } from "../src/sync.js";
 import { reportDigest, reportCard } from "../src/report-view.js";
 
 const ex = PLAN.Push.items[0];
+test("timed holds never record repetitions-in-reserve or infer fatigue from missing effort", () => {
+  const f = feedbackValue("steady", "stable", "weighted-seconds");
+  assert.equal(f.rir, null);
+  const r = normalizeRecord({
+    date: "2026-10-22",
+    items: [{ name: "站姿单侧哑铃静止保持", sets: ["5kg*20s"], feedback: f }],
+  });
+  assert.equal(r.items[0].feedback.rir, null);
+  assert.equal(r.items[0].feedback.confirmed, true);
+});
 const rec = (day, sets, feedback = feedbackValue("steady", "stable")) => ({
   date: `2026-10-${day}`,
   items: [{ name: ex[0], sets, feedback }],

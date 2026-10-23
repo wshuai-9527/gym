@@ -234,9 +234,9 @@ function renderCheck(force = false) {
     }
     html += `</div><button class="btn full exercise-rest" data-rest="${restSeconds(ex[0])}">组间休息 · ${restSeconds(ex[0])} 秒</button><details class="load-advice"><summary>负荷建议</summary><p>${escape(ex[4]?.message || progressionAdvice(store.records(), ex[0], ex[1], iso()).text)}</p></details><label class="feedback-field">这次感觉<select data-feedback="${i}" aria-label="${escape(ex[0])}训练反馈">${[
       ["", "未评价"],
-      ["easy", "轻松 · 还可做3次以上"],
-      ["steady", "合适 · 还可做约2次"],
-      ["hard", "吃力 · 只剩0–1次"],
+      ["easy", time ? "轻松 · 姿势可持续" : "轻松 · 还可做3次以上"],
+      ["steady", time ? "合适 · 仍有余力" : "合适 · 还可做约2次"],
+      ["hard", time ? "吃力 · 快到姿势极限" : "吃力 · 只剩0–1次"],
       ["form", "动作开始失控"],
       ["pain", "出现疼痛"],
     ]
@@ -292,8 +292,14 @@ function archive(d) {
       items.push({
         name: ex[0],
         sets,
-        ...(feedbackValue(d.feedback?.[i], d.quality?.[i])
-          ? { feedback: feedbackValue(d.feedback?.[i], d.quality?.[i]) }
+        ...(feedbackValue(d.feedback?.[i], d.quality?.[i], loggingMode(ex[0]))
+          ? {
+              feedback: feedbackValue(
+                d.feedback?.[i],
+                d.quality?.[i],
+                loggingMode(ex[0]),
+              ),
+            }
           : {}),
       });
   });
