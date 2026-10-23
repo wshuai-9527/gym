@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Gym Vault" />
     <link rel="manifest" href="./manifest.webmanifest" />
-    <title>Gym Vault · V59</title>
+    <title>Gym Vault · V59.0.2</title>
     <link rel="stylesheet" href="./src/styles.css" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
   </head>
@@ -58,13 +58,24 @@
           <span>组间休息 <b id="training-rest-time">00:00</b></span>
           <button class="btn" id="training-rest-stop">结束休息</button>
         </aside>
+        <p class="quick-record-date" id="quick-record-date"></p>
         <div class="actions">
           <button class="btn primary full" id="finish-day">
             完成训练并归档</button
           ><button class="btn" id="clear-day">清空本次进度</button
-          ><button class="btn" id="basketball-day">今天篮球/有氧</button
-          ><button class="btn" id="rest-day">今天休息</button>
+          ><button class="btn" id="basketball-day">记录篮球／有氧</button
+          ><button class="btn" id="rest-day" aria-pressed="false">
+            记录休息
+          </button>
         </div>
+        <p
+          class="day-record-status"
+          id="day-record-status"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          hidden
+        ></p>
       </section>
       <section class="screen" id="timer">
         <header class="head">
@@ -222,7 +233,13 @@
         ><button data-go="archive"><b>▤</b>档案</button>
       </nav>
     </div>
-    <div class="toast" id="toast"></div>
+    <div
+      class="toast"
+      id="toast"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
     <script src="./vendor/supabase/supabase.js"></script>
     <script type="module" src="./src/app.js"></script>
   </body>

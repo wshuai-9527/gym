@@ -1,6 +1,6 @@
 {
   "name": "gym-vault",
-  "version": "59.0.1",
+  "version": "59.0.2",
   "private": true,
   "type": "module",
   "scripts": {

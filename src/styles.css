@@ -1287,3 +1287,35 @@ details.card a {
   line-height: 1.7;
   padding-left: 22px;
 }
+
+/* Keep record confirmation beside the controls, including after a reload. */
+.quick-record-date {
+  font-size: 16px;
+  margin: 16px 0 8px;
+  color: var(--muted);
+}
+.day-record-status {
+  white-space: pre-line;
+  font-size: 17px;
+  line-height: 1.7;
+  padding: 16px;
+  border-radius: 14px;
+  background: #e0f3ec;
+  color: #145c46;
+  border: 1px solid #a6d6c4;
+}
+.day-record-status.needs-attention {
+  background: #fff3dc;
+  color: #734700;
+  border-color: #e4c486;
+}
+.actions .btn.recorded {
+  background: #e0f3ec;
+  color: #145c46;
+  border-color: #57a58a;
+  font-weight: 650;
+}
+.toast {
+  font-size: 17px;
+  padding: 14px 18px;
+}

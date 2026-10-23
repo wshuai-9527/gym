@@ -48,6 +48,7 @@ const escape = (s) =>
       ],
   );
 let toastTimer;
+let lastRecordedDate = null;
 function toast(m) {
   $("#toast").textContent = m;
   $("#toast").classList.add("show");
@@ -81,6 +82,7 @@ let aiRenderedSig = null;
 const status = (m) => {
   $("#cloud-status").textContent = m;
   $("#autosave-text").textContent = m;
+  if (store) renderRecordReceipt();
 };
 function guarded(fn) {
   return async (...a) => {
@@ -101,6 +103,7 @@ const reminders = new RestNotifications(
   localStorage,
 );
 function startStore(owner) {
+  lastRecordedDate = null;
   store = new Store(localStorage, owner);
   store.migrateLegacy();
   sync = new Sync(client, store, status, () => renderAll());
@@ -459,7 +462,41 @@ function renderArchive() {
       )
       .join("");
 }
+function renderRecordReceipt() {
+  const date = lastRecordedDate || plan().date;
+  const key = "record:" + date;
+  const saved = store.get(key);
+  const box = $("#day-record-status");
+  box.hidden = !saved;
+  for (const [id, name, label] of [
+    ["basketball-day", "篮球", "篮球／有氧"],
+    ["rest-day", "休息", "休息"],
+  ]) {
+    const selected = !!saved?.items.some((i) => i.name === name);
+    $("#" + id).setAttribute("aria-pressed", String(selected));
+    $("#" + id).classList.toggle("recorded", selected);
+    $("#" + id).textContent = selected ? "✓ 已记录" + label : "记录" + label;
+  }
+  $("#quick-record-date").textContent = "记录日期 · " + date;
+  if (!saved) return;
+  const module = moduleOf(saved.items);
+  const label =
+    { Basketball: "篮球／有氧", Rest: "休息", Legs: "腿＋核心" }[module] ||
+    module + " 训练";
+  const pending = store.state.pending.some((op) => op.key === key);
+  const conflict = !!store.state.conflicts[key];
+  const state = conflict
+    ? "本机已保存 · 同步冲突待处理"
+    : store.owner === "guest"
+      ? "本机已保存 · 登录后同步"
+      : pending
+        ? "本机已保存 · 等待云端确认"
+        : "已同步云端";
+  box.textContent = `✓ ${date} · 已记录${label}\n${state}`;
+  box.classList.toggle("needs-attention", conflict);
+}
 function renderAll() {
+  renderRecordReceipt();
   if (!document.activeElement?.closest(".set-row")) renderCheck();
   renderAnalysis();
   renderArchive();
@@ -589,6 +626,7 @@ for (const id of ["plan-date", "plan-module"])
       renderCheck(true);
       return;
     }
+    lastRecordedDate = null;
     const date = $("#plan-date").value,
       module = $("#plan-module").value;
     if (!date) throw Error("请选择日期");
@@ -608,7 +646,9 @@ bind("finish-day", () => {
   if (record(r)) {
     put("draft:active", null);
     renderAll();
-    toast("已归档，等待云端确认");
+    lastRecordedDate = r.date;
+    renderRecordReceipt();
+    toast(`${r.date} · 训练已保存`);
   }
 });
 bind("clear-day", () => {
@@ -622,18 +662,24 @@ for (const [id, name] of [
   ["rest-day", "休息"],
 ])
   bind(id, () => {
+    const date = lastRecordedDate || plan().date;
+    const previous = store.get("record:" + date);
+    if (previous?.items.length === 1 && previous.items[0].name === name) {
+      lastRecordedDate = date;
+      renderRecordReceipt();
+      toast(`${date} · 已记录${name}，无需重复保存`);
+      return;
+    }
     if (
       hasProgress(plan()) &&
       !confirm("当前有训练草稿，确认改为" + name + "？")
     )
       return;
-    if (
-      record(
-        normalizeRecord({ date: plan().date, items: [{ name, sets: [] }] }),
-      )
-    ) {
+    if (record(normalizeRecord({ date, items: [{ name, sets: [] }] }))) {
+      lastRecordedDate = date;
       put("draft:active", null);
       renderAll();
+      toast(`${date} · ${name}已保存`);
     }
   });
 bind("manual-add", () => {
