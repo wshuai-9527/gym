@@ -37,11 +37,15 @@ export function historyReference(records, name, today = iso()) {
 export function historyPreset(reference, index, mode) {
   if (!reference?.canPrefill) return {};
   const p = reference.entries[index] || reference.entries.at(-1);
+  if (mode === "weighted-seconds")
+    return p.weighted && p.sec > 0 ? { kg: p.kg, reps: p.sec } : {};
   if (mode === "seconds") return p.sec > 0 ? { reps: p.sec } : {};
   if (mode === "weighted") return p.weighted ? { kg: p.kg, reps: p.reps } : {};
   return !p.weighted && p.reps > 0 ? { reps: p.reps } : {};
 }
 export function measurementHint(name) {
+  if (name === "站姿单侧哑铃静止保持")
+    return "kg填单只哑铃重量，秒数按每侧；左右都完成后记1组。新动作先自选轻重量，不套用其他动作负重。";
   if (name === "保加利亚分腿蹲")
     return "kg填单只哑铃重量，不填双手相加值。次数按每侧，完成两侧后勾选1组。";
   if (name === "地面哑铃臀桥")

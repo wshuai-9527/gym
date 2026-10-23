@@ -1224,6 +1224,34 @@ details.card a {
   padding: 12px;
   font-size: 17px;
 }
+.report-brief {
+  font-size: 17px;
+  line-height: 1.65;
+}
+.report-conclusion {
+  font-weight: 700;
+  color: var(--text, #172334);
+}
+.report-brief-section h3 {
+  font-size: 17px;
+  margin: 16px 0 8px;
+}
+.report-brief-section ul {
+  margin: 0;
+  padding-left: 22px;
+}
+.report-brief-section li {
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+.report-full {
+  margin: 18px 0;
+}
+.report-full > summary {
+  font-size: 16px;
+  color: #4263c7;
+  padding: 10px 0;
+}
 .feedback-field {
   display: flex;
   align-items: center;

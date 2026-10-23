@@ -1,4 +1,4 @@
-const CACHE = "gym-vault-v58.0.0";
+const CACHE = "gym-vault-v59.0.0";
 const SHELL = [
   "./",
   "./index.html",
@@ -23,6 +23,7 @@ const SHELL = [
   "./src/exercise-visuals.js",
   "./src/progression.js",
   "./src/report-inbox.js",
+  "./src/report-view.js",
 ];
 self.addEventListener("install", (e) =>
   e.waitUntil(

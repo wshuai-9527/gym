@@ -11,7 +11,18 @@ import { RestNotifications } from "../src/notifications.js";
 const record = (date, name, sets = ["20kg*12*3"], rating) => ({
   date,
   items: [
-    { name, sets, ...(rating ? { feedback: feedbackValue(rating) } : {}) },
+    {
+      name,
+      sets,
+      ...(rating
+        ? {
+            feedback: feedbackValue(
+              rating,
+              ["form", "pain"].includes(rating) ? rating : "stable",
+            ),
+          }
+        : {}),
+    },
   ],
 });
 const mem = () => {
@@ -57,15 +68,16 @@ test("new Push resets an incomplete cycle; a Pull alone never creates a report",
 });
 test("adaptive loads require two complete quality exposures; no feedback never raises loads", () => {
   for (const module of ["Push", "Pull", "Legs"]) {
-    const ex = PLAN[module].items[0],
+    const ex = PLAN[module].items.find((x) => x[0] !== "平板支撑"),
       n = parseInt(ex[1]);
     const records = [
       record("2026-01-01", ex[0], [`20kg*12*${n}`], "steady"),
       record("2026-01-05", ex[0], [`20kg*12*${n}`], "steady"),
     ];
     const a = adaptiveItems(records, [ex], module, "2026-01-06")[0];
-    assert.equal(a[4].perSet[0].kg, 20.5);
-    assert.equal(a[4].perSet[0].reps, 8);
+    assert.equal(a[4].perSet[0].kg, 20);
+    assert.equal(a[4].perSet[0].reps, 12);
+    assert.match(a[4].message, /20.5kg/);
     assert.equal(a[4].sets, n);
     records.forEach((r) => delete r.items[0].feedback);
     assert.equal(

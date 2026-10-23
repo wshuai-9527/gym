@@ -197,7 +197,7 @@ export const V53_PLAN = {
     ],
   },
 };
-export const PLAN = {
+export const V58_PLAN = {
   ...V53_PLAN,
   Legs: {
     ...V53_PLAN.Legs,
@@ -228,7 +228,23 @@ export const PLAN = {
     ],
   },
 };
+// Keep old drafts tied to their original exercise/row mapping.
+export const PLAN = {
+  ...V58_PLAN,
+  Legs: {
+    title: "腿＋核心",
+    sub: "小垫可练 · 核心优先",
+    items: [
+      ["平板支撑", "2 × 20–60s", "抗伸展", "核心 / 稳定"],
+      ["保加利亚分腿蹲", "2 × 8–12 / 侧", "单腿蹲", "股四头 / 臀"],
+      ["罗马尼亚硬拉", "2 × 8–12", "髋铰链", "腘绳肌 / 臀"],
+      ["屈膝侧桥", "2 × 15–30s / 侧", "抗侧屈", "腹斜肌 / 稳定"],
+      ["站姿单侧哑铃静止保持", "2 × 20–40s / 侧", "站姿核心", "核心 / 稳定"],
+    ],
+  },
+};
 export function loggingMode(name) {
+  if (name === "站姿单侧哑铃静止保持") return "weighted-seconds";
   if (["平板支撑", "屈膝侧桥"].includes(name)) return "seconds";
   if (
     [
@@ -253,12 +269,13 @@ export function defaultTarget(name) {
       死虫式: 6,
       屈膝侧桥: 20,
       平板支撑: 30,
+      站姿单侧哑铃静止保持: 20,
     }[name] || 12
   );
 }
 export function restSeconds(name) {
   if (
-    loggingMode(name) === "seconds" ||
+    loggingMode(name).endsWith("seconds") ||
     ["仰卧小幅卷腹", "死虫式"].includes(name)
   )
     return 60;
@@ -308,10 +325,11 @@ EX["站姿提踵"] = { m: "Legs" };
 EX["哑铃胸部飞鸟"] = { m: "Push" };
 EX["坐姿反向飞鸟"] = { m: "Pull" };
 export function templateFor(draft) {
-  if (draft?.planVersion === 58 && Array.isArray(draft.planSnapshot))
+  if (draft?.planVersion >= 58 && Array.isArray(draft.planSnapshot))
     return { ...PLAN[draft.module], items: draft.planSnapshot };
   if (Object.values(draft?.rows || {}).some((x) => x.done || x.edited)) {
-    if (draft.planVersion === 58) return PLAN[draft.module];
+    if (draft.planVersion === 59) return PLAN[draft.module];
+    if (draft.planVersion === 58) return V58_PLAN[draft.module];
     if (draft.planVersion === 53) return V53_PLAN[draft.module];
     if (draft.planVersion === 52) return V52_PLAN[draft.module];
     if (draft.planVersion === 51) return V51_PLAN[draft.module];
@@ -353,3 +371,7 @@ CUES["地面哑铃臀桥"] =
   "保留原来的负重形式与kg口径；腹部收紧、臀部发力，不用腰部过伸顶重量。每组在动作稳定的范围完成，不自动清零负荷。";
 CUES["平板支撑"] =
   "有记录时显示并参考最近各组时长，不把已经有训练基础的人统一重置为新手时长。保持肘在肩下、腹臀收紧、自然呼吸；姿势失控就结束。无记录时可从20–40秒开始。";
+EX["站姿单侧哑铃静止保持"] = { m: "Legs" };
+CUES["站姿单侧哑铃静止保持"] =
+  "站立，一手提轻哑铃，手臂自然下垂；肋骨与骨盆对齐，不侧弯、不耸肩，正常呼吸。左右各保持20–40秒，两侧完成记1组。首次自选能稳定控制的轻重量，不沿用划船或分腿蹲重量；握力先疲劳就减重。";
+CUES["屈膝侧桥"] += " 只需垫住前臂与膝盖，不需要全身躺在垫上；垫子滑动就停止。";

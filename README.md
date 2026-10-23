@@ -1,4 +1,8 @@
-# Gym Vault · V58
+# Gym Vault · V59
+
+## V59
+
+周期报告默认显示结论、关键变化和下次重点，完整原文折叠；未来AI报告采用简洁口径。小垫版腿＋核心无全身仰卧动作，保留旧版本草稿与历史。同步先加载当前文档、独立重试旧档案；余力和动作状态分开确认，加重只提示、不覆盖预填，不因器械档位不足自动增组。详见 [V59说明](docs/V59-compact-reports-small-mat.md)。
 
 移动优先的训练记录应用，部署在 GitHub Pages，Supabase 提供账号与文档同步。日期固定 Australia/Brisbane。
 

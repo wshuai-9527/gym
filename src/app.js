@@ -28,6 +28,7 @@ import { calendarDays } from "./reports.js";
 import { exerciseVisual } from "./exercise-visuals.js";
 import { progressionAdvice } from "./progression.js";
 import { fetchAIReports, reportFresh } from "./report-inbox.js";
+import { reportCard } from "./report-view.js";
 import { RestNotifications } from "./notifications.js";
 import { trainingCycles } from "./cycles.js";
 import { adaptiveItems, feedbackValue } from "./adaptive.js";
@@ -76,6 +77,7 @@ let store,
 let accountRecoveryNeeded = !!client;
 let accountRecovery;
 let aiInboxSig = null;
+let aiRenderedSig = null;
 const status = (m) => {
   $("#cloud-status").textContent = m;
   $("#autosave-text").textContent = m;
@@ -101,10 +103,11 @@ const reminders = new RestNotifications(
 function startStore(owner) {
   store = new Store(localStorage, owner);
   store.migrateLegacy();
-  sync = new Sync(client, store, status);
+  sync = new Sync(client, store, status, () => renderAll());
   renderedSig = null;
   checkFingerprint = archiveFingerprint = analysisFingerprint = null;
   aiInboxSig = null;
+  aiRenderedSig = null;
   renderAll();
 }
 function scheduleSync() {
@@ -124,7 +127,7 @@ function put(key, value) {
 }
 function plan() {
   const d = currentPlan(store.records(), store.get("draft:active"));
-  if (d.planVersion !== 58 || (hasProgress(d) && d.planSnapshot)) return d;
+  if (d.planVersion !== 59 || (hasProgress(d) && d.planSnapshot)) return d;
   return {
     ...d,
     planSnapshot: adaptiveItems(
@@ -151,9 +154,12 @@ function capture() {
   );
   const next = {
     ...d,
-    planVersion: d.planVersion ?? (hasProgress(d) ? 49 : 58),
+    planVersion: d.planVersion ?? (hasProgress(d) ? 49 : 59),
     feedback: Object.fromEntries(
       $$("[data-feedback]").map((el) => [el.dataset.feedback, el.value]),
+    ),
+    quality: Object.fromEntries(
+      $$("[data-quality]").map((el) => [el.dataset.quality, el.value]),
     ),
     rows,
     updatedAt: Date.now(),
@@ -161,7 +167,8 @@ function capture() {
   if (
     (hasProgress(next) || hasProgress(d)) &&
     (JSON.stringify(next.rows) !== JSON.stringify(d.rows) ||
-      JSON.stringify(next.feedback) !== JSON.stringify(d.feedback || {}))
+      JSON.stringify(next.feedback) !== JSON.stringify(d.feedback || {}) ||
+      JSON.stringify(next.quality) !== JSON.stringify(d.quality || {}))
   ) {
     put("draft:active", next);
   }
@@ -170,7 +177,12 @@ function capture() {
 function renderCheck(force = false) {
   const d = plan(),
     p = templateFor(d);
-  const fingerprint = JSON.stringify([d, store.records(), iso()]);
+  const fingerprint = JSON.stringify([
+    d,
+    store.records(),
+    iso(),
+    sync.historyState,
+  ]);
   if (!force && fingerprint === checkFingerprint) return;
   checkFingerprint = fingerprint;
   renderedSig = d.date + "|" + d.module;
@@ -179,7 +191,7 @@ function renderCheck(force = false) {
   $("#focus-title").textContent =
     d.module === "Legs" ? "腿＋核心" : d.module + " 日";
   $("#focus-desc").textContent = `${d.date} · ${p.items.length} 个动作`;
-  $("#focus-tags").innerHTML = "<span>V58</span><span>自动保存</span>";
+  $("#focus-tags").innerHTML = "<span>V59</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
@@ -197,10 +209,16 @@ function renderCheck(force = false) {
           : ["侧平举", "上斜划船"].includes(ex[0])
             ? 4
             : +ex[1][0],
-      time = loggingMode(ex[0]) === "seconds",
-      body = loggingMode(ex[0]) !== "weighted",
+      time = loggingMode(ex[0]).endsWith("seconds"),
+      body = !loggingMode(ex[0]).startsWith("weighted"),
       previous = historyReference(store.records(), ex[0]);
-    html += `<article class="glass card exercise-card"><div class="exercise-head"><span class="exercise-index">${String(i + 1).padStart(2, "0")}</span><div><h3 class="ex-name">${ex[0]}</h3><div class="ex-meta">${ex[3]} · ${ex[1]}</div></div></div><p class="history-reference">${previous ? `上次 ${previous.date} · ${previous.rawSets.map((s) => escape(s).replace(/\*/g, " × ")).join(" / ")}${previous.canPrefill ? " · 本次先参考" : " · 记录较早或无法解析，请重新确认"}` : "暂无同动作历史 · 不套用其他动作的重量"}</p><details class="exercise-guide"><summary>动作示意与要点</summary>${exerciseVisual(ex[0])}<p class="mini">动作简图不用于测量角度。<a href="https://www.nasm.org/resource-center/exercise-library" target="_blank" rel="noopener">专业动作库 ↗</a></p><p>${escape(CUES[ex[0]] || "控制动作、保留余力；重量按每只器械填写。")}</p><p>${escape(measurementHint(ex[0]))}${d.module === "Legs" && p === PLAN.Legs ? "负重分腿蹲每轮两侧做完后休息2–3分钟，左右换侧可按呼吸恢复适当休息；臀桥90–120秒、核心约60秒，未恢复可延长。" : "主项休息2–3分钟，孤立动作约60–120秒。"}</p></details>${ex[4]?.paused ? `<p role="alert" class="pain-notice">${escape(ex[4].message)}</p>` : ""}<div class="set-columns"><span>组</span><span>${body ? "负重" : "重量 kg"}</span><span>${time ? "时间 s" : "次数"}</span><span>完成</span></div><div class="set-list">`;
+    const historyMessage =
+      sync.historyState === "loading"
+        ? "正在加载云端历史…"
+        : sync.historyState === "error"
+          ? "云端历史暂未加载，联网后重试"
+          : "暂无同动作历史 · 首次负荷请自行确认";
+    html += `<article class="glass card exercise-card"><div class="exercise-head"><span class="exercise-index">${String(i + 1).padStart(2, "0")}</span><div><h3 class="ex-name">${ex[0]}</h3><div class="ex-meta">${ex[3]} · ${ex[1]}</div></div></div><p class="history-reference">${previous ? `上次 ${previous.date} · ${previous.rawSets.map((s) => escape(s).replace(/\*/g, " × ")).join(" / ")}${previous.canPrefill ? " · 本次先参考" : " · 记录较早或无法解析，请重新确认"}` : historyMessage}</p><details class="exercise-guide"><summary>动作示意与要点</summary>${exerciseVisual(ex[0])}<p class="mini">动作简图不用于测量角度。<a href="https://www.nasm.org/resource-center/exercise-library" target="_blank" rel="noopener">专业动作库 ↗</a></p><p>${escape(CUES[ex[0]] || "控制动作、保留余力；重量按每只器械填写。")}</p><p>${escape(measurementHint(ex[0]))}${d.module === "Legs" ? "负重分腿蹲每轮两侧做完后休息2–3分钟，左右换侧可按呼吸恢复适当休息；核心约60秒，未恢复可延长。" : "主项休息2–3分钟，孤立动作约60–120秒。"}</p></details>${ex[4]?.paused ? `<p role="alert" class="pain-notice">${escape(ex[4].message)}</p>` : ""}<div class="set-columns"><span>组</span><span>${body ? "负重" : "重量 kg"}</span><span>${time ? "时间 s" : "次数"}</span><span>完成</span></div><div class="set-list">`;
     for (let j = 0; j < n; j++) {
       const key = `${i}-${j}`,
         x = d.rows[key] || {},
@@ -226,6 +244,18 @@ function renderCheck(force = false) {
         ([v, t]) =>
           `<option value="${v}" ${d.feedback?.[i] === v ? "selected" : ""}>${t}</option>`,
       )
+      .join(
+        "",
+      )}</select></label><label class="feedback-field">动作状态<select data-quality="${i}" aria-label="${escape(ex[0])}动作状态">${[
+      ["", "未确认"],
+      ["stable", "动作稳定 · 无痛"],
+      ["form", "动作失控"],
+      ["pain", "出现疼痛"],
+    ]
+      .map(
+        ([v, t]) =>
+          `<option value="${v}" ${d.quality?.[i] === v ? "selected" : ""}>${t}</option>`,
+      )
       .join("")}</select></label></article>`;
   });
   $("#check-list").innerHTML = html;
@@ -246,20 +276,24 @@ function archive(d) {
     for (const [key, x] of Object.entries(d.rows))
       if (key.startsWith(i + "-") && x.done) {
         validateWorkSet(x, loggingMode(ex[0]));
-        const time = loggingMode(ex[0]) === "seconds",
+        const time = loggingMode(ex[0]).endsWith("seconds"),
           body = loggingMode(ex[0]) === "bodyweight";
         if (!time && !body && (x.kg === "" || Number(x.kg) < 0))
           throw Error("请填写已勾选组的重量");
         sets.push(
-          time ? `${x.reps}s` : body ? `${x.reps}` : `${x.kg}kg*${x.reps}`,
+          time
+            ? `${loggingMode(ex[0]) === "weighted-seconds" ? x.kg + "kg*" : ""}${x.reps}s`
+            : body
+              ? `${x.reps}`
+              : `${x.kg}kg*${x.reps}`,
         );
       }
     if (sets.length)
       items.push({
         name: ex[0],
         sets,
-        ...(feedbackValue(d.feedback?.[i])
-          ? { feedback: feedbackValue(d.feedback[i]) }
+        ...(feedbackValue(d.feedback?.[i], d.quality?.[i])
+          ? { feedback: feedbackValue(d.feedback?.[i], d.quality?.[i]) }
           : {}),
       });
   });
@@ -311,7 +345,7 @@ function renderAnalysis() {
     .slice(1, 25)
     .map((c, i) => cycleHTML(c, i + 1))
     .join("")}
-  <details class="glass card"><summary>当前训练与调整方式</summary><p>Push 13组、Pull 12组；腿＋核心为腿部6组、核心6组。每个动作的“这次感觉”结合近期完成记录，用于下次小幅调整组数、重量或次数；没有反馈时沿用记录，不自动加重。进行中的草稿保留原计划，下一次新训练使用更新建议。</p><p>目标每周PPL两轮，恢复不足或篮球负荷较高时顺延。上肢多数工作组保留约2次余力，腿部以维持与动作控制为主。腹肌可见度还取决于体脂与个体差异。</p><a href="https://acsm.org/resistance-training-guidelines-update-2026/" target="_blank" rel="noopener">训练依据 ↗</a></details>`;
+  <details class="glass card"><summary>当前训练与调整方式</summary><p>Push 13组、Pull 12组；小垫版为腿部4组、核心6组，无需全身仰卧。平板支撑优先，侧桥垫住前臂与膝盖，单侧哑铃保持站姿完成。余力与动作状态分别确认，先巩固次数；加重由你确认，不因器械档位不足自动加组。进行中的草稿保留原计划，下一次新训练使用更新建议。</p><p>目标每周PPL两轮，恢复不足或篮球负荷较高时顺延。上肢多数工作组保留约2次余力，腿部以维持与动作控制为主。腹肌可见度还取决于体脂与个体差异。</p><a href="https://acsm.org/resistance-training-guidelines-update-2026/" target="_blank" rel="noopener">训练依据 ↗</a></details>`;
 }
 async function renderAIInbox() {
   const owner = store.owner;
@@ -333,27 +367,27 @@ async function renderAIInbox() {
     const reports = await fetchAIReports(client, owner);
     localStorage.setItem("gym-ai-cache:" + owner, JSON.stringify(reports));
     if (owner !== store.owner) return;
+    const rendered = JSON.stringify([
+      owner,
+      reports,
+      reports.map((r) => reportFresh(r, store)),
+    ]);
+    if (rendered === aiRenderedSig) return;
+    aiRenderedSig = rendered;
     el.innerHTML = reports.length
-      ? `<h2>AI 周期复盘</h2>${reports.map((r, i) => `<details class="report-card ai-report" ${i === 0 ? "open" : ""}><summary><span><small>${escape(r.period_start)} — ${escape(r.period_end)}</small><b>${escape(r.title)}</b></span><span>${reportFresh(r, store) ? "AI解读" : "待更新"}</span></summary><div class="report-content">${!reportFresh(r, store) ? "<p>训练记录已有修改，以下是生成时的快照。</p>" : ""}<p class="ai-content">${escape(r.content)}</p><small>生成：${escape(r.generated_at)} · AI建议需结合实际状态</small></div></details>`).join("")}`
+      ? `<h2>AI 周期复盘</h2><p class="note">只看变化和下次重点；完整分析可展开。</p>${reports.map((r, i) => reportCard(r, { open: i === 0, fresh: reportFresh(r, store) })).join("")}`
       : '<article class="glass card"><h2>AI 周期复盘</h2><p>暂无已送达报告。</p></article>';
   } catch (error) {
     if (owner !== store.owner) return;
+    aiRenderedSig = null;
     const cached = JSON.parse(
       localStorage.getItem("gym-ai-cache:" + owner) || "[]",
     );
     el.innerHTML =
-      '<article class="glass card"><h2>AI 周期复盘</h2><p>离线报告 · 联网后更新</p>' +
+      '<h2>AI 周期复盘</h2><p class="note">离线报告 · 联网后更新</p>' +
       cached
-        .map(
-          (r) =>
-            '<details class="report-card" open><summary>' +
-            escape(r.title) +
-            '</summary><p class="ai-content">' +
-            escape(r.content) +
-            "</p></details>",
-        )
-        .join("") +
-      "</article>";
+        .map((r, i) => reportCard(r, { open: i === 0, fresh: false }))
+        .join("");
   }
 }
 function renderArchive() {
@@ -462,7 +496,7 @@ document.addEventListener(
   "input",
   guarded((e) => {
     if (e.target.id === "archive-search") renderArchive();
-    if (e.target.matches("[data-feedback]")) capture();
+    if (e.target.matches("[data-feedback], [data-quality]")) capture();
     if (e.target.closest(".set-row")) {
       e.target.closest(".set-row").dataset.edited = "true";
       capture();
@@ -555,7 +589,7 @@ for (const id of ["plan-date", "plan-module"])
     put("draft:active", {
       date,
       module,
-      planVersion: 58,
+      planVersion: 59,
       dateExplicit:
         id === "plan-date" || !!store.get("draft:active")?.dateExplicit,
       rows: {},

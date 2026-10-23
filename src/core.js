@@ -3,21 +3,18 @@ export const canon = (n) =>
   ALIAS[String(n || "").trim()] || String(n || "").trim();
 export const TIME_ZONE = "Australia/Brisbane";
 export function validateWorkSet({ kg, reps }, mode) {
+  const timed = mode.endsWith("seconds");
   const n = Number(reps);
   if (
     String(reps ?? "").trim() === "" ||
     !Number.isFinite(n) ||
     n <= 0 ||
-    n > (mode === "seconds" ? 86400 : 1000) ||
-    (mode !== "seconds" && !Number.isInteger(n))
+    n > (timed ? 86400 : 1000) ||
+    (!timed && !Number.isInteger(n))
   )
-    throw Error(
-      mode === "seconds"
-        ? "请填写有效的完成秒数"
-        : "请填写1–1000之间的整数次数",
-    );
+    throw Error(timed ? "请填写有效的完成秒数" : "请填写1–1000之间的整数次数");
   if (
-    mode === "weighted" &&
+    mode.startsWith("weighted") &&
     (String(kg ?? "").trim() === "" ||
       !Number.isFinite(Number(kg)) ||
       Number(kg) < 0 ||
@@ -58,6 +55,8 @@ export function addDays(d, n) {
 export function parseSet(raw) {
   const s = String(raw).replace(/\s/g, "").replace(/×/g, "*");
   let m;
+  if ((m = s.match(/^(\d+(?:\.\d+)?)kg\*(\d+(?:\.\d+)?)s(?:\*(\d+))?$/i)))
+    return { kg: +m[1], reps: 0, count: +(m[3] || 1), sec: +m[2] };
   if ((m = s.match(/^(\d+(?:\.\d+)?)kg\*(\d+)(?:\*(\d+))?$/i)))
     return { kg: +m[1], reps: +m[2], count: +(m[3] || 1), sec: 0 };
   if ((m = s.match(/^(\d+(?:\.\d+)?)s(?:\*(\d+))?$/i)))
@@ -106,12 +105,13 @@ export function normalizeRecord(r, year = 2026) {
       typeof f.rir === "number" &&
       f.rir >= 0 &&
       f.rir <= 5 &&
-      typeof f.quality === "boolean" &&
-      typeof f.pain === "boolean"
+      (typeof f.quality === "boolean" || f.quality === null) &&
+      (typeof f.pain === "boolean" || f.pain === null)
         ? {
             rir: f.rir,
             quality: f.quality,
             pain: f.pain,
+            ...(f.confirmed === true ? { confirmed: true } : {}),
             ...(typeof f.rating === "string"
               ? { rating: f.rating.slice(0, 20) }
               : {}),
@@ -160,7 +160,8 @@ export function hasProgress(d) {
   return (
     !!d &&
     (Object.values(d.rows || {}).some((x) => x.done || x.edited) ||
-      Object.values(d.feedback || {}).some(Boolean))
+      Object.values(d.feedback || {}).some(Boolean) ||
+      Object.values(d.quality || {}).some(Boolean))
   );
 }
 export function currentPlan(records, draft, today = iso()) {
@@ -169,9 +170,9 @@ export function currentPlan(records, draft, today = iso()) {
     ["Push", "Pull", "Legs"].includes(draft.module) &&
     (hasProgress(draft) || draft.dateExplicit || draft.date === today)
   )
-    return hasProgress(draft) ? draft : { ...draft, planVersion: 58 };
+    return hasProgress(draft) ? draft : { ...draft, planVersion: 59 };
   return {
-    planVersion: 58,
+    planVersion: 59,
     date: today,
     module: nextModule(records.filter((r) => r.date <= today)),
     rows: {},
