@@ -31,8 +31,10 @@ import { fetchAIReports, reportFresh } from "./report-inbox.js";
 import { reportCard } from "./report-view.js";
 import { RestNotifications } from "./notifications.js";
 import { trainingCycles } from "./cycles.js";
-import { adaptiveItems, feedbackValue } from "./adaptive.js";
+import { feedbackValue } from "./adaptive.js";
 import { preparationCard } from "./preparation.js";
+import { renderAnalytics } from "./analytics-charts.js";
+import { nextCycleItems } from "./cycle-progression.js";
 import {
   historyReference,
   historyPreset,
@@ -80,6 +82,7 @@ let accountRecoveryNeeded = !!client;
 let accountRecovery;
 let aiInboxSig = null;
 let aiRenderedSig = null;
+let analysisChartSelection = {};
 const status = (m) => {
   $("#cloud-status").textContent = m;
   $("#autosave-text").textContent = m;
@@ -104,6 +107,7 @@ const reminders = new RestNotifications(
   localStorage,
 );
 function startStore(owner) {
+  analysisChartSelection = {};
   lastRecordedDate = null;
   store = new Store(localStorage, owner);
   store.migrateLegacy();
@@ -134,7 +138,7 @@ function plan() {
   if (d.planVersion !== 59 || (hasProgress(d) && d.planSnapshot)) return d;
   return {
     ...d,
-    planSnapshot: adaptiveItems(
+    planSnapshot: nextCycleItems(
       store.records(),
       PLAN[d.module].items,
       d.module,
@@ -196,7 +200,7 @@ function renderCheck(force = false) {
   $("#focus-title").textContent =
     d.module === "Legs" ? "腿＋核心" : d.module + " 日";
   $("#focus-desc").textContent = `${d.date} · ${p.items.length} 个动作`;
-  $("#focus-tags").innerHTML = "<span>V59.1.0</span><span>自动保存</span>";
+  $("#focus-tags").innerHTML = "<span>V59.3.0</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
@@ -237,7 +241,7 @@ function renderCheck(force = false) {
           : historical;
       html += `<div class="set-row ${x.done ? "checked" : ""}" data-key="${key}" data-ex="${i}" data-edited="${!!x.edited}"><button class="set-check" aria-label="完成${ex[0]}第${j + 1}组" aria-pressed="${!!x.done}">✓</button><b>${j + 1}</b><div class="field"><input type="number" inputmode="decimal" min="0" max="1000" step="0.5" class="kg" aria-label="重量" placeholder="${body ? "自重" : "—"}" ${body ? "disabled" : ""} value="${escape(x.kg ?? (body ? "" : (preset.kg ?? "")))}"><span class="unit">${body ? "" : "kg"}</span></div><div class="field"><input type="number" inputmode="numeric" min="1" max="${time ? 86400 : 1000}" class="reps" aria-label="${time ? "秒数" : "次数"}" value="${escape(x.reps ?? preset.reps ?? (d.planVersion >= 51 ? defaultTarget(ex[0]) : time ? (d.planVersion === 50 ? 40 : d.planVersion === 51 ? defaultTarget(ex[0]) : 80) : 12))}"><span class="unit">${time ? "s" : ""}</span></div></div>`;
     }
-    html += `</div><button class="btn full exercise-rest" data-rest="${restSeconds(ex[0])}">组间休息 · ${restSeconds(ex[0])} 秒</button><details class="load-advice"><summary>负荷建议</summary><p>${escape(ex[4]?.message || progressionAdvice(store.records(), ex[0], ex[1], iso()).text)}</p></details><label class="feedback-field">这次感觉<select data-feedback="${i}" aria-label="${escape(ex[0])}训练反馈">${[
+    html += `</div><button class="btn full exercise-rest" data-rest="${restSeconds(ex[0])}">组间休息 · ${restSeconds(ex[0])} 秒</button>${["reps", "weight", "reduce", "pause"].includes(ex[4]?.action) ? `<p class="cycle-adjustment">下轮建议 · ${escape(ex[4].message)}</p>` : ""}${ex[4]?.weightProposal && !Object.entries(d.rows).some(([key, x]) => key.startsWith(i + "-") && (x.done || x.edited)) ? `<button class="btn full" data-cycle-weight="${i}">器械可加 0.5kg · 采用加重建议</button>` : ""}<details class="load-advice"><summary>负荷建议</summary><p>${escape(ex[4]?.message || progressionAdvice(store.records(), ex[0], ex[1], iso()).text)}</p></details><label class="feedback-field">这次感觉<select data-feedback="${i}" aria-label="${escape(ex[0])}训练反馈">${[
       ["", "未评价"],
       ["steady", "合适"],
       ["easy", "轻松"],
@@ -349,15 +353,6 @@ function record(r) {
   put(key, r);
   return true;
 }
-function bar(values) {
-  const max = Math.max(1, ...Object.values(values));
-  return Object.entries(values)
-    .map(
-      ([k, v]) =>
-        `<div class="rowbar ${["Push", "Pull", "Legs", "Rest", "Basketball"].includes(k) ? k : ""}"><b>${escape(k)}</b><div class="bar"><i style="width:${(v / max) * 100}%"></i></div><span>${Number(v).toFixed(1)}</span></div>`,
-    )
-    .join("");
-}
 function renderAnalysis() {
   void renderAIInbox();
   const fingerprint = JSON.stringify([store.records(), iso()]);
@@ -366,6 +361,7 @@ function renderAnalysis() {
   const records = store.records(),
     a = analyse(records),
     cycles = trainingCycles(records);
+  renderAnalysisCharts();
   const metric = (label, value, unit = "") =>
     `<div class="stat"><span>${label}</span><strong>${value}<small>${unit}</small></strong></div>`;
   const cycleHTML = (c, i) =>
@@ -374,7 +370,7 @@ function renderAnalysis() {
   $("#analysis-body").innerHTML = `
   <article class="glass card report-overview"><h2>完成一轮，再复盘。</h2><p>${cycles.pending ? `已完成：${Object.keys(cycles.pending).join(" → ")}；下一步 ${cycles.pending.Pull ? "腿＋核心" : "Pull"}` : "下一轮从 Push 开始"}</p><p>篮球和休息顺延周期；完成 Push、Pull、Legs 后生成报告。</p></article>
   <div class="section-title"><h2>上一轮周期</h2><span>${cycles.completed.length} 轮已完成</span></div>${cycles.completed[0] ? cycleHTML(cycles.completed[0], 0) : '<div class="empty-state">完成一轮推、拉、腿后，这里会出现周期报告。</div>'}
-  <div class="section-title"><h2>最近7天</h2></div><div class="metric-grid">${metric("记录组数", a.sets, "组")}${metric("记录负荷", Math.round(a.volume), "kg·次")}${metric("计时训练", a.seconds, "秒")}${metric("下一次力量", nextModule(records))}</div>
+  <details class="glass card"><summary>最近7天 · 详细数据</summary><div class="metric-grid">${metric("记录组数", a.sets, "组")}${metric("记录负荷", Math.round(a.volume), "kg·次")}${metric("计时训练", a.seconds, "秒")}${metric("下一次力量", nextModule(records))}</div></details>
   <article class="glass card"><div class="section-title"><h2>训练节奏</h2><span>14天</span></div><div class="activity-calendar">${calendarDays(
     records,
   )
@@ -384,13 +380,62 @@ function renderAnalysis() {
     )
     .join(
       "",
-    )}</div><div class="calendar-legend"><span style="--dot:#167e73">推</span><span style="--dot:#4263c7">拉</span><span style="--dot:#9553ab">腿</span><span style="--dot:#d09b48">篮球</span><span style="--dot:#8998a4">休息</span></div>${bar(a.modules)}</article>
+    )}</div><div class="calendar-legend"><span style="--dot:#167e73">推</span><span style="--dot:#4263c7">拉</span><span style="--dot:#9553ab">腿</span><span style="--dot:#d09b48">篮球</span><span style="--dot:#8998a4">休息</span></div></article>
   <div class="section-title"><h2>历史周期报告</h2></div>${cycles.completed
     .slice(1, 25)
     .map((c, i) => cycleHTML(c, i + 1))
     .join("")}
   <details class="glass card"><summary>当前训练与调整方式</summary><p>Push 13组、Pull 12组；小垫版为腿部4组、核心6组，无需全身仰卧。平板支撑优先，侧桥垫住前臂与膝盖，单侧哑铃保持站姿完成。余力与动作状态分别确认，先巩固次数；加重由你确认，不因器械档位不足自动加组。进行中的草稿保留原计划，下一次新训练使用更新建议。</p><p>目标每周PPL两轮，恢复不足或篮球负荷较高时顺延。上肢多数工作组保留约2次余力，腿部以维持与动作控制为主。腹肌可见度还取决于体脂与个体差异。</p><a href="https://acsm.org/resistance-training-guidelines-update-2026/" target="_blank" rel="noopener">训练依据 ↗</a></details>`;
 }
+function renderAnalysisCharts() {
+  const result = renderAnalytics(
+    store.records(),
+    iso(),
+    analysisChartSelection,
+  );
+  analysisChartSelection = result.selection;
+  const cycles = trainingCycles(store.records());
+  const adjustments = ["Push", "Pull", "Legs"].flatMap((module) =>
+    nextCycleItems(store.records(), PLAN[module].items, module, iso())
+      .filter((ex) =>
+        ["reps", "weight", "pause", "reduce"].includes(ex[4].action),
+      )
+      .map(
+        (ex) =>
+          `<li><strong>${escape(ex[0])}</strong><p>${escape(ex[4].message)}</p></li>`,
+      ),
+  );
+  const next = cycles.completed[0];
+  $("#analysis-charts").innerHTML =
+    result.html +
+    (next
+      ? `<details class="glass card next-cycle-plan"><summary>下一轮调整 · 来自 ${next.end} 完成周期</summary>${adjustments.length ? `<ul>${adjustments.join("")}</ul>` : "<p>本轮暂未满足调整条件；查看训练页“负荷建议”可见缺少的反馈或记录。</p>"}<p class="chart-note">次数建议会预填到下一次新训练。加重需确认器械有对应档位后点一次采用；进行中的草稿保持原样。</p></details>`
+      : "");
+}
+$("#analysis-charts").addEventListener("change", (e) => {
+  if (e.target.id === "chart-exercise")
+    analysisChartSelection = { exercise: e.target.value };
+  else if (e.target.id === "chart-load")
+    analysisChartSelection.loadKey = e.target.value;
+  else return;
+  const id = e.target.id;
+  renderAnalysisCharts();
+  $("#" + id)?.focus();
+});
+function selectChartPoint(e) {
+  const point = e.target.closest("[data-chart-caption]");
+  if (point) $("#chart-point-detail").textContent = point.dataset.chartCaption;
+}
+$("#analysis-charts").addEventListener("click", selectChartPoint);
+$("#analysis-charts").addEventListener("keydown", (e) => {
+  if (
+    ["Enter", " "].includes(e.key) &&
+    e.target.matches("[data-chart-caption]")
+  ) {
+    e.preventDefault();
+    selectChartPoint(e);
+  }
+});
 async function renderAIInbox() {
   const owner = store.owner;
   const el = $("#ai-reports");
@@ -590,6 +635,33 @@ document.addEventListener(
 document.addEventListener(
   "click",
   guarded((e) => {
+    const adopt = e.target.closest("[data-cycle-weight]");
+    if (adopt) {
+      const i = Number(adopt.dataset.cycleWeight);
+      const ex = templateFor(plan()).items[i];
+      const proposal = ex?.[4]?.weightProposal;
+      const rows = $$(`.set-row[data-ex="${i}"]`);
+      if (
+        !proposal ||
+        rows.some(
+          (row) =>
+            row.dataset.edited === "true" || row.classList.contains("checked"),
+        )
+      ) {
+        toast("已有本次输入，先保留；请按今天实际状态调整");
+        return;
+      }
+      rows.forEach((row, j) => {
+        row.querySelector(".kg").value = proposal[j].kg;
+        row.querySelector(".reps").value = proposal[j].reps;
+        row.dataset.edited = "true";
+      });
+      capture();
+      adopt.disabled = true;
+      adopt.textContent = `已采用 ${proposal[0].kg}kg 建议 · 尚未记录完成`;
+      toast("建议已填入，先热身试练；不合适可直接改回");
+      return;
+    }
     const feeling = e.target.closest("[data-feeling]");
     if (feeling) {
       const field = document.querySelector(

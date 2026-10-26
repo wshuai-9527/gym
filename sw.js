@@ -1,4 +1,4 @@
-const CACHE = "gym-vault-v59.1.0";
+const CACHE = "gym-vault-v59.3.0";
 const SHELL = [
   "./",
   "./index.html",
@@ -15,6 +15,8 @@ const SHELL = [
   "./src/styles.css",
   "./src/app.js",
   "./src/preparation.js",
+  "./src/analytics-charts.js",
+  "./src/cycle-progression.js",
   "./src/core.js",
   "./src/storage.js",
   "./src/sync.js",

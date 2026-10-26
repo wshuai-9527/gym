@@ -1286,6 +1286,124 @@ details.card a {
   min-height: 52px;
   justify-content: center;
 }
+.chart-card h2 {
+  font-size: 22px;
+  margin: 0 0 8px;
+}
+.cycle-adjustment {
+  background: #eef8f5;
+  border-left: 3px solid #167e73;
+  padding: 12px;
+  font-size: 17px;
+  line-height: 1.65;
+  border-radius: 8px;
+}
+.next-cycle-plan summary {
+  font-size: 18px;
+  min-height: 44px;
+  align-content: center;
+}
+.next-cycle-plan li {
+  margin-bottom: 16px;
+  font-size: 17px;
+}
+.next-cycle-plan p {
+  font-size: 16px;
+  line-height: 1.65;
+}
+.chart-subtitle,
+.chart-note {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #526560;
+}
+.data-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  margin: 12px 0 0;
+}
+.data-chart text {
+  font-size: 14px;
+  fill: #526560;
+}
+.data-chart .chart-value {
+  fill: #24443e;
+  font-weight: 700;
+}
+.chart-grid {
+  stroke: #e2e8e6;
+  stroke-width: 1;
+}
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 17px;
+}
+.chart-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.chart-legend i {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+.chart-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+.chart-controls label {
+  min-width: 0;
+  font-size: 16px;
+}
+.chart-controls select {
+  width: 100%;
+  min-width: 0;
+  min-height: 50px;
+  font-size: 17px;
+}
+.chart-point-detail {
+  min-height: 3em;
+  background: #eef8f5;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 17px;
+  line-height: 1.6;
+}
+[data-chart-caption] {
+  cursor: pointer;
+}
+[data-chart-caption]:focus-visible {
+  outline: none;
+  stroke: #24443e;
+  stroke-width: 2;
+}
+.chart-data > summary {
+  font-size: 16px;
+  min-height: 44px;
+  align-content: center;
+  cursor: pointer;
+}
+.chart-table-wrap {
+  overflow-x: auto;
+}
+.chart-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.chart-table-wrap th,
+.chart-table-wrap td {
+  text-align: left;
+  border-bottom: 1px solid #e2e8e6;
+  padding: 10px 5px;
+  white-space: nowrap;
+}
 .preparation-card > summary small {
   font-size: 16px;
   font-weight: 400;
