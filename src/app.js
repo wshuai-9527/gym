@@ -32,6 +32,7 @@ import { reportCard } from "./report-view.js";
 import { RestNotifications } from "./notifications.js";
 import { trainingCycles } from "./cycles.js";
 import { adaptiveItems, feedbackValue } from "./adaptive.js";
+import { preparationCard } from "./preparation.js";
 import {
   historyReference,
   historyPreset,
@@ -195,7 +196,7 @@ function renderCheck(force = false) {
   $("#focus-title").textContent =
     d.module === "Legs" ? "腿＋核心" : d.module + " 日";
   $("#focus-desc").textContent = `${d.date} · ${p.items.length} 个动作`;
-  $("#focus-tags").innerHTML = "<span>V59.0.3</span><span>自动保存</span>";
+  $("#focus-tags").innerHTML = "<span>V59.1.0</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
@@ -205,7 +206,7 @@ function renderCheck(force = false) {
       `<span class="${seq[(seq.indexOf(d.module) + i) % 3]} ${i === 0 ? "current" : ""}"><small>第 ${i + 1} 次力量</small><b>${seq[(seq.indexOf(d.module) + i) % 3]}</b></span>`,
   ).join("");
   let html = "";
-  html += `<details class="glass card"><summary>训练前 · 热身与进阶</summary><p>先做约5分钟轻活动，再用轻负荷完成首个主项的1–3组递增热身；热身不计入工作组。今天疼痛或明显疲劳时降低训练量或暂停，不强追计划。</p><p>先保持最近重量，把各工作组逐步做到次数范围上限；连续两次同动作都完成目标、动作稳定且仍约有2次余力，再考虑最小可用档位加重。没有余力/动作质量信息，App不自动加重。腿部以维持与控制为主，不必须追求加重；核心姿势失控即结束，不把长时间硬撑当唯一进步指标。</p><p>休息按钮仅启动计时，不会勾选完成或归档。计时只是提醒，未恢复就多休息；从主屏幕打开并启用后台提醒后，联网时可收到系统通知。</p></details>`;
+  $("#daily-warmup").innerHTML = preparationCard(p.items);
   p.items.forEach((ex, i) => {
     const n =
         d.planVersion >= 50
@@ -282,8 +283,29 @@ function count() {
     done = rows.filter((r) => r.classList.contains("checked")).length,
     p = Math.round((done / rows.length) * 100) || 0;
   $("#set-count").textContent = `${done}/${rows.length} 组`;
+  renderCooldown();
   $("#progress-text").textContent = p + "%";
   $("#ring").style.setProperty("--p", p);
+}
+function renderCooldown() {
+  const d = plan(),
+    p = templateFor(d);
+  const completed = new Set(
+    $$(".set-row.checked").map((row) => Number(row.dataset.ex)),
+  );
+  const saved = !hasProgress(d) && store.get("record:" + d.date);
+  const items = completed.size
+    ? p.items.filter((_, i) => completed.has(i))
+    : saved && ["Push", "Pull", "Legs"].includes(moduleOf(saved.items))
+      ? saved.items
+      : p.items;
+  const html = preparationCard(items, "cooldown");
+  // Preserve open instructions during routine saves/sync and unchanged set checks.
+  const host = $("#daily-cooldown");
+  if (host.dataset.content !== html) {
+    host.dataset.content = html;
+    host.innerHTML = html;
+  }
 }
 function archive(d) {
   const items = [];

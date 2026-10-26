@@ -1276,6 +1276,63 @@ details.card a {
   gap: 10px;
   margin-top: 16px;
 }
+.preparation-card > summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 21px;
+  font-weight: 700;
+  min-height: 52px;
+  justify-content: center;
+}
+.preparation-card > summary small {
+  font-size: 16px;
+  font-weight: 400;
+  color: #526560;
+}
+.prep-intro,
+.prep-note,
+.prep-evidence p {
+  font-size: 16px;
+  line-height: 1.65;
+  color: #526560;
+}
+.prep-steps {
+  margin: 16px 0;
+  padding-left: 26px;
+}
+.prep-steps li {
+  padding: 12px 0;
+  border-bottom: 1px solid #e3e9e7;
+}
+.prep-steps strong,
+.prep-steps span {
+  display: block;
+  font-size: 18px;
+  line-height: 1.6;
+}
+.prep-steps span {
+  color: #167066;
+}
+.prep-steps details summary,
+.prep-evidence summary {
+  font-size: 16px;
+  min-height: 44px;
+  display: list-item;
+  align-content: center;
+  cursor: pointer;
+}
+.prep-steps details p {
+  font-size: 17px;
+  line-height: 1.7;
+  margin: 0 0 10px;
+}
+.prep-evidence a {
+  display: block;
+  font-size: 16px;
+  padding: 8px 0;
+}
 .feeling-buttons button {
   flex: 1;
   min-height: 50px;

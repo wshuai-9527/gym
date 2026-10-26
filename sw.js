@@ -1,4 +1,4 @@
-const CACHE = "gym-vault-v59.0.3";
+const CACHE = "gym-vault-v59.1.0";
 const SHELL = [
   "./",
   "./index.html",
@@ -14,6 +14,7 @@ const SHELL = [
   "./vendor/supabase/591.supabase.js",
   "./src/styles.css",
   "./src/app.js",
+  "./src/preparation.js",
   "./src/core.js",
   "./src/storage.js",
   "./src/sync.js",

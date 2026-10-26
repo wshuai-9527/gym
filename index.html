@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Gym Vault" />
     <link rel="manifest" href="./manifest.webmanifest" />
-    <title>Gym Vault · V59.0.3</title>
+    <title>Gym Vault · V59.1.0</title>
     <link rel="stylesheet" href="./src/styles.css" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
   </head>
@@ -49,6 +49,7 @@
           </select>
           <div class="schedule" id="schedule"></div>
         </article>
+        <div id="daily-warmup"></div>
         <div class="section-title">
           <h2>本次动作</h2>
           <span id="set-count">0/0 组</span>
@@ -58,6 +59,7 @@
           <span>组间休息 <b id="training-rest-time">00:00</b></span>
           <button class="btn" id="training-rest-stop">结束休息</button>
         </aside>
+        <div id="daily-cooldown"></div>
         <p class="quick-record-date" id="quick-record-date"></p>
         <div class="actions">
           <button class="btn primary full" id="finish-day">
