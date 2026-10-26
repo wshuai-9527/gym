@@ -174,18 +174,19 @@ function capture() {
       JSON.stringify(next.quality) !== JSON.stringify(d.quality || {}))
   ) {
     put("draft:active", next);
+    // The DOM already represents this local edit. Sync must not replace it.
+    checkFingerprint = trainingFingerprint(plan());
   }
   return next;
+}
+function trainingFingerprint(d) {
+  const { updatedAt, ...visible } = d;
+  return JSON.stringify([visible, store.records(), iso(), sync.historyState]);
 }
 function renderCheck(force = false) {
   const d = plan(),
     p = templateFor(d);
-  const fingerprint = JSON.stringify([
-    d,
-    store.records(),
-    iso(),
-    sync.historyState,
-  ]);
+  const fingerprint = trainingFingerprint(d);
   if (!force && fingerprint === checkFingerprint) return;
   checkFingerprint = fingerprint;
   renderedSig = d.date + "|" + d.module;
@@ -194,7 +195,7 @@ function renderCheck(force = false) {
   $("#focus-title").textContent =
     d.module === "Legs" ? "腿＋核心" : d.module + " 日";
   $("#focus-desc").textContent = `${d.date} · ${p.items.length} 个动作`;
-  $("#focus-tags").innerHTML = "<span>V59</span><span>自动保存</span>";
+  $("#focus-tags").innerHTML = "<span>V59.0.3</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
@@ -237,11 +238,12 @@ function renderCheck(force = false) {
     }
     html += `</div><button class="btn full exercise-rest" data-rest="${restSeconds(ex[0])}">组间休息 · ${restSeconds(ex[0])} 秒</button><details class="load-advice"><summary>负荷建议</summary><p>${escape(ex[4]?.message || progressionAdvice(store.records(), ex[0], ex[1], iso()).text)}</p></details><label class="feedback-field">这次感觉<select data-feedback="${i}" aria-label="${escape(ex[0])}训练反馈">${[
       ["", "未评价"],
-      ["easy", time ? "轻松 · 姿势可持续" : "轻松 · 还可做3次以上"],
-      ["steady", time ? "合适 · 仍有余力" : "合适 · 还可做约2次"],
-      ["hard", time ? "吃力 · 快到姿势极限" : "吃力 · 只剩0–1次"],
-      ["form", "动作开始失控"],
-      ["pain", "出现疼痛"],
+      ["steady", "合适"],
+      ["easy", "轻松"],
+      ["hard", "吃力"],
+      ...(["form", "pain"].includes(d.feedback?.[i])
+        ? [[d.feedback[i], "已记录异常"]]
+        : []),
     ]
       .map(
         ([v, t]) =>
@@ -249,7 +251,18 @@ function renderCheck(force = false) {
       )
       .join(
         "",
-      )}</select></label><label class="feedback-field">动作状态<select data-quality="${i}" aria-label="${escape(ex[0])}动作状态">${[
+      )}</select></label><div class="feeling-buttons" role="group" aria-label="${escape(ex[0])}这次感觉">${[
+      ["steady", "合适"],
+      ["easy", "轻松"],
+      ["hard", "吃力"],
+    ]
+      .map(
+        ([value, label]) =>
+          `<button type="button" data-feeling="${i}" data-rating="${value}" aria-pressed="${d.feedback?.[i] === value}">${label}</button>`,
+      )
+      .join(
+        "",
+      )}</div><details class="feedback-safety"><summary>动作状态（可选）</summary><label class="feedback-field">动作状态<select data-quality="${i}" aria-label="${escape(ex[0])}动作状态">${[
       ["", "未确认"],
       ["stable", "动作稳定 · 无痛"],
       ["form", "动作失控"],
@@ -259,7 +272,7 @@ function renderCheck(force = false) {
         ([v, t]) =>
           `<option value="${v}" ${d.quality?.[i] === v ? "selected" : ""}>${t}</option>`,
       )
-      .join("")}</select></label></article>`;
+      .join("")}</select></label></details></article>`;
   });
   $("#check-list").innerHTML = html;
   count();
@@ -497,7 +510,12 @@ function renderRecordReceipt() {
 }
 function renderAll() {
   renderRecordReceipt();
-  if (!document.activeElement?.closest(".set-row")) renderCheck();
+  if (
+    !document.activeElement?.closest(
+      ".set-row, .feeling-buttons, .feedback-field, .feedback-safety, .load-advice",
+    )
+  )
+    renderCheck();
   renderAnalysis();
   renderArchive();
 }
@@ -550,6 +568,21 @@ document.addEventListener(
 document.addEventListener(
   "click",
   guarded((e) => {
+    const feeling = e.target.closest("[data-feeling]");
+    if (feeling) {
+      const field = document.querySelector(
+        `[data-feedback="${feeling.dataset.feeling}"]`,
+      );
+      field.value =
+        field.value === feeling.dataset.rating ? "" : feeling.dataset.rating;
+      feeling.parentElement.querySelectorAll("button").forEach((button) => {
+        button.setAttribute(
+          "aria-pressed",
+          String(button.dataset.rating === field.value),
+        );
+      });
+      capture();
+    }
     const check = e.target.closest(".set-check");
     if (check) {
       const row = check.closest(".set-row");

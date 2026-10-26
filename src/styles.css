@@ -1268,6 +1268,36 @@ details.card a {
   border: 1px solid #dce3e8;
   background: white;
 }
+.feedback-field:has([data-feedback]) {
+  display: none;
+}
+.feeling-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.feeling-buttons button {
+  flex: 1;
+  min-height: 50px;
+  font-size: 18px;
+  border: 1px solid #becbc8;
+  border-radius: 12px;
+  background: white;
+  color: #24443e;
+}
+.feeling-buttons button[aria-pressed="true"] {
+  background: #167e73;
+  border-color: #167e73;
+  color: white;
+  font-weight: 700;
+}
+.feedback-safety {
+  margin-top: 14px;
+}
+.feedback-safety summary {
+  font-size: 16px;
+  color: #526560;
+}
 .update-banner {
   position: fixed;
   top: env(safe-area-inset-top, 8px);
