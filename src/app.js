@@ -42,6 +42,10 @@ import {
 } from "./history-reference.js";
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
+const rangeStart = (target, name) => {
+  const match = String(target).match(/(\d+)\s*[–-]\s*\d+/);
+  return match ? Number(match[1]) : defaultTarget(name);
+};
 const escape = (s) =>
   String(s ?? "").replace(
     /[&<>"']/g,
@@ -135,7 +139,7 @@ function put(key, value) {
 }
 function plan() {
   const d = currentPlan(store.records(), store.get("draft:active"));
-  if (d.planVersion !== 59 || (hasProgress(d) && d.planSnapshot)) return d;
+  if (d.planVersion !== 60 || (hasProgress(d) && d.planSnapshot)) return d;
   return {
     ...d,
     planSnapshot: nextCycleItems(
@@ -162,7 +166,7 @@ function capture() {
   );
   const next = {
     ...d,
-    planVersion: d.planVersion ?? (hasProgress(d) ? 49 : 59),
+    planVersion: d.planVersion ?? (hasProgress(d) ? 49 : 60),
     feedback: Object.fromEntries(
       $$("[data-feedback]").map((el) => [el.dataset.feedback, el.value]),
     ),
@@ -200,7 +204,7 @@ function renderCheck(force = false) {
   $("#focus-title").textContent =
     d.module === "Legs" ? "腿＋核心" : d.module + " 日";
   $("#focus-desc").textContent = `${d.date} · ${p.items.length} 个动作`;
-  $("#focus-tags").innerHTML = "<span>V59.3.0</span><span>自动保存</span>";
+  $("#focus-tags").innerHTML = "<span>V60.0.0</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
@@ -232,14 +236,14 @@ function renderCheck(force = false) {
       const key = `${i}-${j}`,
         x = d.rows[key] || {},
         historical = historyPreset(previous, j, loggingMode(ex[0])),
-        adjusted = ex[4]?.perSet?.[j] || ex[4]?.perSet?.at(-1),
+        adjusted = ex[4]?.perSet?.[j],
         preset = adjusted
           ? {
               kg: adjusted.kg ?? historical.kg,
               reps: adjusted.reps ?? historical.reps,
             }
           : historical;
-      html += `<div class="set-row ${x.done ? "checked" : ""}" data-key="${key}" data-ex="${i}" data-edited="${!!x.edited}"><button class="set-check" aria-label="完成${ex[0]}第${j + 1}组" aria-pressed="${!!x.done}">✓</button><b>${j + 1}</b><div class="field"><input type="number" inputmode="decimal" min="0" max="1000" step="0.5" class="kg" aria-label="重量" placeholder="${body ? "自重" : "—"}" ${body ? "disabled" : ""} value="${escape(x.kg ?? (body ? "" : (preset.kg ?? "")))}"><span class="unit">${body ? "" : "kg"}</span></div><div class="field"><input type="number" inputmode="numeric" min="1" max="${time ? 86400 : 1000}" class="reps" aria-label="${time ? "秒数" : "次数"}" value="${escape(x.reps ?? preset.reps ?? (d.planVersion >= 51 ? defaultTarget(ex[0]) : time ? (d.planVersion === 50 ? 40 : d.planVersion === 51 ? defaultTarget(ex[0]) : 80) : 12))}"><span class="unit">${time ? "s" : ""}</span></div></div>`;
+      html += `<div class="set-row ${x.done ? "checked" : ""}" data-key="${key}" data-ex="${i}" data-edited="${!!x.edited}"><button class="set-check" aria-label="完成${ex[0]}第${j + 1}组" aria-pressed="${!!x.done}">✓</button><b>${j + 1}</b><div class="field"><input type="number" inputmode="decimal" min="0" max="1000" step="0.5" class="kg" aria-label="重量" placeholder="${body ? "自重" : "—"}" ${body ? "disabled" : ""} value="${escape(x.kg ?? (body ? "" : (preset.kg ?? "")))}"><span class="unit">${body ? "" : "kg"}</span></div><div class="field"><input type="number" inputmode="numeric" min="1" max="${time ? 86400 : 1000}" class="reps" aria-label="${time ? "秒数" : "次数"}" value="${escape(x.reps ?? preset.reps ?? (d.planVersion >= 60 ? rangeStart(ex[1], ex[0]) : d.planVersion >= 51 ? defaultTarget(ex[0]) : time ? (d.planVersion === 50 ? 40 : d.planVersion === 51 ? defaultTarget(ex[0]) : 80) : 12))}"><span class="unit">${time ? "s" : ""}</span></div></div>`;
     }
     html += `</div><button class="btn full exercise-rest" data-rest="${restSeconds(ex[0])}">组间休息 · ${restSeconds(ex[0])} 秒</button>${["reps", "weight", "reduce", "pause"].includes(ex[4]?.action) ? `<p class="cycle-adjustment">下轮建议 · ${escape(ex[4].message)}</p>` : ""}${ex[4]?.weightProposal && !Object.entries(d.rows).some(([key, x]) => key.startsWith(i + "-") && (x.done || x.edited)) ? `<button class="btn full" data-cycle-weight="${i}">器械可加 0.5kg · 采用加重建议</button>` : ""}<details class="load-advice"><summary>负荷建议</summary><p>${escape(ex[4]?.message || progressionAdvice(store.records(), ex[0], ex[1], iso()).text)}</p></details><label class="feedback-field">这次感觉<select data-feedback="${i}" aria-label="${escape(ex[0])}训练反馈">${[
       ["", "未评价"],
@@ -385,7 +389,7 @@ function renderAnalysis() {
     .slice(1, 25)
     .map((c, i) => cycleHTML(c, i + 1))
     .join("")}
-  <details class="glass card"><summary>当前训练与调整方式</summary><p>Push 13组、Pull 12组；小垫版为腿部4组、核心6组，无需全身仰卧。平板支撑优先，侧桥垫住前臂与膝盖，单侧哑铃保持站姿完成。余力与动作状态分别确认，先巩固次数；加重由你确认，不因器械档位不足自动加组。进行中的草稿保留原计划，下一次新训练使用更新建议。</p><p>目标每周PPL两轮，恢复不足或篮球负荷较高时顺延。上肢多数工作组保留约2次余力，腿部以维持与动作控制为主。腹肌可见度还取决于体脂与个体差异。</p><a href="https://acsm.org/resistance-training-guidelines-update-2026/" target="_blank" rel="noopener">训练依据 ↗</a></details>`;
+  <details class="glass card"><summary>当前训练与调整方式</summary><p>Push 13组、Pull 12组；腿部4组、核心6组。核心采用平板支撑、站姿绳索抗旋转推和站姿绳索斜向下拉，不需要整块瑜伽垫；目标是抗伸展、抗旋转与受控旋转，不宣称单靠核心动作就能直接提高球技。余力与动作状态分别确认，先巩固次数；加重由你确认，不因器械档位不足自动加组。进行中的草稿保留原计划，下一次新训练使用更新建议。</p><p>恢复允许时，让各主要肌群一周内尽量练到约2次；篮球负荷较高、睡眠不足或尚未恢复时顺延，不为凑频率补练。上肢多数工作组保留约2次余力，腿部以维持与动作控制为主。</p><a href="https://acsm.org/resistance-training-guidelines-update-2026/" target="_blank" rel="noopener">训练依据 ↗</a></details>`;
 }
 function renderAnalysisCharts() {
   const result = renderAnalytics(
@@ -760,7 +764,7 @@ for (const id of ["plan-date", "plan-module"])
     put("draft:active", {
       date,
       module,
-      planVersion: 59,
+      planVersion: 60,
       dateExplicit:
         id === "plan-date" || !!store.get("draft:active")?.dateExplicit,
       rows: {},

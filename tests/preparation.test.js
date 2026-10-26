@@ -20,6 +20,7 @@ test("preparation follows actual exercises and aliases, not a fixed module label
   assert(single.cooldown.some((s) => s.name.includes("后肩")));
   assert(!single.cooldown.some((s) => s.name.includes("胸部")));
   assert(!preparationCard(PLAN.Push.items).includes("set-row"));
+  assert(preparationCard(PLAN.Legs.items).includes("约 8–15 分钟"));
 });
 
 test("opening guidance never saves work; cooldown follows completed work after archive and reload", async (t) => {

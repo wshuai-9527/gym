@@ -229,7 +229,7 @@ export const V58_PLAN = {
   },
 };
 // Keep old drafts tied to their original exercise/row mapping.
-export const PLAN = {
+export const V59_PLAN = {
   ...V58_PLAN,
   Legs: {
     title: "腿＋核心",
@@ -240,6 +240,20 @@ export const PLAN = {
       ["罗马尼亚硬拉", "2 × 8–12", "髋铰链", "腘绳肌 / 臀"],
       ["屈膝侧桥", "2 × 15–30s / 侧", "抗侧屈", "腹斜肌 / 稳定"],
       ["站姿单侧哑铃静止保持", "2 × 20–40s / 侧", "站姿核心", "核心 / 稳定"],
+    ],
+  },
+};
+export const PLAN = {
+  ...V59_PLAN,
+  Legs: {
+    title: "腿＋核心",
+    sub: "小垫可练 · 篮球躯干控制",
+    items: [
+      ["平板支撑", "2 × 20–60s", "抗伸展", "核心 / 稳定"],
+      ["保加利亚分腿蹲", "2 × 8–12 / 侧", "单腿蹲", "股四头 / 臀"],
+      ["罗马尼亚硬拉", "2 × 8–12", "髋铰链", "腘绳肌 / 臀"],
+      ["站姿绳索抗旋转推", "2 × 8–12 / 侧", "抗旋转", "核心 / 躯干控制"],
+      ["站姿绳索斜向下拉", "2 × 8–12 / 侧", "受控旋转", "核心 / 髋肩协同"],
     ],
   },
 };
@@ -328,7 +342,7 @@ export function templateFor(draft) {
   if (draft?.planVersion >= 58 && Array.isArray(draft.planSnapshot))
     return { ...PLAN[draft.module], items: draft.planSnapshot };
   if (Object.values(draft?.rows || {}).some((x) => x.done || x.edited)) {
-    if (draft.planVersion === 59) return PLAN[draft.module];
+    if (draft.planVersion === 59) return V59_PLAN[draft.module];
     if (draft.planVersion === 58) return V58_PLAN[draft.module];
     if (draft.planVersion === 53) return V53_PLAN[draft.module];
     if (draft.planVersion === 52) return V52_PLAN[draft.module];
@@ -375,3 +389,9 @@ EX["站姿单侧哑铃静止保持"] = { m: "Legs" };
 CUES["站姿单侧哑铃静止保持"] =
   "站立，一手提轻哑铃，手臂自然下垂；肋骨与骨盆对齐，不侧弯、不耸肩，正常呼吸。左右各保持20–40秒，两侧完成记1组。首次自选能稳定控制的轻重量，不沿用划船或分腿蹲重量；握力先疲劳就减重。";
 CUES["屈膝侧桥"] += " 只需垫住前臂与膝盖，不需要全身躺在垫上；垫子滑动就停止。";
+for (const name of ["站姿绳索抗旋转推", "站姿绳索斜向下拉"])
+  EX[name] = { m: "Legs" };
+CUES["站姿绳索抗旋转推"] =
+  "把可调绳索设在胸口高度，侧对器械、双脚约肩宽。双手从胸前缓慢推出并停1秒，抵抗身体被拉转，再收回；左右各做。先用最轻且能稳定控制的档位，腰背或肩部疼痛就停止。";
+CUES["站姿绳索斜向下拉"] =
+  "把绳索设在斜上方，双手握柄，从一侧肩上方缓慢拉向对侧髋旁；胸廓、骨盆与脚可自然协同转动，不锁膝、不甩拉。先轻重量练路径，左右各做；以控制为主，不追求爆发或大重量。";

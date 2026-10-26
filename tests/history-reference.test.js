@@ -29,6 +29,20 @@ test("preserves per-set loads and recorded timing, without doubling", () => {
   assert.deepEqual(historyPreset(timed, 0, "seconds"), { reps: 45 });
   assert.deepEqual(historyPreset(timed, 1, "seconds"), { reps: 35 });
 });
+test("an incomplete previous exercise does not invent repetitions for missing sets", () => {
+  const weighted = historyReference(
+    [r("2025-06-09", "站姿绳索抗旋转推", ["5kg*10"])],
+    "站姿绳索抗旋转推",
+    "2025-06-10",
+  );
+  assert.deepEqual(historyPreset(weighted, 1, "weighted"), { kg: 5 });
+  const timed = historyReference(
+    [r("2025-06-09", "平板支撑", ["45s"])],
+    "平板支撑",
+    "2025-06-10",
+  );
+  assert.deepEqual(historyPreset(timed, 1, "seconds"), {});
+});
 test("stale history stays visible but is not automatically filled", () => {
   const ref = historyReference(
     [r("2025-04-01", "地面哑铃臀桥", ["20kg*12"])],

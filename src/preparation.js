@@ -19,6 +19,8 @@ const groups = {
     "平板支撑肩触碰",
     "屈膝侧桥",
     "站姿单侧哑铃静止保持",
+    "站姿绳索抗旋转推",
+    "站姿绳索斜向下拉",
     "死虫式",
     "仰卧小幅卷腹",
   ],
@@ -250,5 +252,5 @@ const escape = (s) =>
 export function preparationCard(items, phase = "warmup") {
   const warming = phase === "warmup",
     steps = dailyPreparation(items)[phase];
-  return `<details class="glass card preparation-card" data-preparation="${phase}"><summary><span>${warming ? "训练前 · 热身" : "训练后 · 放松与拉伸"}</span><small>${warming ? "约 8–12 分钟" : "约 6–10 分钟"} · 展开跟练</small></summary><p class="prep-intro">${warming ? "升温 → 动态活动 → 主项试练。热身组不用打卡，不计入工作组。" : "先慢走，再按今天练到的部位轻拉。任选舒适动作，时间紧可少选；不强求每项。"}</p><ol class="prep-steps">${steps.map((s) => `<li><div><strong>${escape(s.name)}</strong><span>${escape(s.dose)}</span></div><details><summary>怎么做</summary><p>${escape(s.cue)}</p></details></li>`).join("")}</ol><p class="prep-note">${warming ? "保持轻松、不提前力竭；长时间静态拉伸留到训练后。" : "只到轻微牵拉、不弹震；疼痛、麻木或关节不适立即停止。拉伸主要帮助柔韧性，不保证消除酸痛或预防损伤。"}</p><details class="prep-evidence"><summary>依据与说明</summary><p>具体动作和剂量为结合当天计划、器械及小垫条件的实用安排，并非唯一最佳处方。</p><a href="https://www.heart.org/en/healthy-living/exercise-and-physical-activity/fitness-basics/warm-up-cool-down" target="_blank" rel="noopener">AHA · 热身、放松与拉伸 ↗</a><a href="https://www.sportsmed.org/flexibility-and-stretching" target="_blank" rel="noopener">AOSSM · 动态与静态拉伸 ↗</a><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7558980/" target="_blank" rel="noopener">主项专项热身研究 ↗</a></details></details>`;
+  return `<details class="glass card preparation-card" data-preparation="${phase}"><summary><span>${warming ? "训练前 · 热身" : "训练后 · 放松与拉伸"}</span><small>${warming ? "约 8–15 分钟" : "约 6–10 分钟"} · 展开跟练</small></summary><p class="prep-intro">${warming ? "升温 → 动态活动 → 主项试练。热身组不用打卡，不计入工作组。" : "先慢走，再按今天练到的部位轻拉。任选舒适动作，时间紧可少选；不强求每项。"}</p><ol class="prep-steps">${steps.map((s) => `<li><div><strong>${escape(s.name)}</strong><span>${escape(s.dose)}</span></div><details><summary>怎么做</summary><p>${escape(s.cue)}</p></details></li>`).join("")}</ol><p class="prep-note">${warming ? "保持轻松、不提前力竭；长时间静态拉伸留到训练后。" : "只到轻微牵拉、不弹震；疼痛、麻木或关节不适立即停止。拉伸主要帮助柔韧性，不保证消除酸痛或预防损伤。"}</p><details class="prep-evidence"><summary>依据与说明</summary><p>具体动作和剂量为结合当天计划、器械及小垫条件的实用安排，并非唯一最佳处方。</p><a href="https://www.heart.org/en/healthy-living/exercise-and-physical-activity/fitness-basics/warm-up-cool-down" target="_blank" rel="noopener">AHA · 热身、放松与拉伸 ↗</a><a href="https://www.sportsmed.org/flexibility-and-stretching" target="_blank" rel="noopener">AOSSM · 动态与静态拉伸 ↗</a><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7558980/" target="_blank" rel="noopener">主项专项热身研究 ↗</a></details></details>`;
 }

@@ -8,6 +8,7 @@ import {
   V51_PLAN,
   V52_PLAN,
   V53_PLAN,
+  V59_PLAN,
   templateFor,
   loggingMode,
 } from "../src/catalog.js";
@@ -127,6 +128,23 @@ test("retain Bulgarian and plank without remapping an unfinished V51 draft", () 
   );
   assert.equal(V51_PLAN.Legs.items[3][0], "死虫式");
   assert.equal(PLAN.Legs.items[0][0], "平板支撑");
+});
+
+test("V60 removes floor side bridge and static suitcase hold without rewriting an active V59 draft", () => {
+  const names = PLAN.Legs.items.map((x) => x[0]);
+  assert(names.includes("站姿绳索抗旋转推"));
+  assert(names.includes("站姿绳索斜向下拉"));
+  assert(!names.includes("屈膝侧桥"));
+  assert(!names.includes("站姿单侧哑铃静止保持"));
+  assert.equal(loggingMode("站姿绳索抗旋转推"), "weighted");
+  assert.equal(
+    templateFor({
+      module: "Legs",
+      planVersion: 59,
+      rows: { "3-0": { done: true } },
+    }),
+    V59_PLAN.Legs,
+  );
 });
 
 test("weighted new plan never rewrites a V52 bodyweight draft", () => {
