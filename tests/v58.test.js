@@ -68,7 +68,7 @@ test("new Push resets an incomplete cycle; a Pull alone never creates a report",
 });
 test("adaptive loads require two complete quality exposures; no feedback never raises loads", () => {
   for (const module of ["Push", "Pull", "Legs"]) {
-    const ex = PLAN[module].items.find((x) => x[0] !== "平板支撑"),
+    const ex = PLAN[module].items.find((x) => x[0] !== "平板支撑" && x[0] !== "壶铃摆动"),
       n = parseInt(ex[1]);
     const records = [
       record("2026-01-01", ex[0], [`20kg*12*${n}`], "steady"),

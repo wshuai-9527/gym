@@ -139,7 +139,7 @@ function put(key, value) {
 }
 function plan() {
   const d = currentPlan(store.records(), store.get("draft:active"));
-  if (d.planVersion !== 60 || (hasProgress(d) && d.planSnapshot)) return d;
+  if (d.planVersion !== 61 || (hasProgress(d) && d.planSnapshot)) return d;
   return {
     ...d,
     planSnapshot: nextCycleItems(
@@ -166,7 +166,7 @@ function capture() {
   );
   const next = {
     ...d,
-    planVersion: d.planVersion ?? (hasProgress(d) ? 49 : 60),
+    planVersion: d.planVersion ?? (hasProgress(d) ? 49 : 61),
     feedback: Object.fromEntries(
       $$("[data-feedback]").map((el) => [el.dataset.feedback, el.value]),
     ),
@@ -204,7 +204,7 @@ function renderCheck(force = false) {
   $("#focus-title").textContent =
     d.module === "Legs" ? "腿＋核心" : d.module + " 日";
   $("#focus-desc").textContent = `${d.date} · ${p.items.length} 个动作`;
-  $("#focus-tags").innerHTML = "<span>V60.0.0</span><span>自动保存</span>";
+  $("#focus-tags").innerHTML = "<span>V61.0.0</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
@@ -389,7 +389,7 @@ function renderAnalysis() {
     .slice(1, 25)
     .map((c, i) => cycleHTML(c, i + 1))
     .join("")}
-  <details class="glass card"><summary>当前训练与调整方式</summary><p>Push 13组、Pull 12组；腿部4组、核心6组。核心采用平板支撑、站姿绳索抗旋转推和站姿绳索斜向下拉，不需要整块瑜伽垫；目标是抗伸展、抗旋转与受控旋转，不宣称单靠核心动作就能直接提高球技。余力与动作状态分别确认，先巩固次数；加重由你确认，不因器械档位不足自动加组。进行中的草稿保留原计划，下一次新训练使用更新建议。</p><p>恢复允许时，让各主要肌群一周内尽量练到约2次；篮球负荷较高、睡眠不足或尚未恢复时顺延，不为凑频率补练。上肢多数工作组保留约2次余力，腿部以维持与动作控制为主。</p><a href="https://acsm.org/resistance-training-guidelines-update-2026/" target="_blank" rel="noopener">训练依据 ↗</a></details>`;
+  <details class="glass card"><summary>当前训练与调整方式</summary><p>Push 13组、Pull 12组；腿部力量4组、壶铃摆动2组、核心4组。核心采用平板支撑和直臂支撑交替触肩，无需绳索或整身躺下；目标是抗伸展与抗旋转，不宣称单靠核心动作就能直接提高球技。余力与动作状态分别确认，先巩固次数；加重由你确认，不因器械档位不足自动加组。进行中的草稿保留原计划，下一次新训练使用更新建议。</p><p>恢复允许时，让各主要肌群一周内尽量练到约2次；篮球负荷较高、睡眠不足或尚未恢复时顺延，不为凑频率补练。上肢多数工作组保留约2次余力，腿部以维持与动作控制为主。</p><a href="https://acsm.org/resistance-training-guidelines-update-2026/" target="_blank" rel="noopener">训练依据 ↗</a></details>`;
 }
 function renderAnalysisCharts() {
   const result = renderAnalytics(
@@ -764,7 +764,7 @@ for (const id of ["plan-date", "plan-module"])
     put("draft:active", {
       date,
       module,
-      planVersion: 60,
+      planVersion: 61,
       dateExplicit:
         id === "plan-date" || !!store.get("draft:active")?.dateExplicit,
       rows: {},

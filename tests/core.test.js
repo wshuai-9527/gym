@@ -124,7 +124,7 @@ test("empty old drafts upgrade while real progress keeps its template version", 
     planVersion: 50,
     rows: {},
   };
-  assert.equal(currentPlan([], emptyDraft, "2026-10-18").planVersion, 60);
+  assert.equal(currentPlan([], emptyDraft, "2026-10-18").planVersion, 61);
   assert.equal(
     currentPlan(
       [],

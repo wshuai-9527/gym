@@ -70,15 +70,14 @@ export function nextCycleItems(records, items, module, today) {
       meta.action = actual.feedback.pain ? "pause" : "reduce";
       return finish();
     }
+    if (ex[0] === "壶铃摆动") return finish();
     // Start from recorded loads/reps; old eager per-exposure progression is not
     // applied before a complete cycle. Never reinterpret an active draft here.
     if (actual && age(today, actual.date) <= 28 && !actual.invalid) {
-      meta.perSet = actual.sets
-        .slice(0, n)
-        .map((s) => ({
-          kg: s.weighted ? s.kg : null,
-          reps: timed ? s.sec : s.reps,
-        }));
+      meta.perSet = actual.sets.slice(0, n).map((s) => ({
+        kg: s.weighted ? s.kg : null,
+        reps: timed ? s.sec : s.reps,
+      }));
     }
     meta.message = latest
       ? "保持最近有效负重；本轮证据不足时先巩固"

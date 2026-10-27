@@ -243,7 +243,7 @@ export const V59_PLAN = {
     ],
   },
 };
-export const PLAN = {
+export const V60_PLAN = {
   ...V59_PLAN,
   Legs: {
     title: "腿＋核心",
@@ -257,12 +257,27 @@ export const PLAN = {
     ],
   },
 };
+export const PLAN = {
+  ...V60_PLAN,
+  Legs: {
+    title: "腿＋核心",
+    sub: "小垫可练 · 无绳索",
+    items: [
+      ["壶铃摆动", "2 × 10", "10kg · 髋部发力", "臀 / 后链"],
+      ["平板支撑", "2 × 参考上次时长", "抗伸展", "核心 / 稳定"],
+      ["保加利亚分腿蹲", "2 × 8–12 / 侧", "单腿蹲", "股四头 / 臀"],
+      ["罗马尼亚硬拉", "2 × 8–12", "髋铰链", "腘绳肌 / 臀"],
+      ["直臂支撑交替触肩", "2 × 6–10 / 侧", "抗旋转", "核心 / 躯干控制"],
+    ],
+  },
+};
 export function loggingMode(name) {
   if (name === "站姿单侧哑铃静止保持") return "weighted-seconds";
   if (["平板支撑", "屈膝侧桥"].includes(name)) return "seconds";
   if (
     [
       "平板支撑肩触碰",
+      "直臂支撑交替触肩",
       "坐凳深蹲",
       "自重保加利亚分腿蹲",
       "自重臀桥",
@@ -288,6 +303,7 @@ export function defaultTarget(name) {
   );
 }
 export function restSeconds(name) {
+  if (name === "壶铃摆动") return 120;
   if (
     loggingMode(name).endsWith("seconds") ||
     ["仰卧小幅卷腹", "死虫式"].includes(name)
@@ -342,6 +358,7 @@ export function templateFor(draft) {
   if (draft?.planVersion >= 58 && Array.isArray(draft.planSnapshot))
     return { ...PLAN[draft.module], items: draft.planSnapshot };
   if (Object.values(draft?.rows || {}).some((x) => x.done || x.edited)) {
+    if (draft.planVersion === 60) return V60_PLAN[draft.module];
     if (draft.planVersion === 59) return V59_PLAN[draft.module];
     if (draft.planVersion === 58) return V58_PLAN[draft.module];
     if (draft.planVersion === 53) return V53_PLAN[draft.module];
@@ -395,3 +412,9 @@ CUES["站姿绳索抗旋转推"] =
   "把可调绳索设在胸口高度，侧对器械、双脚约肩宽。双手从胸前缓慢推出并停1秒，抵抗身体被拉转，再收回；左右各做。先用最轻且能稳定控制的档位，腰背或肩部疼痛就停止。";
 CUES["站姿绳索斜向下拉"] =
   "把绳索设在斜上方，双手握柄，从一侧肩上方缓慢拉向对侧髋旁；胸廓、骨盆与脚可自然协同转动，不锁膝、不甩拉。先轻重量练路径，左右各做；以控制为主，不追求爆发或大重量。";
+CUES["平板支撑肩触碰"] =
+  "直臂支撑，双手在肩下、双脚略分开；一手慢触对侧肩，再放稳换手。骨盆保持朝地，不塌腰、不左右甩动。每侧6次起，每次抬手停约1秒；左右各做一次算每侧1次，两侧完成记1组。手掌可直接支撑防滑地面；小垫滑动或手腕不适时，双手撑稳固训练凳做高位版本，并在备注记录支撑高度。首次先做4次/侧试练，控制不住就减少次数或跳过，不另加负重。";
+EX["直臂支撑交替触肩"] = { m: "Legs" };
+CUES["直臂支撑交替触肩"] = CUES["平板支撑肩触碰"];
+CUES["壶铃摆动"] =
+  "热身后先做，10kg双手摆动2组×10次，组间休息90–120秒。臀部后移、快速伸髋带动壶铃，手臂随动；摆到胸口附近即可，不过头、不后仰顶腰。速度下降、腰背疼痛或姿势失控就提前停组；篮球后腿沉时可跳过，不补组。不按轻松反馈自动加重或堆次数。四周留出壶铃摆动与安全落地空间；空间不足不做。";

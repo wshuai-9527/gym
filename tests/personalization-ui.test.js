@@ -56,26 +56,26 @@ test("real UI prefills recorded loads and reps, keeps edits and archives without
   await import("../src/app.js");
   const $ = (s) => document.querySelector(s),
     rows = [...document.querySelectorAll(".set-row")];
-  assert.equal(rows[2].querySelector(".kg").value, "17.5");
-  assert.equal(rows[3].querySelector(".reps").value, "9");
-  assert.equal(rows[0].querySelector(".reps").value, "45");
+  assert.equal(rows[4].querySelector(".kg").value, "17.5");
+  assert.equal(rows[5].querySelector(".reps").value, "9");
+  assert.equal(rows[2].querySelector(".reps").value, "45");
   assert.match(
-    document.querySelectorAll(".history-reference")[1].textContent,
+    document.querySelectorAll(".history-reference")[2].textContent,
     /2025-06-08.*17.5kg × 9 × 3/,
   );
-  rows[2].querySelector(".kg").value = "20";
-  rows[2]
+  rows[4].querySelector(".kg").value = "20";
+  rows[4]
     .querySelector(".kg")
     .dispatchEvent(new window.Event("input", { bubbles: true }));
+  rows[4].querySelector(".set-check").click();
   rows[2].querySelector(".set-check").click();
-  rows[0].querySelector(".set-check").click();
-  $('[data-feedback="1"]').value = "steady";
-  $('[data-feedback="1"]').dispatchEvent(
+  $('[data-feedback="2"]').value = "steady";
+  $('[data-feedback="2"]').dispatchEvent(
     new window.Event("input", { bubbles: true }),
   );
   $('[data-go="archive"]').click();
   $('[data-go="check"]').click();
-  assert.equal(document.querySelectorAll(".kg")[2].value, "20");
+  assert.equal(document.querySelectorAll(".kg")[4].value, "20");
   $("#finish-day").click();
   const state = JSON.parse(localStorage.getItem("gym-vault-v49:guest"));
   assert.deepEqual(

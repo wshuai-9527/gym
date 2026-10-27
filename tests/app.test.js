@@ -134,25 +134,24 @@ test("real UI handlers preserve draft, edit history and escape user content", as
   click('[data-go="check"]');
   const legRows = [...document.querySelectorAll(".set-row")];
   assert.equal(legRows.length, 10);
-  assert.equal(document.querySelectorAll(".kg:disabled").length, 2);
-  assert.equal(legRows[0].querySelector(".reps").value, "20");
+  assert.equal(document.querySelectorAll(".kg:disabled").length, 4);
+  assert.equal(legRows[2].querySelector(".reps").value, "30");
   assert.equal(
     legRows[8].querySelector(".reps").getAttribute("aria-label"),
     "次数",
   );
-  assert.equal(legRows[8].querySelector(".reps").value, "8");
+  assert.equal(legRows[8].querySelector(".reps").value, "6");
   legRows[6].querySelector(".kg").value = "5";
-  legRows[8].querySelector(".kg").value = "5";
-  legRows[0].querySelector(".set-check").click();
-  legRows[6].querySelector(".set-check").click();
+  legRows[2].querySelector(".set-check").click();
   legRows[8].querySelector(".set-check").click();
+  legRows[6].querySelector(".set-check").click();
   click("#finish-day");
   const saved = JSON.parse(localStorage.getItem("gym-vault-v49:guest")).docs[
     "record:2026-10-08"
   ].value;
   assert.deepEqual(
     saved.items.map((i) => i.sets),
-    [["20s"], ["5kg*8"], ["5kg*8"]],
+    [["30s"], ["5kg*8"], ["6"]],
   );
   const keys = Object.keys(
     JSON.parse(localStorage.getItem("gym-vault-v49:guest")).docs,

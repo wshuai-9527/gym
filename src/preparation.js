@@ -17,6 +17,7 @@ const groups = {
   core: [
     "平板支撑",
     "平板支撑肩触碰",
+    "直臂支撑交替触肩",
     "屈膝侧桥",
     "站姿单侧哑铃静止保持",
     "站姿绳索抗旋转推",
@@ -95,6 +96,14 @@ export function dailyPreparation(items) {
         "自然站立、肋骨与骨盆对齐，呼气时轻收腹，吸气仍可保持躯干稳定；不屏息。",
       ),
     );
+  if (names.includes("直臂支撑交替触肩"))
+    dynamic.push(
+      step(
+        "手腕与肩支撑试练",
+        "手腕轻活动后，每侧触肩 4 次",
+        "双手撑稳地面或固定训练凳，脚略分开；慢速换手，骨盆不晃。腕肩不适就跳过，不在滚动或滑动器械上支撑。",
+      ),
+    );
 
   const weightedMain = names.find((n) =>
     [
@@ -111,6 +120,14 @@ export function dailyPreparation(items) {
     ].includes(n),
   );
   const specific = [];
+  if (names.includes("壶铃摆动"))
+    specific.push(
+      step(
+        "壶铃摆动 · 动作试练",
+        "徒手髋铰链后，10kg试做3–5次",
+        "确认能以髋部带动、保持腰背稳定后，休息约1分钟，再做2组×10次。摆动安排在正式力量动作之前；空间不足、篮球后腿沉或腰背不适时跳过。",
+      ),
+    );
   if (weightedMain)
     specific.push(
       step(

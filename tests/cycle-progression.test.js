@@ -80,7 +80,7 @@ test("latest unfinished-cycle records and pain take priority; timing is never au
   assert.equal(advice(records).action, "hold");
   records.at(-1).items[0].feedback = feedbackValue("pain");
   assert(advice(records).paused);
-  const timed = PLAN.Legs.items[0];
+  const timed = PLAN.Legs.items.find((x) => x[0] === "平板支撑");
   const a = advice(cycles(), timed, "Legs");
   assert.equal(a.perSet[0].reps, 70);
   assert.equal(a.weightProposal, null);

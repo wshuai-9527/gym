@@ -71,7 +71,7 @@ test("eligible increase is advice, not a silent new weight; unavailable small in
   assert.equal(adaptiveItems(light, [ex], "Push", "2026-10-23")[0][4].sets, 3);
 });
 test("small-mat plan removes supine movements, preserves completed V58 mappings and weighted timing", () => {
-  assert.equal(PLAN.Legs.items[0][0], "平板支撑");
+  assert.equal(PLAN.Legs.items[1][0], "平板支撑");
   assert(!PLAN.Legs.items.some(([n]) => /仰卧|臀桥|死虫/.test(n)));
   assert.equal(
     templateFor({

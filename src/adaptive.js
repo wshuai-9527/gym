@@ -60,6 +60,26 @@ export function adaptiveItems(records, items, module, today) {
     const last = hits[0];
     const fresh =
       last && (Date.parse(today) - Date.parse(last.date)) / 86400000 <= 28;
+    if (ex[0] === "壶铃摆动")
+      return [
+        ex[0],
+        ex[1],
+        ex[2],
+        ex[3],
+        {
+          sets: 2,
+          perSet: [
+            { kg: 10, reps: 10 },
+            { kg: 10, reps: 10 },
+          ],
+          paused: !!(fresh && last.feedback?.pain),
+          message:
+            fresh && last.feedback?.pain
+              ? "上次报告疼痛：暂停摆动，恢复后再确认"
+              : "10kg × 10次 × 2组；热身后先做，速度下降或姿势失控就停。篮球后腿沉可跳过，不自动加重加次数。",
+          referenceDate: last?.date || null,
+        },
+      ];
     let sets = n,
       kg = null,
       reps = null,
