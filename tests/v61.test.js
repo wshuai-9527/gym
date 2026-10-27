@@ -4,7 +4,7 @@ import { PLAN, V60_PLAN, templateFor, loggingMode } from "../src/catalog.js";
 import { currentPlan, moduleOf } from "../src/core.js";
 import { nextCycleItems } from "../src/cycle-progression.js";
 import { exerciseVisual } from "../src/exercise-visuals.js";
-import { dailyPreparation } from "../src/preparation.js";
+import { exerciseWarmupCue } from "../src/preparation.js";
 
 test("no-cable plan starts shoulder taps independently of ambiguous legacy counts", () => {
   const names = PLAN.Legs.items.map((x) => x[0]);
@@ -27,11 +27,7 @@ test("no-cable plan starts shoulder taps independently of ambiguous legacy count
   assert.equal(loggingMode(taps[0]), "bodyweight");
   assert.equal(moduleOf([{ name: taps[0], sets: ["6*2"] }]), "Legs");
   assert(exerciseVisual(taps[0]).includes("<svg"));
-  assert(
-    dailyPreparation(PLAN.Legs.items).warmup.some((s) =>
-      s.name.includes("手腕"),
-    ),
-  );
+  assert.match(exerciseWarmupCue(taps[0], PLAN.Legs.items), /手腕/);
   assert(!JSON.stringify(taps).includes('"reps":20'));
 });
 

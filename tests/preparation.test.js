@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { dailyPreparation, preparationCard } from "../src/preparation.js";
+import {
+  dailyPreparation,
+  preparationCard,
+  exerciseWarmupCue,
+} from "../src/preparation.js";
 import { PLAN } from "../src/catalog.js";
 import { JSDOM } from "jsdom";
 import { readFile } from "node:fs/promises";
@@ -13,14 +17,28 @@ test("preparation follows actual exercises and aliases, not a fixed module label
   assert(!pull.cooldown.some((s) => s.name.includes("胸部")));
   assert(pull.cooldown.some((s) => s.name.includes("背阔")));
   assert(legs.warmup.some((s) => s.name.includes("髋铰链")));
-  assert(legs.warmup.some((s) => s.name.includes("姿势试练")));
+  for (const prep of [push, pull, legs]) {
+    assert.equal(prep.warmup.length, 3);
+    assert(!JSON.stringify(prep.warmup).match(/试练|递增|计时/));
+  }
+  assert.deepEqual(
+    legs.warmup.map((s) => s.name),
+    ["扶稳踝前移", "扶稳原地分腿蹲", "徒手髋铰链"],
+  );
+  assert.notDeepEqual(push.warmup, pull.warmup);
+  assert.match(exerciseWarmupCue("平板卧推", PLAN.Push.items), /40–60%/);
+  assert.match(
+    exerciseWarmupCue("罗马尼亚硬拉", PLAN.Legs.items),
+    /轮到本动作/,
+  );
+  assert.match(exerciseWarmupCue("直臂支撑交替触肩", PLAN.Legs.items), /手腕/);
   assert.equal(legs.cooldown.length, 4);
   assert(!JSON.stringify(legs).match(/仰卧|死虫|地面臀桥/));
   const single = dailyPreparation([{ name: "哑铃侧平举", sets: [] }]);
   assert(single.cooldown.some((s) => s.name.includes("后肩")));
   assert(!single.cooldown.some((s) => s.name.includes("胸部")));
   assert(!preparationCard(PLAN.Push.items).includes("set-row"));
-  assert(preparationCard(PLAN.Legs.items).includes("约 8–15 分钟"));
+  assert(preparationCard(PLAN.Legs.items).includes("3 项 · 约 3–5 分钟"));
 });
 
 test("opening guidance never saves work; cooldown follows completed work after archive and reload", async (t) => {

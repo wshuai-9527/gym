@@ -96,80 +96,12 @@ export function dailyPreparation(items) {
         "自然站立、肋骨与骨盆对齐，呼气时轻收腹，吸气仍可保持躯干稳定；不屏息。",
       ),
     );
-  if (names.includes("直臂支撑交替触肩"))
+  if (has("chest") || has("triceps"))
     dynamic.push(
       step(
-        "手腕与肩支撑试练",
-        "手腕轻活动后，每侧触肩 4 次",
-        "双手撑稳地面或固定训练凳，脚略分开；慢速换手，骨盆不晃。腕肩不适就跳过，不在滚动或滑动器械上支撑。",
-      ),
-    );
-
-  const weightedMain = names.find((n) =>
-    [
-      "平板卧推",
-      "上斜卧推",
-      "坐姿推肩",
-      "高位下拉",
-      "上斜划船",
-      "单臂哑铃划船",
-      "双臂哑铃俯身划船",
-      "保加利亚分腿蹲",
-      "高脚杯深蹲",
-      "罗马尼亚硬拉",
-    ].includes(n),
-  );
-  const specific = [];
-  if (names.includes("壶铃摆动"))
-    specific.push(
-      step(
-        "壶铃摆动 · 动作试练",
-        "徒手髋铰链后，10kg试做3–5次",
-        "确认能以髋部带动、保持腰背稳定后，休息约1分钟，再做2组×10次。摆动安排在正式力量动作之前；空间不足、篮球后腿沉或腰背不适时跳过。",
-      ),
-    );
-  if (weightedMain)
-    specific.push(
-      step(
-        `${weightedMain} · 递增热身`,
-        "轻 6–8 次 → 稍重 3–5 次",
-        "以今天确认的工作重量为基准：约 40–60% 做 1 组，再约 70–80% 做 1 组；选接近且偏轻的可用档位，不按历史最高值。组间休息 45–90 秒，之后休息约 1–2 分钟再开始工作组；单侧次数均按每侧。很轻的工作重量可只做 1 组，始终不做到吃力。",
-      ),
-    );
-  const later = names.find(
-    (n) =>
-      n !== weightedMain &&
-      [
-        "坐姿推肩",
-        "高位下拉",
-        "单臂哑铃划船",
-        "上斜划船",
-        "罗马尼亚硬拉",
-        "保加利亚分腿蹲",
-      ].includes(n),
-  );
-  if (later)
-    specific.push(
-      step(
-        `${later} · 轮到时再试练`,
-        "轻负重 1 组 × 5–6 次",
-        "在这个动作正式开始前试练，单侧按每侧；使用明显轻于今天工作重量的可控档位，不提前把整场热身做累。",
-      ),
-    );
-  if (names.includes("平板支撑"))
-    specific.unshift(
-      step(
-        "平板支撑 · 姿势试练",
-        "5–10 秒 × 1 次",
-        "只垫住前臂，肘在肩下、腹臀轻收、保持呼吸；这是姿势检查，结束后休息约 30 秒，不替代正式组。",
-      ),
-    );
-  if (!specific.length)
-    specific.push(
-      step(
-        "首个动作 · 轻松试练",
-        "3–5 次；计时动作 5–10 秒",
-        "用更轻负重或更容易的版本确认动作路径；不追求次数、时长或疲劳。",
+        "站姿开合臂",
+        "8 次",
+        "双臂在胸前轻合再向两侧展开，幅度逐渐增加，不后甩、不憋气。",
       ),
     );
 
@@ -238,15 +170,7 @@ export function dailyPreparation(items) {
       ),
     );
   return {
-    warmup: [
-      step(
-        "先让身体暖起来",
-        "快走 / 原地踏步 5 分钟",
-        "逐渐加快到身体微暖、仍可完整说话；天气冷或仍僵硬时延长到 10 分钟。",
-      ),
-      ...dynamic,
-      ...specific,
-    ],
+    warmup: dynamic.slice(0, 3),
     cooldown: [
       step(
         "逐渐放慢",
@@ -266,8 +190,37 @@ const escape = (s) =>
         c
       ],
   );
+export function exerciseWarmupCue(name, items) {
+  const n = canon(name);
+  if (n === "壶铃摆动")
+    return "开始前：徒手髋铰链后，以10kg做3–5次确认路径；休息约1分钟再开始正式组。空间不足或控制不稳时跳过。";
+  if (n === "平板支撑")
+    return "开始前：短暂确认肘肩位置和呼吸，姿势稳定后再开始计时；不另加一组计时试练。";
+  if (n === "直臂支撑交替触肩" || n === "平板支撑肩触碰")
+    return "开始前：轻活动手腕，双手支撑稳妥后慢速交替抬手；腕肩不适或骨盆无法稳定时跳过。";
+  const main = [
+    "平板卧推",
+    "上斜卧推",
+    "坐姿推肩",
+    "高位下拉",
+    "上斜划船",
+    "单臂哑铃划船",
+    "双臂哑铃俯身划船",
+    "保加利亚分腿蹲",
+    "高脚杯深蹲",
+    "罗马尼亚硬拉",
+  ];
+  if (!main.includes(n)) return "";
+  const first = items
+    .map((i) => canon(Array.isArray(i) ? i[0] : i.name))
+    .find((x) => main.includes(x));
+  return n === first
+    ? "开始前：按今天工作重量，用约40–60%做6–8次，再按需用约70–80%做3–5次；选偏轻的可用档位，不做到吃力。组间休息45–90秒，再休息1–2分钟进入正式组；很轻的重量可只做1组。热身组不打卡、不计入工作组。"
+    : "轮到本动作时：按需用明显轻于工作重量的档位做5–6次，休息后进入正式组；单侧按每侧，热身组不打卡。";
+}
+
 export function preparationCard(items, phase = "warmup") {
   const warming = phase === "warmup",
     steps = dailyPreparation(items)[phase];
-  return `<details class="glass card preparation-card" data-preparation="${phase}"><summary><span>${warming ? "训练前 · 热身" : "训练后 · 放松与拉伸"}</span><small>${warming ? "约 8–15 分钟" : "约 6–10 分钟"} · 展开跟练</small></summary><p class="prep-intro">${warming ? "升温 → 动态活动 → 主项试练。热身组不用打卡，不计入工作组。" : "先慢走，再按今天练到的部位轻拉。任选舒适动作，时间紧可少选；不强求每项。"}</p><ol class="prep-steps">${steps.map((s) => `<li><div><strong>${escape(s.name)}</strong><span>${escape(s.dose)}</span></div><details><summary>怎么做</summary><p>${escape(s.cue)}</p></details></li>`).join("")}</ol><p class="prep-note">${warming ? "保持轻松、不提前力竭；长时间静态拉伸留到训练后。" : "只到轻微牵拉、不弹震；疼痛、麻木或关节不适立即停止。拉伸主要帮助柔韧性，不保证消除酸痛或预防损伤。"}</p><details class="prep-evidence"><summary>依据与说明</summary><p>具体动作和剂量为结合当天计划、器械及小垫条件的实用安排，并非唯一最佳处方。</p><a href="https://www.heart.org/en/healthy-living/exercise-and-physical-activity/fitness-basics/warm-up-cool-down" target="_blank" rel="noopener">AHA · 热身、放松与拉伸 ↗</a><a href="https://www.sportsmed.org/flexibility-and-stretching" target="_blank" rel="noopener">AOSSM · 动态与静态拉伸 ↗</a><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7558980/" target="_blank" rel="noopener">主项专项热身研究 ↗</a></details></details>`;
+  return `<details class="glass card preparation-card" data-preparation="${phase}"><summary><span>${warming ? "训练前 · 热身" : "训练后 · 放松与拉伸"}</span><small>${warming ? "3 项 · 约 3–5 分钟" : "约 6–10 分钟"} · 展开跟练</small></summary><p class="prep-intro">${warming ? "先快走或原地踏步约 5 分钟至身体微暖，再做下面最多 3 项动态热身。负重热身见对应动作说明，不计入工作组。" : "先慢走，再按今天练到的部位轻拉。任选舒适动作，时间紧可少选；不强求每项。"}</p><ol class="prep-steps">${steps.map((s) => `<li><div><strong>${escape(s.name)}</strong><span>${escape(s.dose)}</span></div><details><summary>怎么做</summary><p>${escape(s.cue)}</p></details></li>`).join("")}</ol><p class="prep-note">${warming ? "保持轻松、不提前力竭；长时间静态拉伸留到训练后。" : "只到轻微牵拉、不弹震；疼痛、麻木或关节不适立即停止。拉伸主要帮助柔韧性，不保证消除酸痛或预防损伤。"}</p><details class="prep-evidence"><summary>依据与说明</summary><p>具体动作和剂量为结合当天计划、器械及小垫条件的实用安排，并非唯一最佳处方。</p><a href="https://www.heart.org/en/healthy-living/exercise-and-physical-activity/fitness-basics/warm-up-cool-down" target="_blank" rel="noopener">AHA · 热身、放松与拉伸 ↗</a><a href="https://www.sportsmed.org/flexibility-and-stretching" target="_blank" rel="noopener">AOSSM · 动态与静态拉伸 ↗</a><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7558980/" target="_blank" rel="noopener">主项专项热身研究 ↗</a></details></details>`;
 }

@@ -32,7 +32,7 @@ import { reportCard } from "./report-view.js";
 import { RestNotifications } from "./notifications.js";
 import { trainingCycles } from "./cycles.js";
 import { feedbackValue } from "./adaptive.js";
-import { preparationCard } from "./preparation.js";
+import { preparationCard, exerciseWarmupCue } from "./preparation.js";
 import { renderAnalytics } from "./analytics-charts.js";
 import { nextCycleItems } from "./cycle-progression.js";
 import {
@@ -204,7 +204,7 @@ function renderCheck(force = false) {
   $("#focus-title").textContent =
     d.module === "Legs" ? "腿＋核心" : d.module + " 日";
   $("#focus-desc").textContent = `${d.date} · ${p.items.length} 个动作`;
-  $("#focus-tags").innerHTML = "<span>V61.0.1</span><span>自动保存</span>";
+  $("#focus-tags").innerHTML = "<span>V61.0.2</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
@@ -235,7 +235,7 @@ function renderCheck(force = false) {
         : sync.historyState === "error"
           ? "云端历史暂未加载，联网后重试"
           : "暂无同动作历史 · 首次负荷请自行确认";
-    html += `<article class="glass card exercise-card"><div class="exercise-head"><span class="exercise-index">${String(i + 1).padStart(2, "0")}</span><div><h3 class="ex-name">${ex[0]}</h3><div class="ex-meta">${ex[3]} · ${ex[1]}</div></div></div><p class="history-reference">${previous ? `上次 ${previous.date} · ${previous.rawSets.map((s) => escape(s).replace(/\*/g, " × ")).join(" / ")}${previous.canPrefill ? " · 本次先参考" : " · 记录较早或无法解析，请重新确认"}` : historyMessage}</p><details class="exercise-guide"><summary>动作示意与要点</summary>${exerciseVisual(ex[0])}<p class="mini">动作简图不用于测量角度。<a href="https://www.nasm.org/resource-center/exercise-library" target="_blank" rel="noopener">专业动作库 ↗</a></p><p>${escape(CUES[ex[0]] || "控制动作、保留余力；重量按每只器械填写。")}</p><p>${escape(measurementHint(ex[0]))}${d.module === "Legs" ? "负重分腿蹲每轮两侧做完后休息2–3分钟，左右换侧可按呼吸恢复适当休息；核心约60秒，未恢复可延长。" : "主项休息2–3分钟，孤立动作约60–120秒。"}</p></details>${ex[4]?.paused ? `<p role="alert" class="pain-notice">${escape(ex[4].message)}</p>` : ""}<div class="set-columns"><span>组</span><span>${body ? "负重" : "重量 kg"}</span><span>${time ? "时间 s" : "次数"}</span><span>完成</span></div><div class="set-list">`;
+    html += `<article class="glass card exercise-card"><div class="exercise-head"><span class="exercise-index">${String(i + 1).padStart(2, "0")}</span><div><h3 class="ex-name">${ex[0]}</h3><div class="ex-meta">${ex[3]} · ${ex[1]}</div></div></div><p class="history-reference">${previous ? `上次 ${previous.date} · ${previous.rawSets.map((s) => escape(s).replace(/\*/g, " × ")).join(" / ")}${previous.canPrefill ? " · 本次先参考" : " · 记录较早或无法解析，请重新确认"}` : historyMessage}</p><details class="exercise-guide"><summary>动作示意与要点</summary>${exerciseVisual(ex[0])}<p class="mini">动作简图不用于测量角度。<a href="https://www.nasm.org/resource-center/exercise-library" target="_blank" rel="noopener">专业动作库 ↗</a></p><p>${escape(CUES[ex[0]] || "控制动作、保留余力；重量按每只器械填写。")}</p><p>${escape(exerciseWarmupCue(ex[0], p.items))}</p><p>${escape(measurementHint(ex[0]))}${d.module === "Legs" ? "负重分腿蹲每轮两侧做完后休息2–3分钟，左右换侧可按呼吸恢复适当休息；核心约60秒，未恢复可延长。" : "主项休息2–3分钟，孤立动作约60–120秒。"}</p></details>${ex[4]?.paused ? `<p role="alert" class="pain-notice">${escape(ex[4].message)}</p>` : ""}<div class="set-columns"><span>组</span><span>${body ? "负重" : "重量 kg"}</span><span>${time ? "时间 s" : "次数"}</span><span>完成</span></div><div class="set-list">`;
     for (let j = 0; j < n; j++) {
       const key = `${i}-${j}`,
         x = d.rows[key] || {},
