@@ -146,7 +146,7 @@ function plan() {
       store.records(),
       PLAN[d.module].items,
       d.module,
-      iso(),
+      d.date < iso() ? d.date : iso(),
     ),
   };
 }
@@ -204,7 +204,7 @@ function renderCheck(force = false) {
   $("#focus-title").textContent =
     d.module === "Legs" ? "腿＋核心" : d.module + " 日";
   $("#focus-desc").textContent = `${d.date} · ${p.items.length} 个动作`;
-  $("#focus-tags").innerHTML = "<span>V61.0.0</span><span>自动保存</span>";
+  $("#focus-tags").innerHTML = "<span>V61.0.1</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
@@ -224,7 +224,11 @@ function renderCheck(force = false) {
             : +ex[1][0],
       time = loggingMode(ex[0]).endsWith("seconds"),
       body = !loggingMode(ex[0]).startsWith("weighted"),
-      previous = historyReference(store.records(), ex[0]);
+      previous = historyReference(
+        store.records(),
+        ex[0],
+        d.date < iso() ? d.date : iso(),
+      );
     const historyMessage =
       sync.historyState === "loading"
         ? "正在加载云端历史…"

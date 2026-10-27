@@ -48,7 +48,8 @@ export function historyPreset(reference, index, mode) {
   return exact && !p.weighted && p.reps > 0 ? { reps: p.reps } : {};
 }
 export function measurementHint(name) {
-  if (name === "壶铃摆动") return "kg填整只壶铃重量：本计划10kg；双手共握一只，不乘2。次数填写实际完成次数，提前停组按实际记录。";
+  if (name === "壶铃摆动")
+    return "kg填整只壶铃重量：本计划10kg；双手共握一只，不乘2。次数填写实际完成次数，提前停组按实际记录。";
   if (name === "直臂支撑交替触肩")
     return "次数填每侧触肩次数，两侧完成记1组，不把左右相加。固定手部支撑高度；高位与地面版本在备注区分，不直接比较。无需负重。";
   if (["站姿绳索抗旋转推", "站姿绳索斜向下拉"].includes(name))

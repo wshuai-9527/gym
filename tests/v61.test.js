@@ -80,3 +80,52 @@ test("V60 in-progress cable draft retains its original row meanings while fresh 
     61,
   );
 });
+
+test("feedback-only legacy draft keeps its exercise mapping without a snapshot", () => {
+  for (const state of [
+    { feedback: { 3: "steady" } },
+    { quality: { 3: "stable" } },
+  ]) {
+    const draft = {
+      date: "2026-10-27",
+      module: "Legs",
+      planVersion: 60,
+      rows: {},
+      ...state,
+    };
+    assert.equal(currentPlan([], draft, "2026-10-27").planVersion, 60);
+    assert.equal(templateFor(draft), V60_PLAN.Legs);
+    assert.equal(templateFor(draft).items[3][0], "站姿绳索抗旋转推");
+  }
+});
+
+test("loss of swing form pauses fixed-load work even without reported pain", () => {
+  const records = [
+    {
+      date: "2026-10-26",
+      items: [
+        {
+          name: "壶铃摆动",
+          sets: ["10kg*6"],
+          feedback: {
+            quality: false,
+            pain: false,
+            confirmed: true,
+            rating: "hard",
+            rir: 1,
+          },
+        },
+      ],
+    },
+  ];
+  const meta = nextCycleItems(
+    records,
+    PLAN.Legs.items,
+    "Legs",
+    "2026-10-27",
+  )[0][4];
+  assert.equal(meta.paused, true);
+  assert.equal(meta.action, "pause");
+  assert.equal(meta.weightProposal, null);
+  assert.match(meta.message, /暂停/);
+});

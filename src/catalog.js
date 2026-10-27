@@ -357,7 +357,11 @@ EX["坐姿反向飞鸟"] = { m: "Pull" };
 export function templateFor(draft) {
   if (draft?.planVersion >= 58 && Array.isArray(draft.planSnapshot))
     return { ...PLAN[draft.module], items: draft.planSnapshot };
-  if (Object.values(draft?.rows || {}).some((x) => x.done || x.edited)) {
+  if (
+    Object.values(draft?.rows || {}).some((x) => x.done || x.edited) ||
+    Object.values(draft?.feedback || {}).some(Boolean) ||
+    Object.values(draft?.quality || {}).some(Boolean)
+  ) {
     if (draft.planVersion === 60) return V60_PLAN[draft.module];
     if (draft.planVersion === 59) return V59_PLAN[draft.module];
     if (draft.planVersion === 58) return V58_PLAN[draft.module];

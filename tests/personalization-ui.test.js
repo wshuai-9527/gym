@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 test("real UI prefills recorded loads and reps, keeps edits and archives without load conversion", async (t) => {
   t.mock.timers.enable({
     apis: ["setInterval", "setTimeout", "Date"],
-    now: new Date("2025-06-10T03:00:00Z"),
+    now: new Date("2025-06-12T03:00:00Z"),
   });
   const dom = new JSDOM(
     await readFile(new URL("../index.html", import.meta.url), "utf8"),
@@ -41,10 +41,21 @@ test("real UI prefills recorded loads and reps, keeps edits and archives without
       deleted: {},
       docs: {
         "record:2025-06-08": { version: 1, value: original },
+        "record:2025-06-11": {
+          version: 1,
+          value: {
+            date: "2025-06-11",
+            items: [
+              { name: "保加利亚分腿蹲", sets: ["30kg*12*3"] },
+              { name: "平板支撑", sets: ["90s*2"] },
+            ],
+          },
+        },
         "draft:active": {
           version: 1,
           value: {
             date: "2025-06-10",
+            dateExplicit: true,
             module: "Legs",
             planVersion: 52,
             rows: {},

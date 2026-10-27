@@ -72,10 +72,13 @@ export function adaptiveItems(records, items, module, today) {
             { kg: 10, reps: 10 },
             { kg: 10, reps: 10 },
           ],
-          paused: !!(fresh && last.feedback?.pain),
+          paused: !!(
+            fresh &&
+            (last.feedback?.pain || last.feedback?.quality === false)
+          ),
           message:
-            fresh && last.feedback?.pain
-              ? "上次报告疼痛：暂停摆动，恢复后再确认"
+            fresh && (last.feedback?.pain || last.feedback?.quality === false)
+              ? "上次报告疼痛或动作失控：先暂停摆动，恢复并确认髋铰链控制后再试练，不直接重复10kg工作组"
               : "10kg × 10次 × 2组；热身后先做，速度下降或姿势失控就停。篮球后腿沉可跳过，不自动加重加次数。",
           referenceDate: last?.date || null,
         },

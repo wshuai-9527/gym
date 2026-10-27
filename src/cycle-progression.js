@@ -67,7 +67,7 @@ export function nextCycleItems(records, items, module, today) {
         actual.feedback?.quality === false ||
         meta.sets < n)
     ) {
-      meta.action = actual.feedback.pain ? "pause" : "reduce";
+      meta.action = meta.paused || actual.feedback?.pain ? "pause" : "reduce";
       return finish();
     }
     if (ex[0] === "壶铃摆动") return finish();
