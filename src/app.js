@@ -4,6 +4,7 @@ import {
   templateFor,
   loggingMode,
   defaultTarget,
+  PLAN_VERSION,
   restSeconds,
 } from "./catalog.js";
 import {
@@ -43,9 +44,16 @@ import {
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
 const rangeStart = (target, name) => {
-  const match = String(target).match(/(\d+)\s*[–-]\s*\d+/);
+  const match = String(target).match(/^\d+\s*×\s*(\d+)/);
   return match ? Number(match[1]) : defaultTarget(name);
 };
+function exactSetTarget(reps, prescription, timed) {
+  const unit = timed ? " 秒" : " 次";
+  const side = prescription.includes("/ 侧") ? " / 侧" : "";
+  return reps.every((value) => value === reps[0])
+    ? `${reps.length} 组 × ${reps[0]}${unit}${side}`
+    : `${reps.length} 组 · ${reps.join(" / ")}${unit}${side}`;
+}
 const escape = (s) =>
   String(s ?? "").replace(
     /[&<>"']/g,
@@ -139,7 +147,8 @@ function put(key, value) {
 }
 function plan() {
   const d = currentPlan(store.records(), store.get("draft:active"));
-  if (d.planVersion !== 61 || (hasProgress(d) && d.planSnapshot)) return d;
+  if (d.planVersion !== PLAN_VERSION || (hasProgress(d) && d.planSnapshot))
+    return d;
   return {
     ...d,
     planSnapshot: nextCycleItems(
@@ -166,7 +175,7 @@ function capture() {
   );
   const next = {
     ...d,
-    planVersion: d.planVersion ?? (hasProgress(d) ? 49 : 61),
+    planVersion: d.planVersion ?? (hasProgress(d) ? 49 : PLAN_VERSION),
     feedback: Object.fromEntries(
       $$("[data-feedback]").map((el) => [el.dataset.feedback, el.value]),
     ),
@@ -204,7 +213,7 @@ function renderCheck(force = false) {
   $("#focus-title").textContent =
     d.module === "Legs" ? "腿＋核心" : d.module + " 日";
   $("#focus-desc").textContent = `${d.date} · ${p.items.length} 个动作`;
-  $("#focus-tags").innerHTML = "<span>V61.0.2</span><span>自动保存</span>";
+  $("#focus-tags").innerHTML = "<span>V63.0.0</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
@@ -235,19 +244,52 @@ function renderCheck(force = false) {
         : sync.historyState === "error"
           ? "云端历史暂未加载，联网后重试"
           : "暂无同动作历史 · 首次负荷请自行确认";
-    html += `<article class="glass card exercise-card"><div class="exercise-head"><span class="exercise-index">${String(i + 1).padStart(2, "0")}</span><div><h3 class="ex-name">${ex[0]}</h3><div class="ex-meta">${ex[3]} · ${ex[1]}</div></div></div><p class="history-reference">${previous ? `上次 ${previous.date} · ${previous.rawSets.map((s) => escape(s).replace(/\*/g, " × ")).join(" / ")}${previous.canPrefill ? " · 本次先参考" : " · 记录较早或无法解析，请重新确认"}` : historyMessage}</p><details class="exercise-guide"><summary>动作示意与要点</summary>${exerciseVisual(ex[0])}<p class="mini">动作简图不用于测量角度。<a href="https://www.nasm.org/resource-center/exercise-library" target="_blank" rel="noopener">专业动作库 ↗</a></p><p>${escape(CUES[ex[0]] || "控制动作、保留余力；重量按每只器械填写。")}</p><p>${escape(exerciseWarmupCue(ex[0], p.items))}</p><p>${escape(measurementHint(ex[0]))}${d.module === "Legs" ? "负重分腿蹲每轮两侧做完后休息2–3分钟，左右换侧可按呼吸恢复适当休息；核心约60秒，未恢复可延长。" : "主项休息2–3分钟，孤立动作约60–120秒。"}</p></details>${ex[4]?.paused ? `<p role="alert" class="pain-notice">${escape(ex[4].message)}</p>` : ""}<div class="set-columns"><span>组</span><span>${body ? "负重" : "重量 kg"}</span><span>${time ? "时间 s" : "次数"}</span><span>完成</span></div><div class="set-list">`;
+    const fallbackReps =
+      d.planVersion >= 60
+        ? rangeStart(ex[1], ex[0])
+        : d.planVersion >= 51
+          ? defaultTarget(ex[0])
+          : time
+            ? d.planVersion === 50
+              ? 40
+              : 80
+            : 12;
+    const presets = Array.from({ length: n }, (_, j) => {
+      const historical = historyPreset(previous, j, loggingMode(ex[0]));
+      const adjusted = ex[4]?.perSet?.[j];
+      const recorded = adjusted?.reps ?? historical.reps;
+      const ceiling =
+        d.planVersion >= 62 && !time
+          ? Number(ex[1].match(/[–-](\d+)/)?.[1] ?? Infinity)
+          : Infinity;
+      return {
+        kg: adjusted?.kg ?? historical.kg,
+        reps: recorded > 0 ? Math.min(recorded, ceiling) : fallbackReps,
+      };
+    });
+    const proposal = ex[4]?.weightProposal;
+    const adopted =
+      proposal?.length === n &&
+      proposal.every(
+        (set, j) =>
+          d.rows[`${i}-${j}`]?.edited &&
+          Number(d.rows[`${i}-${j}`].kg) === set.kg &&
+          Number(d.rows[`${i}-${j}`].reps) === set.reps,
+      );
+    const target =
+      d.planVersion >= 62
+        ? exactSetTarget(
+            (adopted ? proposal : presets).map((set) => set.reps),
+            ex[1],
+            time,
+          )
+        : ex[1];
+    html += `<article class="glass card exercise-card"><div class="exercise-head"><span class="exercise-index">${String(i + 1).padStart(2, "0")}</span><div><h3 class="ex-name">${ex[0]}</h3><div class="ex-meta">${ex[3]}${ex[0] === "壶铃摆动" && d.planVersion >= 63 ? " · 可选" : ""} · <span data-set-target="${i}">${escape(target)}</span></div></div></div><p class="history-reference">${previous ? `上次 ${previous.date} · ${previous.rawSets.map((s) => escape(s).replace(/\*/g, " × ")).join(" / ")}${previous.canPrefill ? " · 本次先参考" : " · 记录较早或无法解析，请重新确认"}` : historyMessage}</p><details class="exercise-guide"><summary>动作示意与要点</summary>${exerciseVisual(ex[0])}<p class="mini">动作简图不用于测量角度。<a href="https://www.nasm.org/resource-center/exercise-library" target="_blank" rel="noopener">专业动作库 ↗</a></p><p>${escape(CUES[ex[0]] || "控制动作、保留余力；重量按每只器械填写。")}</p><p>${escape(exerciseWarmupCue(ex[0], p.items))}</p><p>${escape(measurementHint(ex[0]))}${d.module === "Legs" ? "负重分腿蹲每轮两侧做完后休息2–3分钟，左右换侧可按呼吸恢复适当休息；核心约60秒，未恢复可延长。" : "主项休息2–3分钟，孤立动作约60–120秒。"}</p></details>${ex[4]?.paused ? `<p role="alert" class="pain-notice">${escape(ex[4].message)}</p>` : ""}<div class="set-columns"><span>组</span><span>${body ? "负重" : "重量 kg"}</span><span>${time ? "时间 s" : "次数"}</span><span>完成</span></div><div class="set-list">`;
     for (let j = 0; j < n; j++) {
       const key = `${i}-${j}`,
         x = d.rows[key] || {},
-        historical = historyPreset(previous, j, loggingMode(ex[0])),
-        adjusted = ex[4]?.perSet?.[j],
-        preset = adjusted
-          ? {
-              kg: adjusted.kg ?? historical.kg,
-              reps: adjusted.reps ?? historical.reps,
-            }
-          : historical;
-      html += `<div class="set-row ${x.done ? "checked" : ""}" data-key="${key}" data-ex="${i}" data-edited="${!!x.edited}"><button class="set-check" aria-label="完成${ex[0]}第${j + 1}组" aria-pressed="${!!x.done}">✓</button><b>${j + 1}</b><div class="field"><input type="number" inputmode="decimal" min="0" max="1000" step="0.5" class="kg" aria-label="重量" placeholder="${body ? "自重" : "—"}" ${body ? "disabled" : ""} value="${escape(x.kg ?? (body ? "" : (preset.kg ?? "")))}"><span class="unit">${body ? "" : "kg"}</span></div><div class="field"><input type="number" inputmode="numeric" min="1" max="${time ? 86400 : 1000}" class="reps" aria-label="${time ? "秒数" : "次数"}" value="${escape(x.reps ?? preset.reps ?? (d.planVersion >= 60 ? rangeStart(ex[1], ex[0]) : d.planVersion >= 51 ? defaultTarget(ex[0]) : time ? (d.planVersion === 50 ? 40 : d.planVersion === 51 ? defaultTarget(ex[0]) : 80) : 12))}"><span class="unit">${time ? "s" : ""}</span></div></div>`;
+        preset = presets[j];
+      html += `<div class="set-row ${x.done ? "checked" : ""}" data-key="${key}" data-ex="${i}" data-edited="${!!x.edited}"><button class="set-check" aria-label="完成${ex[0]}第${j + 1}组" aria-pressed="${!!x.done}">✓</button><b>${j + 1}</b><div class="field"><input type="number" inputmode="decimal" min="0" max="1000" step="0.5" class="kg" aria-label="重量" placeholder="${body ? "自重" : "—"}" ${body ? "disabled" : ""} value="${escape(x.kg ?? (body ? "" : (preset.kg ?? "")))}"><span class="unit">${body ? "" : "kg"}</span></div><div class="field"><input type="number" inputmode="numeric" min="1" max="${time ? 86400 : 1000}" class="reps" aria-label="${time ? "秒数" : "次数"}" value="${escape(x.reps ?? preset.reps)}"><span class="unit">${time ? "s" : ""}</span></div></div>`;
     }
     html += `</div><button class="btn full exercise-rest" data-rest="${restSeconds(ex[0])}">组间休息 · ${restSeconds(ex[0])} 秒</button>${["reps", "weight", "reduce", "pause"].includes(ex[4]?.action) ? `<p class="cycle-adjustment">下轮建议 · ${escape(ex[4].message)}</p>` : ""}${ex[4]?.weightProposal && !Object.entries(d.rows).some(([key, x]) => key.startsWith(i + "-") && (x.done || x.edited)) ? `<button class="btn full" data-cycle-weight="${i}">器械可加 0.5kg · 采用加重建议</button>` : ""}<details class="load-advice"><summary>负荷建议</summary><p>${escape(ex[4]?.message || progressionAdvice(store.records(), ex[0], ex[1], iso()).text)}</p></details><label class="feedback-field">这次感觉<select data-feedback="${i}" aria-label="${escape(ex[0])}训练反馈">${[
       ["", "未评价"],
@@ -393,7 +435,7 @@ function renderAnalysis() {
     .slice(1, 25)
     .map((c, i) => cycleHTML(c, i + 1))
     .join("")}
-  <details class="glass card"><summary>当前训练与调整方式</summary><p>Push 13组、Pull 12组；腿部力量4组、壶铃摆动2组、核心4组。核心采用平板支撑和直臂支撑交替触肩，无需绳索或整身躺下；目标是抗伸展与抗旋转，不宣称单靠核心动作就能直接提高球技。余力与动作状态分别确认，先巩固次数；加重由你确认，不因器械档位不足自动加组。进行中的草稿保留原计划，下一次新训练使用更新建议。</p><p>恢复允许时，让各主要肌群一周内尽量练到约2次；篮球负荷较高、睡眠不足或尚未恢复时顺延，不为凑频率补练。上肢多数工作组保留约2次余力，腿部以维持与动作控制为主。</p><a href="https://acsm.org/resistance-training-guidelines-update-2026/" target="_blank" rel="noopener">训练依据 ↗</a></details>`;
+  <details class="glass card"><summary>当前训练与调整方式</summary><p>每轮 Push 8组（胸6组、侧肩2组），Pull 12组（下拉与划船共8组、后肩和二头各2组）。Legs 含腿部力量4组、核心6组，可选壶铃摆动2组。核心跟腿日训练：平板支撑、屈膝侧桥、站姿单侧静止保持。余力与动作状态分别确认，先巩固次数；加重由你确认，不因器械档位不足自动加组。进行中的草稿保留原计划，下一次新训练使用更新建议。</p><p>恢复允许时，让各主要肌群一周内尽量练到约2次；篮球负荷较高、睡眠不足或尚未恢复时顺延，不为凑频率补练。上肢多数工作组保留约2次余力，腿部以维持与动作控制为主。</p><a href="https://acsm.org/resistance-training-guidelines-update-2026/" target="_blank" rel="noopener">训练依据 ↗</a></details>`;
 }
 function renderAnalysisCharts() {
   const result = renderAnalytics(
@@ -665,6 +707,14 @@ document.addEventListener(
         row.dataset.edited = "true";
       });
       capture();
+      const target = $(`[data-set-target="${i}"]`);
+      if (target && plan().planVersion >= 62) {
+        target.textContent = exactSetTarget(
+          proposal.map((set) => set.reps),
+          ex[1],
+          false,
+        );
+      }
       adopt.disabled = true;
       adopt.textContent = `已采用 ${proposal[0].kg}kg 建议 · 尚未记录完成`;
       toast("建议已填入，先热身试练；不合适可直接改回");
@@ -768,7 +818,7 @@ for (const id of ["plan-date", "plan-module"])
     put("draft:active", {
       date,
       module,
-      planVersion: 61,
+      planVersion: PLAN_VERSION,
       dateExplicit:
         id === "plan-date" || !!store.get("draft:active")?.dateExplicit,
       rows: {},

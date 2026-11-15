@@ -257,7 +257,7 @@ export const V60_PLAN = {
     ],
   },
 };
-export const PLAN = {
+export const V61_PLAN = {
   ...V60_PLAN,
   Legs: {
     title: "腿＋核心",
@@ -268,6 +268,62 @@ export const PLAN = {
       ["保加利亚分腿蹲", "2 × 8–12 / 侧", "单腿蹲", "股四头 / 臀"],
       ["罗马尼亚硬拉", "2 × 8–12", "髋铰链", "腘绳肌 / 臀"],
       ["直臂支撑交替触肩", "2 × 6–10 / 侧", "抗旋转", "核心 / 躯干控制"],
+    ],
+  },
+};
+export const V62_PLAN = {
+  ...V61_PLAN,
+  Push: {
+    ...V61_PLAN.Push,
+    sub: "胸部主项 · 肩中束",
+    items: [
+      V61_PLAN.Push.items[0],
+      ["上斜卧推", "3 × 8–10", "辅助", "上胸 / 前束"],
+      V61_PLAN.Push.items[3],
+    ],
+  },
+  Pull: {
+    ...V61_PLAN.Pull,
+    sub: "胸托划船优先 · 背阔与后肩",
+    items: [
+      ["上斜划船", "3 × 8–12", "胸托划船", "中背 / 背阔"],
+      V61_PLAN.Pull.items[0],
+      ["单臂哑铃划船", "2 × 10–15 / 侧", "水平拉", "背阔肌 / 中背"],
+      V61_PLAN.Pull.items[3],
+      V61_PLAN.Pull.items[4],
+    ],
+  },
+};
+export const PLAN_VERSION = 63;
+export const PLAN = {
+  Push: {
+    ...V62_PLAN.Push,
+    items: [
+      ["平板卧推", "3 × 8–10", "胸部主项", "胸 / 三头"],
+      ["上斜卧推", "3 × 8–10", "上胸辅助", "上胸 / 前束"],
+      ["站姿哑铃侧平举", "2 × 12–16", "控制下放", "侧三角"],
+    ],
+  },
+  Pull: {
+    ...V62_PLAN.Pull,
+    items: [
+      ["上斜划船", "3 × 8–10", "胸托划船", "中背 / 背阔"],
+      ["高位下拉", "3 × 10–12", "垂直拉", "背阔肌 / 二头"],
+      ["单臂哑铃划船", "2 × 10–13 / 侧", "单侧水平拉", "背阔肌 / 中背"],
+      ["坐姿俯身反向飞鸟", "2 × 12–16", "控制下放", "后肩 / 上背"],
+      ["靠腿二头弯举", "2 × 8–10 / 侧", "孤立", "二头"],
+    ],
+  },
+  Legs: {
+    ...V62_PLAN.Legs,
+    sub: "腿部低量 · 小垫核心",
+    items: [
+      ["壶铃摆动", "2 × 10", "可选 · 髋部发力", "臀 / 后链"],
+      ["平板支撑", "2 × 参考上次时长", "抗伸展", "核心 / 稳定"],
+      ["保加利亚分腿蹲", "2 × 8–10 / 侧", "单腿蹲", "股四头 / 臀"],
+      ["罗马尼亚硬拉", "2 × 8–10", "髋铰链", "腘绳肌 / 臀"],
+      ["屈膝侧桥", "2 × 20s / 侧", "抗侧屈", "腹斜肌 / 稳定"],
+      ["站姿单侧哑铃静止保持", "2 × 20s / 侧", "站姿抗侧屈", "核心 / 稳定"],
     ],
   },
 };
@@ -303,6 +359,7 @@ export function defaultTarget(name) {
   );
 }
 export function restSeconds(name) {
+  if (["平板卧推", "保加利亚分腿蹲", "罗马尼亚硬拉"].includes(name)) return 180;
   if (name === "壶铃摆动") return 120;
   if (
     loggingMode(name).endsWith("seconds") ||
@@ -311,14 +368,12 @@ export function restSeconds(name) {
     return 60;
   if (
     [
-      "平板卧推",
       "上斜卧推",
       "坐姿推肩",
       "高位下拉",
+      "上斜划船",
       "单臂哑铃划船",
       "双臂哑铃俯身划船",
-      "保加利亚分腿蹲",
-      "罗马尼亚硬拉",
       "高脚杯深蹲",
     ].includes(name)
   )
@@ -326,11 +381,15 @@ export function restSeconds(name) {
   return 90;
 }
 export const CUES = {
-  平板卧推: "肩胛稳定，手腕在肘部上方；保留约 2 次余力，主项休息 2–3 分钟。",
-  上斜卧推: "较小上斜角，控制下放；与平板卧推分开看进步，不硬凑总重量。",
+  平板卧推:
+    "先用轻重量试动作，肩胛稳定，手腕在肘部上方；在舒适幅度内保留约 2 次余力，组间休息 2–3 分钟。出现疼痛或不稳就停组。",
+  上斜卧推:
+    "采用较小上斜角，控制下放；在舒适幅度内完成，出现疼痛或不稳就停组。",
+  上斜划船:
+    "胸口贴稳凳面，控制拉起和下放；前两组动作稳定、仍有余力时，再用同一重量尝试第三组。",
   坐姿推肩: "躯干稳定、不用腰椎后仰顶重量；肩部不适时降低负荷或范围。",
   站姿哑铃侧平举:
-    "站直，向身体两侧抬臂至舒适高度；练中肩。不是胸前夹合，也不是俯身后肩飞鸟。",
+    "站稳，手臂向身体两侧略偏前抬至舒适高度；用能控制下放的重量，出现疼痛或不稳就停组。",
   坐姿俯身反向飞鸟:
     "坐姿髋部前折，躯干接近水平，向两侧打开手臂；练后肩。不要靠耸肩或甩动完成。",
   单臂哑铃划船:
@@ -344,6 +403,9 @@ export const CUES = {
   地面哑铃臀桥: "肋骨下收、臀部发力，不用腰部过伸顶起；顶部短暂停顿。",
   站姿提踵: "扶稳、足踝上下控制，底部舒适拉伸；避免弹跳借力。",
   平板支撑: "保持呼吸和躯干稳定，姿势先于时长；无法保持时提前结束。",
+  屈膝侧桥: "肘在肩下，膝盖放在小垫上；髋部离地后保持呼吸。支撑肩不适时停组。",
+  站姿单侧哑铃静止保持:
+    "单手提铃，直立站稳，避免向一侧倾斜。无同动作记录时从最轻可控档试起；肩部不适时停组。",
   过顶臂屈伸: "肘部尽量稳定，在舒适范围屈伸，不追求肘肩疼痛下的深度。",
 };
 ALIAS["单手哑铃划船"] = "单臂哑铃划船";
@@ -356,12 +418,22 @@ EX["哑铃胸部飞鸟"] = { m: "Push" };
 EX["坐姿反向飞鸟"] = { m: "Pull" };
 export function templateFor(draft) {
   if (draft?.planVersion >= 58 && Array.isArray(draft.planSnapshot))
-    return { ...PLAN[draft.module], items: draft.planSnapshot };
+    return {
+      ...(draft.planVersion === 62
+        ? V62_PLAN
+        : draft.planVersion === 61
+          ? V61_PLAN
+          : PLAN)[draft.module],
+      items: draft.planSnapshot,
+    };
   if (
     Object.values(draft?.rows || {}).some((x) => x.done || x.edited) ||
     Object.values(draft?.feedback || {}).some(Boolean) ||
     Object.values(draft?.quality || {}).some(Boolean)
   ) {
+    if (draft.planVersion === PLAN_VERSION) return PLAN[draft.module];
+    if (draft.planVersion === 62) return V62_PLAN[draft.module];
+    if (draft.planVersion === 61) return V61_PLAN[draft.module];
     if (draft.planVersion === 60) return V60_PLAN[draft.module];
     if (draft.planVersion === 59) return V59_PLAN[draft.module];
     if (draft.planVersion === 58) return V58_PLAN[draft.module];

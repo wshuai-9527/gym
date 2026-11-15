@@ -89,7 +89,7 @@ test("calendar distinguishes missing dates from explicit rest", () => {
 test("leg plus core plan separates bodyweight reps and per-side seconds, preserving V50 drafts", () => {
   assert.equal(
     PLAN.Legs.items.reduce((sum, x) => sum + Number(x[1][0]), 0),
-    10,
+    12,
   );
   assert.equal(
     PLAN.Legs.items.slice(0, 2).reduce((sum, x) => sum + Number(x[1][0]), 0),

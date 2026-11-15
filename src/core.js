@@ -1,4 +1,4 @@
-import { ALIAS, EX } from "./catalog.js";
+import { ALIAS, EX, PLAN_VERSION } from "./catalog.js";
 export const canon = (n) =>
   ALIAS[String(n || "").trim()] || String(n || "").trim();
 export const TIME_ZONE = "Australia/Brisbane";
@@ -169,9 +169,9 @@ export function currentPlan(records, draft, today = iso()) {
     ["Push", "Pull", "Legs"].includes(draft.module) &&
     (hasProgress(draft) || draft.dateExplicit || draft.date === today)
   )
-    return hasProgress(draft) ? draft : { ...draft, planVersion: 61 };
+    return hasProgress(draft) ? draft : { ...draft, planVersion: PLAN_VERSION };
   return {
-    planVersion: 61,
+    planVersion: PLAN_VERSION,
     date: today,
     module: nextModule(records.filter((r) => r.date <= today)),
     rows: {},
