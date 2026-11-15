@@ -67,36 +67,36 @@ test("real UI prefills recorded loads and reps, keeps edits and archives without
   await import("../src/app.js");
   const $ = (s) => document.querySelector(s),
     rows = [...document.querySelectorAll(".set-row")];
-  assert.equal(rows[4].querySelector(".kg").value, "17.5");
-  assert.equal(rows[5].querySelector(".reps").value, "9");
-  assert.equal(rows[2].querySelector(".reps").value, "45");
+  assert.equal(rows[0].querySelector(".kg").value, "17.5");
+  assert.equal(rows[1].querySelector(".reps").value, "9");
+  assert.equal(rows[6].querySelector(".reps").value, "45");
   assert.match(
-    document.querySelectorAll(".history-reference")[2].textContent,
+    document.querySelectorAll(".history-reference")[0].textContent,
     /2025-06-08.*17.5kg × 9 × 3/,
   );
-  rows[4].querySelector(".kg").value = "20";
-  rows[4]
+  rows[0].querySelector(".kg").value = "20";
+  rows[0]
     .querySelector(".kg")
     .dispatchEvent(new window.Event("input", { bubbles: true }));
-  rows[4].querySelector(".set-check").click();
-  rows[2].querySelector(".set-check").click();
-  $('[data-feedback="2"]').value = "steady";
-  $('[data-feedback="2"]').dispatchEvent(
+  rows[0].querySelector(".set-check").click();
+  rows[6].querySelector(".set-check").click();
+  $('[data-feedback="0"]').value = "steady";
+  $('[data-feedback="0"]').dispatchEvent(
     new window.Event("input", { bubbles: true }),
   );
   $('[data-go="archive"]').click();
   $('[data-go="check"]').click();
-  assert.equal(document.querySelectorAll(".kg")[4].value, "20");
+  assert.equal(document.querySelectorAll(".kg")[0].value, "20");
   $("#finish-day").click();
   const state = JSON.parse(localStorage.getItem("gym-vault-v49:guest"));
   assert.deepEqual(
     state.docs["record:2025-06-10"].value.items.map((i) => i.sets),
-    [["45s"], ["20kg*9"]],
+    [["20kg*9"], ["45s"]],
   );
   assert.deepEqual(state.docs["record:2025-06-08"].value, original);
-  assert.equal(state.docs["record:2025-06-10"].value.items[1].feedback.rir, 2);
+  assert.equal(state.docs["record:2025-06-10"].value.items[0].feedback.rir, 2);
   assert.equal(
-    state.docs["record:2025-06-10"].value.items[1].feedback.quality,
+    state.docs["record:2025-06-10"].value.items[0].feedback.quality,
     null,
   );
   dom.window.close();

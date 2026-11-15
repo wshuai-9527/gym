@@ -5,6 +5,7 @@ import {
   V60_PLAN,
   V61_PLAN,
   V62_PLAN,
+  V63_PLAN,
   templateFor,
   loggingMode,
 } from "../src/catalog.js";
@@ -58,7 +59,7 @@ test("swing stays at prescribed 10kg 2x10 despite old high-rep history and respe
     },
   ];
   const get = () =>
-    nextCycleItems(rows, PLAN.Legs.items, "Legs", "2026-10-27")[0];
+    nextCycleItems(rows, V63_PLAN.Legs.items, "Legs", "2026-10-27")[0];
   assert.deepEqual(get()[4].perSet, [
     { kg: 10, reps: 10 },
     { kg: 10, reps: 10 },
@@ -80,7 +81,7 @@ test("V60 in-progress cable draft retains its original row meanings while fresh 
   assert.equal(templateFor(draft), V60_PLAN.Legs);
   assert.equal(
     currentPlan([], { ...draft, rows: {} }, "2026-10-27").planVersion,
-    63,
+    64,
   );
 });
 
@@ -112,18 +113,26 @@ test("V62 prioritizes supported rows and retains the exercise mapping of V61 dra
   }
 });
 
-test("new plans prescribe timed core work without borrowing a different exercise's weight", () => {
+test("V64 has five leg exercises and retains the V63 draft mapping", () => {
   const module = "Legs";
   const items = PLAN[module].items;
   assert.deepEqual(
-    items.slice(4).map((item) => item.slice(0, 2)),
+    items.map((item) => item[0]),
     [
-      ["屈膝侧桥", "2 × 20s / 侧"],
-      ["站姿单侧哑铃静止保持", "2 × 20s / 侧"],
+      "保加利亚分腿蹲",
+      "扶稳站姿腿弯举",
+      "扶稳自重提踵",
+      "平板支撑",
+      "站姿单侧哑铃静止保持",
     ],
   );
-  assert.equal(loggingMode(items[4][0]), "seconds");
-  assert.equal(loggingMode(items[5][0]), "weighted-seconds");
+  assert.equal(loggingMode(items[3][0]), "seconds");
+  assert.equal(loggingMode(items[4][0]), "weighted-seconds");
+  for (const [name] of items.slice(1, 3)) {
+    assert.equal(loggingMode(name), "bodyweight");
+    assert.equal(moduleOf([{ name, sets: ["12"] }]), "Legs");
+    assert.match(exerciseVisual(name), /<svg/);
+  }
   const records = [
     {
       date: "2026-10-26",
@@ -131,7 +140,7 @@ test("new plans prescribe timed core work without borrowing a different exercise
     },
   ];
   const planned = nextCycleItems(records, items, module, "2026-10-27");
-  assert.deepEqual(planned[5][4].perSet, []);
+  assert.deepEqual(planned[4][4].perSet, []);
   const old = {
     date: "2026-10-26",
     module,
@@ -139,6 +148,7 @@ test("new plans prescribe timed core work without borrowing a different exercise
     rows: { "4-0": { edited: true } },
   };
   assert.equal(templateFor(old).items[4][0], "直臂支撑交替触肩");
+  assert.equal(templateFor({ ...old, planVersion: 63 }), V63_PLAN.Legs);
 });
 
 test("feedback-only legacy draft keeps its exercise mapping without a snapshot", () => {
@@ -180,7 +190,7 @@ test("loss of swing form pauses fixed-load work even without reported pain", () 
   ];
   const meta = nextCycleItems(
     records,
-    PLAN.Legs.items,
+    V63_PLAN.Legs.items,
     "Legs",
     "2026-10-27",
   )[0][4];

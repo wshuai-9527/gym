@@ -1,4 +1,4 @@
-const CACHE = "gym-vault-v63.0.0";
+const CACHE = "gym-vault-v64.0.0";
 const SHELL = [
   "./",
   "./index.html",
