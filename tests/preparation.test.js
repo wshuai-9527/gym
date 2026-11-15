@@ -16,23 +16,22 @@ test("preparation follows actual exercises and aliases, not a fixed module label
   assert(push.cooldown.some((s) => s.name.includes("胸部")));
   assert(!pull.cooldown.some((s) => s.name.includes("胸部")));
   assert(pull.cooldown.some((s) => s.name.includes("背阔")));
-  assert(legs.warmup.some((s) => s.name.includes("髋铰链")));
   for (const prep of [push, pull, legs]) {
     assert.equal(prep.warmup.length, 3);
     assert(!JSON.stringify(prep.warmup).match(/试练|递增|计时/));
   }
   assert.deepEqual(
     legs.warmup.map((s) => s.name),
-    ["扶稳踝前移", "扶稳原地分腿蹲", "徒手髋铰链"],
+    ["扶稳踝前移", "扶稳原地分腿蹲", "站姿收紧与呼吸"],
   );
   assert.notDeepEqual(push.warmup, pull.warmup);
   assert.match(exerciseWarmupCue("平板卧推", PLAN.Push.items), /40–60%/);
   assert.match(
-    exerciseWarmupCue("罗马尼亚硬拉", PLAN.Legs.items),
-    /轮到本动作/,
+    exerciseWarmupCue("保加利亚分腿蹲", PLAN.Legs.items),
+    /40–60%/,
   );
   assert.match(exerciseWarmupCue("直臂支撑交替触肩", PLAN.Legs.items), /手腕/);
-  assert.equal(legs.cooldown.length, 4);
+  assert.equal(legs.cooldown.length, 3);
   assert(!JSON.stringify(legs).match(/仰卧|死虫|地面臀桥/));
   const single = dailyPreparation([{ name: "哑铃侧平举", sets: [] }]);
   assert(single.cooldown.some((s) => s.name.includes("后肩")));

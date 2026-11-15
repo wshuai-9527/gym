@@ -294,8 +294,7 @@ export const V62_PLAN = {
     ],
   },
 };
-export const PLAN_VERSION = 63;
-export const PLAN = {
+export const V63_PLAN = {
   Push: {
     ...V62_PLAN.Push,
     items: [
@@ -327,6 +326,21 @@ export const PLAN = {
     ],
   },
 };
+export const PLAN_VERSION = 64;
+export const PLAN = {
+  ...V63_PLAN,
+  Legs: {
+    title: "腿＋核心",
+    sub: "五项 · 站姿腿部与小垫核心",
+    items: [
+      V63_PLAN.Legs.items[2],
+      ["扶稳站姿腿弯举", "2 × 12 / 侧", "自重试练", "腘绳肌"],
+      ["扶稳自重提踵", "2 × 15", "双脚站稳", "小腿"],
+      V63_PLAN.Legs.items[1],
+      V63_PLAN.Legs.items[5],
+    ],
+  },
+};
 export function loggingMode(name) {
   if (name === "站姿单侧哑铃静止保持") return "weighted-seconds";
   if (["平板支撑", "屈膝侧桥"].includes(name)) return "seconds";
@@ -337,6 +351,8 @@ export function loggingMode(name) {
       "坐凳深蹲",
       "自重保加利亚分腿蹲",
       "自重臀桥",
+      "扶稳站姿腿弯举",
+      "扶稳自重提踵",
       "仰卧小幅卷腹",
       "死虫式",
     ].includes(name)
@@ -363,7 +379,7 @@ export function restSeconds(name) {
   if (name === "壶铃摆动") return 120;
   if (
     loggingMode(name).endsWith("seconds") ||
-    ["仰卧小幅卷腹", "死虫式"].includes(name)
+    ["仰卧小幅卷腹", "死虫式", "扶稳站姿腿弯举", "扶稳自重提踵"].includes(name)
   )
     return 60;
   if (
@@ -402,6 +418,10 @@ export const CUES = {
     "微屈膝，臀部后移、哑铃贴腿；以髋部折叠为主，不追求触地。先用轻重量学习。",
   地面哑铃臀桥: "肋骨下收、臀部发力，不用腰部过伸顶起；顶部短暂停顿。",
   站姿提踵: "扶稳、足踝上下控制，底部舒适拉伸；避免弹跳借力。",
+  扶稳站姿腿弯举:
+    "双手轻扶固定支撑，保持大腿朝下，慢慢把脚跟抬向臀部，下放也减速。腰背不舒服、身体前倾或拱腰时停组；本计划用自重，两侧做完记一组。",
+  扶稳自重提踵:
+    "在平地双脚站稳，轻扶固定支撑。慢慢抬起脚跟，再控制落地。身体保持直立，避免弹跳借力。",
   平板支撑: "保持呼吸和躯干稳定，姿势先于时长；无法保持时提前结束。",
   屈膝侧桥: "肘在肩下，膝盖放在小垫上；髋部离地后保持呼吸。支撑肩不适时停组。",
   站姿单侧哑铃静止保持:
@@ -414,16 +434,15 @@ ALIAS["侧平举"] = "站姿哑铃侧平举";
 ALIAS["哑铃侧平举"] = "站姿哑铃侧平举";
 EX["站姿哑铃侧平举"] = { m: "Push" };
 EX["站姿提踵"] = { m: "Legs" };
+EX["扶稳站姿腿弯举"] = { m: "Legs" };
+EX["扶稳自重提踵"] = { m: "Legs" };
 EX["哑铃胸部飞鸟"] = { m: "Push" };
 EX["坐姿反向飞鸟"] = { m: "Pull" };
 export function templateFor(draft) {
   if (draft?.planVersion >= 58 && Array.isArray(draft.planSnapshot))
     return {
-      ...(draft.planVersion === 62
-        ? V62_PLAN
-        : draft.planVersion === 61
-          ? V61_PLAN
-          : PLAN)[draft.module],
+      ...({ 61: V61_PLAN, 62: V62_PLAN, 63: V63_PLAN }[draft.planVersion] ??
+        PLAN)[draft.module],
       items: draft.planSnapshot,
     };
   if (
@@ -432,6 +451,7 @@ export function templateFor(draft) {
     Object.values(draft?.quality || {}).some(Boolean)
   ) {
     if (draft.planVersion === PLAN_VERSION) return PLAN[draft.module];
+    if (draft.planVersion === 63) return V63_PLAN[draft.module];
     if (draft.planVersion === 62) return V62_PLAN[draft.module];
     if (draft.planVersion === 61) return V61_PLAN[draft.module];
     if (draft.planVersion === 60) return V60_PLAN[draft.module];
@@ -473,14 +493,14 @@ EX["自重保加利亚分腿蹲"] = { m: "Legs" };
 CUES["自重保加利亚分腿蹲"] =
   "用稳定训练凳放后脚，可轻扶固定支撑；先自重，每侧8次起。前脚踩稳、缓慢下蹲至舒适范围，不跳跃、不追求力竭；平衡困难时后脚落地做原地分腿蹲，膝髋锐痛时停止。两侧完成后勾选1组。";
 CUES["保加利亚分腿蹲"] =
-  "沿用最近同动作负荷作为参考，不因减少组数而强制改自重；热身后按今天状态确认。固定凳子、脚掌踩稳，可轻扶稳定支点；控制深度和呼吸，膝髋疼痛时停止。以本次显示的每侧组数为准。";
+  "固定凳子、脚掌踩稳，先徒手热身。腰、膝、髋都舒适再按状态选重量，历史预填仅供参考；出现疼痛或姿势失控就停组。以本次显示的每侧组数为准。";
 CUES["地面哑铃臀桥"] =
   "保留原来的负重形式与kg口径；腹部收紧、臀部发力，不用腰部过伸顶重量。每组在动作稳定的范围完成，不自动清零负荷。";
 CUES["平板支撑"] =
-  "有记录时显示并参考最近各组时长，不把已经有训练基础的人统一重置为新手时长。保持肘在肩下、腹臀收紧、自然呼吸；姿势失控就结束。无记录时可从20–40秒开始。";
+  "有记录时参考最近各组时长。小垫垫前臂，脚尖踩稳，肘在肩下并自然呼吸。腰肩不适或姿势失控就提前结束；无记录时可从20–40秒开始。";
 EX["站姿单侧哑铃静止保持"] = { m: "Legs" };
 CUES["站姿单侧哑铃静止保持"] =
-  "站立，一手提轻哑铃，手臂自然下垂；肋骨与骨盆对齐，不侧弯、不耸肩，正常呼吸。左右各保持20–40秒，两侧完成记1组。首次自选能稳定控制的轻重量，不沿用划船或分腿蹲重量；握力先疲劳就减重。";
+  "站立，一手提轻哑铃，手臂自然下垂；肋骨与骨盆对齐，正常呼吸。按本次目标完成两侧记1组；首练选择最轻可控档。腰肩不适就停组。";
 CUES["屈膝侧桥"] += " 只需垫住前臂与膝盖，不需要全身躺在垫上；垫子滑动就停止。";
 for (const name of ["站姿绳索抗旋转推", "站姿绳索斜向下拉"])
   EX[name] = { m: "Legs" };

@@ -47,9 +47,9 @@ export function nextCycleItems(records, items, module, today) {
     const n = parseInt(items[index][1]),
       mode = loggingMode(ex[0]),
       timed = mode.endsWith("seconds");
-    const bounds = items[index][1].match(/(\d+)[–-](\d+)/),
+    const bounds = items[index][1].match(/^\d+\s*×\s*(\d+)(?:[–-](\d+))?/),
       lo = bounds ? +bounds[1] : 8,
-      hi = bounds ? +bounds[2] : 12;
+      hi = bounds ? +(bounds[2] ?? bounds[1]) : 12;
     const hits = history(records, ex[0], today),
       actual = hits[0];
     const meta = {

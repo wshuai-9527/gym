@@ -213,7 +213,7 @@ function renderCheck(force = false) {
   $("#focus-title").textContent =
     d.module === "Legs" ? "腿＋核心" : d.module + " 日";
   $("#focus-desc").textContent = `${d.date} · ${p.items.length} 个动作`;
-  $("#focus-tags").innerHTML = "<span>V63.0.0</span><span>自动保存</span>";
+  $("#focus-tags").innerHTML = "<span>V64.0.0</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
@@ -260,7 +260,10 @@ function renderCheck(force = false) {
       const recorded = adjusted?.reps ?? historical.reps;
       const ceiling =
         d.planVersion >= 62 && !time
-          ? Number(ex[1].match(/[–-](\d+)/)?.[1] ?? Infinity)
+          ? Number(
+              ex[1].match(/[–-](\d+)/)?.[1] ??
+                (d.planVersion >= 64 ? fallbackReps : Infinity),
+            )
           : Infinity;
       return {
         kg: adjusted?.kg ?? historical.kg,
@@ -435,7 +438,7 @@ function renderAnalysis() {
     .slice(1, 25)
     .map((c, i) => cycleHTML(c, i + 1))
     .join("")}
-  <details class="glass card"><summary>当前训练与调整方式</summary><p>每轮 Push 8组（胸6组、侧肩2组），Pull 12组（下拉与划船共8组、后肩和二头各2组）。Legs 含腿部力量4组、核心6组，可选壶铃摆动2组。核心跟腿日训练：平板支撑、屈膝侧桥、站姿单侧静止保持。余力与动作状态分别确认，先巩固次数；加重由你确认，不因器械档位不足自动加组。进行中的草稿保留原计划，下一次新训练使用更新建议。</p><p>恢复允许时，让各主要肌群一周内尽量练到约2次；篮球负荷较高、睡眠不足或尚未恢复时顺延，不为凑频率补练。上肢多数工作组保留约2次余力，腿部以维持与动作控制为主。</p><a href="https://acsm.org/resistance-training-guidelines-update-2026/" target="_blank" rel="noopener">训练依据 ↗</a></details>`;
+  <details class="glass card"><summary>当前训练与调整方式</summary><p>每轮 Push 8组（胸6组、侧肩2组），Pull 12组（下拉与划船共8组、后肩和二头各2组）。Legs 5项：分腿蹲、站姿腿弯举、提踵、平板支撑和站姿单侧静止保持。腿日先徒手试分腿蹲，再按当天腰部状态选重量。腿弯举用自重熟悉动作，训练中出现或加重疼痛就停组。余力与动作状态分别确认，先巩固次数；加重由你确认，不因器械档位不足自动加组。进行中的草稿保留原计划，下一次新训练使用更新建议。</p><p>恢复允许时，让各主要肌群一周内尽量练到约2次；篮球负荷较高、睡眠不足或尚未恢复时顺延，不为凑频率补练。上肢多数工作组保留约2次余力，腿部以维持与动作控制为主。</p><a href="https://acsm.org/resistance-training-guidelines-update-2026/" target="_blank" rel="noopener">训练依据 ↗</a></details>`;
 }
 function renderAnalysisCharts() {
   const result = renderAnalytics(

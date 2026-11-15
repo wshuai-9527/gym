@@ -63,5 +63,6 @@ export function measurementHint(name) {
   if (name === "单臂哑铃划船")
     return "每只哑铃重量、每侧次数；与双臂划船分别记录。";
   if (name === "屈膝侧桥") return "秒数按每侧填写，两侧都完成后勾选1组。";
+  if (name === "扶稳站姿腿弯举") return "填写每侧完成次数，左右完成后勾选1组。";
   return "与上次保持相同器械和填写口径；参考值需要按本次实际完成情况修改。";
 }
