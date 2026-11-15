@@ -64,7 +64,13 @@ test("real UI handlers preserve draft, edit history and escape user content", as
   assert.match($("#analysis-body").textContent, /完成一轮推、拉、腿/);
   click('[data-go="check"]');
 
-  assert.equal(document.querySelectorAll(".set-row").length, 13);
+  assert.equal(document.querySelectorAll(".set-row").length, 9);
+  assert.deepEqual(
+    [...document.querySelectorAll(".exercise-card .reps")]
+      .filter((_, index) => index % 3 === 0)
+      .map((input) => input.value),
+    ["8", "8", "12"],
+  );
   click(".set-check");
   assert.equal(document.querySelectorAll(".checked").length, 0);
   const recordsBeforeRest = JSON.parse(

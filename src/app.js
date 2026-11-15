@@ -4,6 +4,7 @@ import {
   templateFor,
   loggingMode,
   defaultTarget,
+  PLAN_VERSION,
   restSeconds,
 } from "./catalog.js";
 import {
@@ -43,7 +44,7 @@ import {
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
 const rangeStart = (target, name) => {
-  const match = String(target).match(/(\d+)\s*[–-]\s*\d+/);
+  const match = String(target).match(/^\d+\s*×\s*(\d+)/);
   return match ? Number(match[1]) : defaultTarget(name);
 };
 const escape = (s) =>
@@ -139,7 +140,8 @@ function put(key, value) {
 }
 function plan() {
   const d = currentPlan(store.records(), store.get("draft:active"));
-  if (d.planVersion !== 61 || (hasProgress(d) && d.planSnapshot)) return d;
+  if (d.planVersion !== PLAN_VERSION || (hasProgress(d) && d.planSnapshot))
+    return d;
   return {
     ...d,
     planSnapshot: nextCycleItems(
@@ -166,7 +168,7 @@ function capture() {
   );
   const next = {
     ...d,
-    planVersion: d.planVersion ?? (hasProgress(d) ? 49 : 61),
+    planVersion: d.planVersion ?? (hasProgress(d) ? 49 : PLAN_VERSION),
     feedback: Object.fromEntries(
       $$("[data-feedback]").map((el) => [el.dataset.feedback, el.value]),
     ),
@@ -204,7 +206,7 @@ function renderCheck(force = false) {
   $("#focus-title").textContent =
     d.module === "Legs" ? "腿＋核心" : d.module + " 日";
   $("#focus-desc").textContent = `${d.date} · ${p.items.length} 个动作`;
-  $("#focus-tags").innerHTML = "<span>V61.0.2</span><span>自动保存</span>";
+  $("#focus-tags").innerHTML = "<span>V62.0.0</span><span>自动保存</span>";
   $("#plan-date").value = d.date;
   $("#plan-module").value = d.module;
   const seq = ["Push", "Pull", "Legs"];
@@ -768,7 +770,7 @@ for (const id of ["plan-date", "plan-module"])
     put("draft:active", {
       date,
       module,
-      planVersion: 61,
+      planVersion: PLAN_VERSION,
       dateExplicit:
         id === "plan-date" || !!store.get("draft:active")?.dateExplicit,
       rows: {},

@@ -1,6 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { PLAN, V60_PLAN, templateFor, loggingMode } from "../src/catalog.js";
+import {
+  PLAN,
+  V60_PLAN,
+  V61_PLAN,
+  templateFor,
+  loggingMode,
+} from "../src/catalog.js";
 import { currentPlan, moduleOf } from "../src/core.js";
 import { nextCycleItems } from "../src/cycle-progression.js";
 import { exerciseVisual } from "../src/exercise-visuals.js";
@@ -62,7 +68,7 @@ test("swing stays at prescribed 10kg 2x10 despite old high-rep history and respe
   assert.equal(get()[4].action, "pause");
 });
 
-test("V60 in-progress cable draft retains its original row meanings while fresh plan is V61", () => {
+test("V60 in-progress cable draft retains its original row meanings while fresh plan upgrades", () => {
   const draft = {
     date: "2026-10-27",
     module: "Legs",
@@ -73,8 +79,33 @@ test("V60 in-progress cable draft retains its original row meanings while fresh 
   assert.equal(templateFor(draft), V60_PLAN.Legs);
   assert.equal(
     currentPlan([], { ...draft, rows: {} }, "2026-10-27").planVersion,
-    61,
+    62,
   );
+});
+
+test("V62 prioritizes supported rows and retains the exercise mapping of V61 drafts", () => {
+  assert.deepEqual(
+    PLAN.Push.items.map(([name, target]) => [name, target]),
+    [
+      ["平板卧推", "3 × 8–12"],
+      ["上斜卧推", "3 × 8–12"],
+      ["站姿哑铃侧平举", "3 × 12–20"],
+    ],
+  );
+  assert.deepEqual(PLAN.Pull.items[0].slice(0, 2), ["上斜划船", "3 × 8–12"]);
+  assert.equal(PLAN.Legs, V61_PLAN.Legs);
+  for (const module of ["Push", "Pull"]) {
+    const draft = {
+      date: "2026-10-27",
+      module,
+      planVersion: 61,
+      rows: { "2-0": { edited: true } },
+    };
+    assert.equal(
+      templateFor(currentPlan([], draft, draft.date)),
+      V61_PLAN[module],
+    );
+  }
 });
 
 test("feedback-only legacy draft keeps its exercise mapping without a snapshot", () => {
