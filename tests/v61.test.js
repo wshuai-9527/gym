@@ -4,6 +4,7 @@ import {
   PLAN,
   V60_PLAN,
   V61_PLAN,
+  V62_PLAN,
   templateFor,
   loggingMode,
 } from "../src/catalog.js";
@@ -13,7 +14,7 @@ import { exerciseVisual } from "../src/exercise-visuals.js";
 import { exerciseWarmupCue } from "../src/preparation.js";
 
 test("no-cable plan starts shoulder taps independently of ambiguous legacy counts", () => {
-  const names = PLAN.Legs.items.map((x) => x[0]);
+  const names = V61_PLAN.Legs.items.map((x) => x[0]);
   assert.deepEqual(names, [
     "壶铃摆动",
     "平板支撑",
@@ -26,14 +27,14 @@ test("no-cable plan starts shoulder taps independently of ambiguous legacy count
   ];
   const taps = nextCycleItems(
     records,
-    PLAN.Legs.items,
+    V61_PLAN.Legs.items,
     "Legs",
     "2026-10-27",
   )[4];
   assert.equal(loggingMode(taps[0]), "bodyweight");
   assert.equal(moduleOf([{ name: taps[0], sets: ["6*2"] }]), "Legs");
   assert(exerciseVisual(taps[0]).includes("<svg"));
-  assert.match(exerciseWarmupCue(taps[0], PLAN.Legs.items), /手腕/);
+  assert.match(exerciseWarmupCue(taps[0], V61_PLAN.Legs.items), /手腕/);
   assert(!JSON.stringify(taps).includes('"reps":20'));
 });
 
@@ -79,21 +80,24 @@ test("V60 in-progress cable draft retains its original row meanings while fresh 
   assert.equal(templateFor(draft), V60_PLAN.Legs);
   assert.equal(
     currentPlan([], { ...draft, rows: {} }, "2026-10-27").planVersion,
-    62,
+    63,
   );
 });
 
 test("V62 prioritizes supported rows and retains the exercise mapping of V61 drafts", () => {
   assert.deepEqual(
-    PLAN.Push.items.map(([name, target]) => [name, target]),
+    V62_PLAN.Push.items.map(([name, target]) => [name, target]),
     [
       ["平板卧推", "3 × 8–12"],
       ["上斜卧推", "3 × 8–10"],
       ["站姿哑铃侧平举", "3 × 12–20"],
     ],
   );
-  assert.deepEqual(PLAN.Pull.items[0].slice(0, 2), ["上斜划船", "3 × 8–12"]);
-  assert.equal(PLAN.Legs, V61_PLAN.Legs);
+  assert.deepEqual(V62_PLAN.Pull.items[0].slice(0, 2), [
+    "上斜划船",
+    "3 × 8–12",
+  ]);
+  assert.equal(V62_PLAN.Legs, V61_PLAN.Legs);
   for (const module of ["Push", "Pull"]) {
     const draft = {
       date: "2026-10-27",
@@ -106,6 +110,35 @@ test("V62 prioritizes supported rows and retains the exercise mapping of V61 dra
       V61_PLAN[module],
     );
   }
+});
+
+test("new plans prescribe timed core work without borrowing a different exercise's weight", () => {
+  const module = "Legs";
+  const items = PLAN[module].items;
+  assert.deepEqual(
+    items.slice(4).map((item) => item.slice(0, 2)),
+    [
+      ["屈膝侧桥", "2 × 20s / 侧"],
+      ["站姿单侧哑铃静止保持", "2 × 20s / 侧"],
+    ],
+  );
+  assert.equal(loggingMode(items[4][0]), "seconds");
+  assert.equal(loggingMode(items[5][0]), "weighted-seconds");
+  const records = [
+    {
+      date: "2026-10-26",
+      items: [{ name: "直臂支撑交替触肩", sets: ["12*2"] }],
+    },
+  ];
+  const planned = nextCycleItems(records, items, module, "2026-10-27");
+  assert.deepEqual(planned[5][4].perSet, []);
+  const old = {
+    date: "2026-10-26",
+    module,
+    planVersion: 62,
+    rows: { "4-0": { edited: true } },
+  };
+  assert.equal(templateFor(old).items[4][0], "直臂支撑交替触肩");
 });
 
 test("feedback-only legacy draft keeps its exercise mapping without a snapshot", () => {

@@ -2,10 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { nextCycleItems } from "../src/cycle-progression.js";
 import { feedbackValue } from "../src/adaptive.js";
-import { PLAN } from "../src/catalog.js";
+import { PLAN, V62_PLAN } from "../src/catalog.js";
 import { JSDOM } from "jsdom";
 import { readFile } from "node:fs/promises";
-const ex = PLAN.Push.items[0];
+const ex = V62_PLAN.Push.items[0];
 const r = (day, name, sets, feedback) => ({
   date: `2026-10-${day}`,
   items: [{ name, sets, ...(feedback ? { feedback } : {}) }],
@@ -124,7 +124,7 @@ test("one tap adopts a supported proposal into draft only; it does not complete 
   assert.equal(document.querySelector(".kg").value, "20");
   const target = () =>
     document.querySelector("[data-set-target='0']").textContent;
-  assert.equal(target(), "3 组 × 12 次");
+  assert.equal(target(), "3 组 × 10 次");
   const btn = document.querySelector('[data-cycle-weight="0"]');
   assert(btn);
   btn.click();

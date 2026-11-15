@@ -64,12 +64,12 @@ test("real UI handlers preserve draft, edit history and escape user content", as
   assert.match($("#analysis-body").textContent, /完成一轮推、拉、腿/);
   click('[data-go="check"]');
 
-  assert.equal(document.querySelectorAll(".set-row").length, 9);
+  assert.equal(document.querySelectorAll(".set-row").length, 8);
   assert.deepEqual(
     [...document.querySelectorAll("[data-set-target]")].map(
       (el) => el.textContent,
     ),
-    ["3 组 × 8 次", "3 组 × 8 次", "3 组 × 12 次"],
+    ["3 组 × 8 次", "3 组 × 8 次", "2 组 × 12 次"],
   );
   assert.deepEqual(
     [...document.querySelectorAll(".exercise-card .reps")]
@@ -84,9 +84,9 @@ test("real UI handlers preserve draft, edit history and escape user content", as
   ).docs;
   click("[data-rest]");
   assert.equal($("#training-rest").hidden, false);
-  assert.equal($("#training-rest-time").textContent, "02:30");
+  assert.equal($("#training-rest-time").textContent, "03:00");
   t.mock.timers.tick(2000);
-  assert.equal($("#training-rest-time").textContent, "02:28");
+  assert.equal($("#training-rest-time").textContent, "02:58");
   assert.deepEqual(
     JSON.parse(localStorage.getItem("gym-vault-v49:guest")).docs,
     recordsBeforeRest,
@@ -145,14 +145,16 @@ test("real UI handlers preserve draft, edit history and escape user content", as
   );
   click('[data-go="check"]');
   const legRows = [...document.querySelectorAll(".set-row")];
-  assert.equal(legRows.length, 10);
+  assert.equal(legRows.length, 12);
   assert.equal(document.querySelectorAll(".kg:disabled").length, 4);
   assert.equal(legRows[2].querySelector(".reps").value, "30");
   assert.equal(
     legRows[8].querySelector(".reps").getAttribute("aria-label"),
-    "次数",
+    "秒数",
   );
-  assert.equal(legRows[8].querySelector(".reps").value, "6");
+  assert.equal(legRows[8].querySelector(".reps").value, "20");
+  assert.equal(legRows[10].querySelector(".kg").value, "");
+  assert.equal(legRows[10].querySelector(".reps").value, "20");
   legRows[6].querySelector(".kg").value = "5";
   legRows[2].querySelector(".set-check").click();
   legRows[8].querySelector(".set-check").click();
@@ -163,7 +165,7 @@ test("real UI handlers preserve draft, edit history and escape user content", as
   ].value;
   assert.deepEqual(
     saved.items.map((i) => i.sets),
-    [["30s"], ["5kg*8"], ["6"]],
+    [["30s"], ["5kg*8"], ["20s"]],
   );
   const keys = Object.keys(
     JSON.parse(localStorage.getItem("gym-vault-v49:guest")).docs,
