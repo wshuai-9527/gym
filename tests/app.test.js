@@ -66,6 +66,12 @@ test("real UI handlers preserve draft, edit history and escape user content", as
 
   assert.equal(document.querySelectorAll(".set-row").length, 9);
   assert.deepEqual(
+    [...document.querySelectorAll("[data-set-target]")].map(
+      (el) => el.textContent,
+    ),
+    ["3 组 × 8 次", "3 组 × 8 次", "3 组 × 12 次"],
+  );
+  assert.deepEqual(
     [...document.querySelectorAll(".exercise-card .reps")]
       .filter((_, index) => index % 3 === 0)
       .map((input) => input.value),

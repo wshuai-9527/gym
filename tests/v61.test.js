@@ -88,7 +88,7 @@ test("V62 prioritizes supported rows and retains the exercise mapping of V61 dra
     PLAN.Push.items.map(([name, target]) => [name, target]),
     [
       ["平板卧推", "3 × 8–12"],
-      ["上斜卧推", "3 × 8–12"],
+      ["上斜卧推", "3 × 8–10"],
       ["站姿哑铃侧平举", "3 × 12–20"],
     ],
   );

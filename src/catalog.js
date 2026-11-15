@@ -279,7 +279,7 @@ export const PLAN = {
     sub: "胸部主项 · 肩中束",
     items: [
       V61_PLAN.Push.items[0],
-      V61_PLAN.Push.items[1],
+      ["上斜卧推", "3 × 8–10", "辅助", "上胸 / 前束"],
       V61_PLAN.Push.items[3],
     ],
   },
@@ -339,6 +339,7 @@ export function restSeconds(name) {
       "上斜卧推",
       "坐姿推肩",
       "高位下拉",
+      "上斜划船",
       "单臂哑铃划船",
       "双臂哑铃俯身划船",
       "保加利亚分腿蹲",

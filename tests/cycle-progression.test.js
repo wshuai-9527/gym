@@ -122,11 +122,15 @@ test("one tap adopts a supported proposal into draft only; it does not complete 
   );
   await import("../src/app.js?cycle-progression-ui");
   assert.equal(document.querySelector(".kg").value, "20");
+  const target = () =>
+    document.querySelector("[data-set-target='0']").textContent;
+  assert.equal(target(), "3 组 × 12 次");
   const btn = document.querySelector('[data-cycle-weight="0"]');
   assert(btn);
   btn.click();
   assert.equal(document.querySelector(".kg").value, "20.5");
   assert.equal(document.querySelector(".reps").value, "8");
+  assert.equal(target(), "3 组 × 8 次");
   assert.equal(document.querySelectorAll(".set-row.checked").length, 0);
   const saved = JSON.parse(localStorage.getItem("gym-vault-v49:guest"));
   for (const key of Object.keys(docs))
@@ -136,6 +140,7 @@ test("one tap adopts a supported proposal into draft only; it does not complete 
   // Reload uses the frozen active snapshot and edited rows rather than reapplying.
   await import("../src/app.js?cycle-progression-ui-reload");
   assert.equal(document.querySelector(".kg").value, "20.5");
+  assert.equal(target(), "3 组 × 8 次");
   assert.equal(document.querySelector('[data-cycle-weight="0"]'), null);
   dom.window.close();
 });
